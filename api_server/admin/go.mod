@@ -1,4 +1,4 @@
-module apps
+module admin
 
 go 1.23.1
 
