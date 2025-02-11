@@ -8,7 +8,7 @@ import (
 	"log"
 	"mime/multipart"
 	"net/http"
-	supporters "registration/api/generated"
+	"registration/api/generated/supporters"
 	"registration/internal/services"
 	"time"
 

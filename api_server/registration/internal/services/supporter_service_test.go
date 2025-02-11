@@ -2,7 +2,7 @@ package services
 
 import (
 	"bytes"
-	supporters "registration/api/generated"
+	"registration/api/generated/supporters"
 	models "registration/models/generated"
 	"strconv"
 	"testing"
