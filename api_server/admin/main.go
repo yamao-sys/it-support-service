@@ -1,9 +1,7 @@
 package main
 
 import (
-	admin_router "apps/apps/admin/router"
-	business_router "apps/apps/business/router"
-	registration_router "apps/apps/registration/router"
+	"net/http"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -17,14 +15,9 @@ func main() {
 
 	// NOTE: Handlerをルーティングに追加
 	e := echo.New()
-	switch os.Getenv("APP_MODE") {
-	case "registration":
-		e = registration_router.SetupRouting(e)
-	case "business":
-		e = business_router.SetupRouting(e)
-	case "admin":
-		e = admin_router.SetupRouting(e)
-	}
+	e.GET("/", func(c echo.Context) error {
+		return c.String(http.StatusOK, "Hello, Admin!")
+	})
 
 	e.Logger.Fatal(e.Start(":" + os.Getenv("SERVER_PORT")))
 }
