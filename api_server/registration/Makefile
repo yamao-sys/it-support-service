@@ -6,7 +6,7 @@ test-local:
 	godotenv -f /app/.env.test.local go test -v ./... -p 1
 
 test-ci:
-	godotenv -f env.test go test -v ./... -p 1
+	godotenv -f .env.test go test -v ./... -p 1
 
 prepare-sqlboiler:
 	@go get -u github.com/tiendc/sqlboiler-extensions@$(BOIL_EXT_VER)
