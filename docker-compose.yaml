@@ -1,0 +1,90 @@
+version: '3.9'
+services:
+  registration_api:
+    container_name: registration_api
+    build:
+      context: ./api_server
+    volumes:
+      - ./api_server:/app
+    ports:
+      - 8080:8080
+    depends_on:
+      - db
+    tty: true # コンテナの永続化
+    environment:
+      - TZ=Asia/Tokyo
+      - SERVER_PORT=8080
+      - APP_MODE=registration
+    command: 'air -c .air.registration.toml'
+
+  business_api:
+    container_name: business_api
+    build:
+      context: ./api_server
+    volumes:
+      - ./api_server:/app
+    ports:
+      - 8081:8081
+    depends_on:
+      - db
+    tty: true # コンテナの永続化
+    environment:
+      - TZ=Asia/Tokyo
+      - SERVER_PORT=8081
+      - APP_MODE=business
+    command: 'air -c .air.business.toml'
+
+  admin_api:
+    container_name: admin_api
+    build:
+      context: ./api_server
+    volumes:
+      - ./api_server:/app
+    ports:
+      - 8082:8082
+    depends_on:
+      - db
+    tty: true # コンテナの永続化
+    environment:
+      - TZ=Asia/Tokyo
+      - SERVER_PORT=8082
+      - APP_MODE=admin
+    command: 'air -c .air.admin.toml'
+
+  migrations:
+    container_name: migrations
+    build:
+      context: ./migrations
+    volumes:
+      - ./migrations:/app
+    depends_on:
+      - db
+    tty: true # コンテナの永続化
+    environment:
+      - TZ=Asia/Tokyo
+      - MYSQL_DBNAME=it_support
+      - MYSQL_USER=root
+      - MYSQL_PASS=root
+      - MYSQL_HOST=db
+      - MYSQL_PORT=3306
+  db:
+    image: mysql:8.0.28
+    container_name: db
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: it_support
+      TZ: 'Asia/Tokyo'
+    volumes:
+      - ./db/my.cnf:/etc/mysql/conf.d/my.cnf
+      - ./mysql:/var/lib/mysql
+  gcs:
+    image: fsouza/fake-gcs-server
+    tty: true
+    ports:
+      - 4443:4443
+    volumes:
+      - ./.data:/data/it_support_dev
+      - ./.storage:/storage
+    command: -scheme http -public-host ${URL:-localhost}:4443 -external-url http://${URL:-gcs}:4443 -port-http 8000
