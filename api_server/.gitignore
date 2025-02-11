@@ -3,5 +3,6 @@
 .env.test.local
 
 tmp/
+tmp_registration/
 tmp_business/
 tmp_admin/
