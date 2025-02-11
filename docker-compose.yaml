@@ -53,11 +53,6 @@ services:
     tty: true # コンテナの永続化
     environment:
       - TZ=Asia/Tokyo
-      - MYSQL_DBNAME=it_support
-      - MYSQL_USER=root
-      - MYSQL_PASS=root
-      - MYSQL_HOST=db
-      - MYSQL_PORT=3306
 
   db:
     image: mysql:8.0.28

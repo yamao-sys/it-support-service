@@ -6,4 +6,10 @@ create-migration:
 	sql-migrate new -env="mysql" ${FILENAME}
 
 migrate:
-	sql-migrate up -env="mysql"
+	godotenv -f .env sql-migrate up -env="mysql"
+
+migrate-test-local:
+	godotenv -f .env.test.local sql-migrate up -env="mysql"
+
+migrate-test:
+	godotenv -f .env.test sql-migrate up -env="mysql"
