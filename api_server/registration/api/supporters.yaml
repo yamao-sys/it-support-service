@@ -22,11 +22,10 @@ paths:
         $ref: '#/components/requestBodies/SignUpInput'
       description: validate sign up
       tags:
-        - auth
+        - supporters
   /supporters/signUp:
     post:
       summary: SignUp
-      tags: []
       responses:
         '200':
           $ref: '#/components/responses/SignUpResponse'
@@ -37,6 +36,8 @@ paths:
       operationId: post-auth-sign_up
       requestBody:
         $ref: '#/components/requestBodies/SignUpInput'
+      tags:
+        - supporters
 components:
   schemas:
     SignUpValidationError:
@@ -146,5 +147,3 @@ components:
 tags:
   - name: supporters
     description: supporters endpoint
-  - name: registration app
-    description: registration app

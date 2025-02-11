@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"mime/multipart"
 	"net/http"
-	supporters "registration/api/generated"
+	"registration/api/generated/supporters"
 	"registration/internal/services"
 	models "registration/models/generated"
 	"strconv"

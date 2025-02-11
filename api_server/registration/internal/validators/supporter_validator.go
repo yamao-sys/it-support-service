@@ -2,7 +2,7 @@ package validator
 
 import (
 	"fmt"
-	supporters "registration/api/generated"
+	"registration/api/generated/supporters"
 
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/go-ozzo/ozzo-validation/v4/is"

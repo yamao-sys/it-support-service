@@ -3,7 +3,7 @@ package main
 import (
 	"net/http"
 	"os"
-	supporters "registration/api/generated"
+	"registration/api/generated/supporters"
 	"registration/internal/database"
 	"registration/internal/handlers"
 	"registration/internal/services"

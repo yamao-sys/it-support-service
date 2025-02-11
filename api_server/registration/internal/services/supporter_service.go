@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"io"
 	"os"
-	supporters "registration/api/generated"
+	"registration/api/generated/supporters"
 	validator "registration/internal/validators"
 	models "registration/models/generated"
 	"strconv"
