@@ -1,0 +1,7 @@
+.env.development
+.env
+.env.test.local
+
+tmp/
+tmp_business/
+tmp_admin/
