@@ -3,3 +3,5 @@ mysql
 # fake Cloud Storageデータ
 .data
 .storage
+
+.env
