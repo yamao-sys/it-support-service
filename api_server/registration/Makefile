@@ -6,7 +6,7 @@ test-local:
 	godotenv -f /app/.env.test.local go test -v ./... -p 1
 
 test-ci:
-	godotenv -f /app/.env.test go test -v ./... -p 1
+	godotenv -f env.test go test -v ./... -p 1
 
 prepare-sqlboiler:
 	@go get -u github.com/tiendc/sqlboiler-extensions@$(BOIL_EXT_VER)
@@ -19,7 +19,4 @@ gen-models:
  		--templates $(GOPATH)/pkg/mod/github.com/tiendc/sqlboiler-extensions@$(BOIL_EXT_VER)/templates/boilv4/mysql
 
 gen-schema:
-	@oapi-codegen -config oapi_codegen_config.yaml -package ${DOMAIN} apps/${APP_NAME}/api/${DOMAIN}.yaml > apps/${APP_NAME}/api/generated/${DOMAIN}.go
-
-run-test-mysql:
-	@go run $(PWD)/main/mysql/...
+	@oapi-codegen -config oapi_codegen_config.yaml -package ${DOMAIN} api/${DOMAIN}.yaml > api/generated/${DOMAIN}.go
