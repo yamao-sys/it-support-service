@@ -21,6 +21,13 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Install pnpm
+        run: |
+          npm install -g pnpm
+          pnpm setup
+          source /root/.bashrc
+          pnpm install turbo --global
+
       - name: Install dependencies
         working-directory: ./frontend/it-support
         run: pnpm i
