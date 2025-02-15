@@ -39,6 +39,11 @@ jobs:
         if: ${{ steps.restore-cache-playwright-browser.outputs.cache-hit != 'true' }}
         run: pnpm playwright install --with-deps
 
+      - name: Install Playwright Browsers
+        working-directory: ./frontend/it-support
+        if: ${{ steps.restore-cache-playwright-browser.outputs.cache-hit != 'true' }}
+        run: pnpm playwright install-deps
+
       - name: Run Playwright tests
         working-directory: ./frontend/it-support
         run: pnpm test:e2e
