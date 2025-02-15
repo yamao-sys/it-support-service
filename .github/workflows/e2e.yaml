@@ -16,6 +16,7 @@ jobs:
           version: 9
 
       - uses: actions/setup-node@v4
+        working-directory: ./frontend/it-support
         with:
           node-version: '20'
           cache: 'pnpm'
