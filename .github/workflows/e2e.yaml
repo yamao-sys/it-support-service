@@ -1,0 +1,38 @@
+name: E2E
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install dependencies
+        working-directory: ./frontend/it-support
+        run: pnpm i
+
+      - name: Install Playwright Browsers
+        working-directory: ./frontend/it-support
+        run: pnpm exec playwright install --with-deps
+
+      - name: Run Playwright tests
+        working-directory: ./frontend/it-support
+        run: pnpm test:e2e
+
+      # - uses: actions/upload-artifact@v4
+      #   if: ${{ !cancelled() }}
+      #   with:
+      #     name: playwright-report
+      #     path: playwright-report/
+      #     retention-days: 30
