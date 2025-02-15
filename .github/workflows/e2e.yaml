@@ -25,7 +25,7 @@ jobs:
         id: restore-cache-playwright-browser
         uses: actions/cache@v4
         with:
-          path: /home/runner/.cache/ms-playwright
+          path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-pnpm-playwright-browser
           restore-keys: |
             ${{ runner.os }}-pnpm-playwright-browser
