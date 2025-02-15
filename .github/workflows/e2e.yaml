@@ -15,12 +15,11 @@ jobs:
         with:
           version: 9
 
-      - name: Set Up Node
-        uses: actions/setup-node@v4
-        working-directory: ./frontend/it-support
+      - uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'pnpm'
+          cache-dependency-path: ./frontend/it-support/pnpm-lock.yaml
 
       - name: Restore Playwright and pnpm cache
         uses: actions/cache@v4
