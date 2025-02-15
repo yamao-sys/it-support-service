@@ -22,11 +22,11 @@ jobs:
           cache-dependency-path: ./frontend/it-support/pnpm-lock.yaml
 
       - name: Restore Playwright and pnpm cache
+        id: restore-cache-playwright-browser
         uses: actions/cache@v4
         with:
           path: |
             ./frontend/it-support/.cache/ms-playwright
-            ./frontend/it-support/.pnpm-store
           key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-
@@ -37,7 +37,8 @@ jobs:
 
       - name: Install Playwright Browsers
         working-directory: ./frontend/it-support
-        run: pnpm exec playwright install --with-deps
+        if: ${{ steps.restore-cache-playwright-browser.outputs.cache-hit != 'true' }}
+        run: pnpm playwright install --with-deps
 
       - name: Run Playwright tests
         working-directory: ./frontend/it-support
