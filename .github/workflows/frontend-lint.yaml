@@ -6,7 +6,7 @@ on:
       - 'frontend/it-support/**/*.js'
       - 'frontend/it-support/**/*.ts'
       - 'frontend/it-support/**/*.tsx'
-      - 'frontend/it-support/**/*/package.json'
+      - 'frontend/it-support/**/package.json'
 
 jobs:
   lint:
