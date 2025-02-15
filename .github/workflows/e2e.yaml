@@ -41,7 +41,6 @@ jobs:
 
       - name: Install Playwright Browsers
         working-directory: ./frontend/it-support
-        if: ${{ steps.restore-cache-playwright-browser.outputs.cache-hit != 'true' }}
         run: pnpm playwright install-deps
 
       - name: Run Playwright tests
