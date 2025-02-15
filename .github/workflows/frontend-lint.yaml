@@ -16,7 +16,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - run: corepack enable
+      - name: Corepack
+        working-directory: ./frontend/it-support
+        run: corepack enable
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
