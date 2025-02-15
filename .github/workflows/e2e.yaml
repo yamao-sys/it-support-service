@@ -27,6 +27,7 @@ jobs:
         with:
           path: |
             ./frontend/it-support/.cache/ms-playwright
+            ./frontend/it-support/.pnpm-store
           key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-
