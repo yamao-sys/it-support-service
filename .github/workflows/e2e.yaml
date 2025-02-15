@@ -25,12 +25,10 @@ jobs:
         id: restore-cache-playwright-browser
         uses: actions/cache@v4
         with:
-          path: |
-            ./frontend/it-support/.cache/ms-playwright
-            ./frontend/it-support/.pnpm-store
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-pnpm-playwright
           restore-keys: |
-            ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+            ${{ runner.os }}-pnpm-playwright
 
       - name: Install dependencies
         working-directory: ./frontend/it-support
