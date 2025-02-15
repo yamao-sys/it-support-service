@@ -12,11 +12,22 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'pnpm'
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 9
+
+      - name: Restore Playwright and pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ./frontend/it-support/.cache/ms-playwright
+            ./frontend/it-support/.pnpm-store
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
 
       - name: Install dependencies
         working-directory: ./frontend/it-support
