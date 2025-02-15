@@ -76,3 +76,17 @@ services:
       - ./.data:/data/it_support_dev
       - ./.storage:/storage
     command: -scheme http -public-host ${URL:-localhost}:4443 -external-url http://${URL:-gcs}:4443 -port-http 8000
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: frontend
+    ports:
+      - 3000:3000
+      - 3001:3001
+    volumes:
+      - ./frontend:/app
+    restart: always
+    tty: true
+    stdin_open: true
+    command: 'bash entrypoint.sh'
