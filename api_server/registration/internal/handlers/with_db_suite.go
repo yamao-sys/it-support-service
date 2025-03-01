@@ -3,9 +3,13 @@ package handlers
 import (
 	"context"
 	"database/sql"
+	"registration/api/generated/csrf"
 	"registration/internal/database"
+	"registration/internal/middlewares"
 
 	"github.com/DATA-DOG/go-txdb"
+	"github.com/labstack/echo/v4"
+	"github.com/oapi-codegen/testutil"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -17,6 +21,9 @@ var (
 	DBCon *sql.DB
 	ctx   context.Context
 	// token string
+	e *echo.Echo
+	csrfToken string
+	csrfTokenCookie string
 )
 
 // func (s *WithDBSuite) SetupSuite()                           {} // テストスイート実施前の処理
@@ -29,6 +36,8 @@ var (
 func init() {
 	txdb.Register("txdb-controller", "mysql", database.GetDsn())
 	ctx = context.Background()
+
+	e = middlewares.ApplyMiddlewares(echo.New())
 }
 
 func (s *WithDBSuite) SetDBCon() {
@@ -41,4 +50,21 @@ func (s *WithDBSuite) SetDBCon() {
 
 func (s *WithDBSuite) CloseDB() {
 	DBCon.Close()
+}
+
+func (s *WithDBSuite) SetCsrfHeaderValues() {
+	csrfServer := NewCsrfHandler()
+	csrfStrictHandler := csrf.NewStrictHandler(csrfServer, nil)
+	csrf.RegisterHandlers(e, csrfStrictHandler)
+
+	result := testutil.NewRequest().Get("/csrf").GoWithHTTPHandler(s.T(), e)
+
+	var res csrf.GetCsrf200JSONResponse
+	err := result.UnmarshalJsonToObject(&res)
+	if err != nil {
+		s.T().Error(err.Error())
+	}
+
+	csrfToken = res.CsrfToken
+	csrfTokenCookie = result.Recorder.Result().Header.Values("Set-Cookie")[0]
 }

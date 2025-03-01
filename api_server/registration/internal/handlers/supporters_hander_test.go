@@ -35,6 +35,9 @@ func (s *TestSupportersHandlerSuite) SetupTest() {
 
 	// NOTE: テスト対象のコントローラを設定
 	testSupportersHandler = NewSupportersHandler(authService)
+
+	// NOTE: CSRFトークンのセット
+	s.SetCsrfHeaderValues()
 }
 
 func (s *TestSupportersHandlerSuite) TearDownTest() {
@@ -58,12 +61,10 @@ func (s *TestSupportersHandlerSuite) TestPostAuthValidateSignUp_SuccessRequiredF
 	// NOTE: 終了メッセージを書く
 	mw.Close()
 
-	e := echo.New()
-
 	strictHandler := supporters.NewStrictHandler(testSupportersHandler, nil)
 	supporters.RegisterHandlers(e, strictHandler)
 
-	result := testutil.NewRequest().Post("/supporters/validateSignUp").WithBody(body.Bytes()).WithContentType(mw.FormDataContentType()).GoWithHTTPHandler(s.T(), e)
+	result := testutil.NewRequest().Post("/supporters/validateSignUp").WithHeader("Cookie", csrfTokenCookie).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithBody(body.Bytes()).WithContentType(mw.FormDataContentType()).GoWithHTTPHandler(s.T(), e)
 	assert.Equal(s.T(), http.StatusOK, result.Code())
 
 	var res supporters.SignUpResponseJSONResponse
@@ -92,12 +93,10 @@ func (s *TestSupportersHandlerSuite) TestPostAuthValidateSignUp_ValidationErrorR
 	// NOTE: 終了メッセージを書く
 	mw.Close()
 
-	e := echo.New()
-
 	strictHandler := supporters.NewStrictHandler(testSupportersHandler, nil)
 	supporters.RegisterHandlers(e, strictHandler)
 
-	result := testutil.NewRequest().Post("/supporters/validateSignUp").WithBody(body.Bytes()).WithContentType(mw.FormDataContentType()).GoWithHTTPHandler(s.T(), e)
+	result := testutil.NewRequest().Post("/supporters/validateSignUp").WithHeader("Cookie", csrfTokenCookie).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithBody(body.Bytes()).WithContentType(mw.FormDataContentType()).GoWithHTTPHandler(s.T(), e)
 	assert.Equal(s.T(), http.StatusOK, result.Code())
 
 	var res supporters.SignUpResponseJSONResponse
@@ -141,12 +140,10 @@ func (s *TestSupportersHandlerSuite) TestPostAuthValidateSignUp_SuccessWithOptio
 	// NOTE: 終了メッセージを書く
 	mw.Close()
 
-	e := echo.New()
-
 	strictHandler := supporters.NewStrictHandler(testSupportersHandler, nil)
 	supporters.RegisterHandlers(e, strictHandler)
 
-	result := testutil.NewRequest().Post("/supporters/validateSignUp").WithBody(body.Bytes()).WithContentType(mw.FormDataContentType()).GoWithHTTPHandler(s.T(), e)
+	result := testutil.NewRequest().Post("/supporters/validateSignUp").WithHeader("Cookie", csrfTokenCookie).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithBody(body.Bytes()).WithContentType(mw.FormDataContentType()).GoWithHTTPHandler(s.T(), e)
 	assert.Equal(s.T(), http.StatusOK, result.Code())
 
 	var res supporters.SignUpResponseJSONResponse
@@ -186,12 +183,10 @@ func (s *TestSupportersHandlerSuite) TestPostAuthValidateSignUp_ValidationErrorW
 	// NOTE: 終了メッセージを書く
 	mw.Close()
 
-	e := echo.New()
-
 	strictHandler := supporters.NewStrictHandler(testSupportersHandler, nil)
 	supporters.RegisterHandlers(e, strictHandler)
 
-	result := testutil.NewRequest().Post("/supporters/validateSignUp").WithBody(body.Bytes()).WithContentType(mw.FormDataContentType()).GoWithHTTPHandler(s.T(), e)
+	result := testutil.NewRequest().Post("/supporters/validateSignUp").WithHeader("Cookie", csrfTokenCookie).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithBody(body.Bytes()).WithContentType(mw.FormDataContentType()).GoWithHTTPHandler(s.T(), e)
 	assert.Equal(s.T(), http.StatusOK, result.Code())
 
 	var res supporters.SignUpResponseJSONResponse
@@ -220,12 +215,10 @@ func (s *TestSupportersHandlerSuite) TestPostAuthSignUp_SuccessRequiredFields() 
 	// NOTE: 終了メッセージを書く
 	mw.Close()
 
-	e := echo.New()
-
 	strictHandler := supporters.NewStrictHandler(testSupportersHandler, nil)
 	supporters.RegisterHandlers(e, strictHandler)
 
-	result := testutil.NewRequest().Post("/supporters/signUp").WithBody(body.Bytes()).WithContentType(mw.FormDataContentType()).GoWithHTTPHandler(s.T(), e)
+	result := testutil.NewRequest().Post("/supporters/signUp").WithHeader("Cookie", csrfTokenCookie).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithBody(body.Bytes()).WithContentType(mw.FormDataContentType()).GoWithHTTPHandler(s.T(), e)
 	assert.Equal(s.T(), http.StatusOK, result.Code())
 
 	var res supporters.SignUpResponseJSONResponse
@@ -279,12 +272,10 @@ func (s *TestSupportersHandlerSuite) TestPostAuthSignUp_SuccessWithOptionalField
 	// NOTE: 終了メッセージを書く
 	mw.Close()
 
-	e := echo.New()
-
 	strictHandler := supporters.NewStrictHandler(testSupportersHandler, nil)
 	supporters.RegisterHandlers(e, strictHandler)
 
-	result := testutil.NewRequest().Post("/supporters/signUp").WithBody(body.Bytes()).WithContentType(mw.FormDataContentType()).GoWithHTTPHandler(s.T(), e)
+	result := testutil.NewRequest().Post("/supporters/signUp").WithHeader("Cookie", csrfTokenCookie).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithBody(body.Bytes()).WithContentType(mw.FormDataContentType()).GoWithHTTPHandler(s.T(), e)
 	assert.Equal(s.T(), http.StatusOK, result.Code())
 
 	var res supporters.SignUpResponseJSONResponse
@@ -338,12 +329,10 @@ func (s *TestSupportersHandlerSuite) TestPostAuthSignUp_SuccessWithEmptyBirthday
 	// NOTE: 終了メッセージを書く
 	mw.Close()
 
-	e := echo.New()
-
 	strictHandler := supporters.NewStrictHandler(testSupportersHandler, nil)
 	supporters.RegisterHandlers(e, strictHandler)
 
-	result := testutil.NewRequest().Post("/supporters/signUp").WithBody(body.Bytes()).WithContentType(mw.FormDataContentType()).GoWithHTTPHandler(s.T(), e)
+	result := testutil.NewRequest().Post("/supporters/signUp").WithHeader("Cookie", csrfTokenCookie).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithBody(body.Bytes()).WithContentType(mw.FormDataContentType()).GoWithHTTPHandler(s.T(), e)
 	assert.Equal(s.T(), http.StatusOK, result.Code())
 
 	var res supporters.SignUpResponseJSONResponse
