@@ -9,7 +9,9 @@ const SupporterRegistrationForm: FC = () => {
     handleSubmit,
     formState: { errors },
   } = useForm();
-  const onSubmit = handleSubmit((data) => console.log(data));
+  const onSubmit = handleSubmit(async (data) => {
+    console.log(data);
+  });
 
   return (
     <>
