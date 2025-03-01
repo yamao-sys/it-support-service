@@ -3,10 +3,10 @@ BOIL_VER := v4.16.2
 BOIL_EXT_VER := v0.8.0
 
 test-local:
-	godotenv -f /app/.env.test.local go test -v ./... -p 1
+	godotenv -f /app/.env.test.local go test -v ./... -p 1 -shuffle=on
 
 test-ci:
-	godotenv -f /app/.env.test go test -v ./... -p 1
+	godotenv -f /app/.env.test go test -v ./... -p 1 -shuffle=on
 
 prepare-sqlboiler:
 	@go get -u github.com/tiendc/sqlboiler-extensions@$(BOIL_EXT_VER)
@@ -19,7 +19,5 @@ gen-models:
  		--templates $(GOPATH)/pkg/mod/github.com/tiendc/sqlboiler-extensions@$(BOIL_EXT_VER)/templates/boilv4/mysql
 
 gen-schema:
+	mkdir api/generated/${DOMAIN}
 	@oapi-codegen -config oapi_codegen_config.yaml -package ${DOMAIN} apps/${APP_NAME}/api/${DOMAIN}.yaml > apps/${APP_NAME}/api/generated/${DOMAIN}.go
-
-run-test-mysql:
-	@go run $(PWD)/main/mysql/...
