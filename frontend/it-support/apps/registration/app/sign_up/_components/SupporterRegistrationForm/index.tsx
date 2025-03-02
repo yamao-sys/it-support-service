@@ -15,8 +15,9 @@ const SupporterRegistrationForm: FC = () => {
     formState: { errors },
   } = useForm<SupporterSignUpInput>();
   const onSubmit = handleSubmit(async (data) => {
-    await postValidateSignUp(data);
+    const result = await postValidateSignUp(data);
     console.log(data);
+    console.log(result);
   });
 
   return (

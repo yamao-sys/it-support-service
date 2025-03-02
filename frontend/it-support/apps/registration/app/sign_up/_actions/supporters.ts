@@ -21,14 +21,23 @@ const getRequestHeaders = async () => {
 };
 
 export async function postValidateSignUp(input: SupporterSignUpInput) {
-  const body = new FormData();
-  for (const [key, value] of Object.entries(input)) {
-    body.append(key, value);
-  }
-
   const { data, error } = await client.POST("/supporters/validateSignUp", {
     ...(await getRequestHeaders()),
-    body: body as unknown as SupporterSignUpInput,
+    body: input,
+    bodySerializer(body) {
+      const formData = new FormData();
+
+      if (body) {
+        for (const [key, value] of Object.entries(input)) {
+          if (value instanceof File) {
+            formData.append(key, value, encodeURI(value.name));
+          } else {
+            formData.append(key, value);
+          }
+        }
+      }
+      return formData;
+    },
   });
   if (error?.code === 500 || data === undefined) {
     throw Error("Internal Server Error");
