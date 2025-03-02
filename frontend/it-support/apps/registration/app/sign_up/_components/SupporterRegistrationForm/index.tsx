@@ -15,6 +15,13 @@ const SupporterRegistrationForm: FC = () => {
     formState: { errors },
   } = useForm<SupporterSignUpInput>();
   const onSubmit = handleSubmit(async (data) => {
+    if (data.frontIdentification instanceof FileList && data.frontIdentification) {
+      data.frontIdentification = data.frontIdentification[0];
+    }
+    if (data.backIdentification instanceof FileList && data.backIdentification) {
+      data.backIdentification = data.backIdentification[0];
+    }
+
     const result = await postValidateSignUp(data);
     console.log(data);
     console.log(result);
@@ -38,6 +45,10 @@ const SupporterRegistrationForm: FC = () => {
           {...register("password", { required: true })}
         />
         {errors.password && <span>パスワードは必須項目です。</span>}
+
+        <input type='file' accept='image/*' {...register("frontIdentification")} />
+
+        <input type='file' accept='image/*' {...register("backIdentification")} />
 
         <button type='submit'>確認画面へ</button>
       </form>
