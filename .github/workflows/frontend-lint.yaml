@@ -44,7 +44,7 @@ jobs:
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ steps.generate_token.outputs.token }}
         working-directory: ./frontend/it-support
-        run: pnpm lint | reviewdog -reporter=github-pr-review -f=tsc -level=warn -filter-mode=nofilter -fail-level=any
+        run: pnpm check-types | reviewdog -reporter=github-pr-review -f=tsc -level=warn -filter-mode=nofilter -fail-level=any
         shell: bash
 
       - name: Run prettier
