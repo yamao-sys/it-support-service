@@ -84,8 +84,10 @@ services:
     ports:
       - 3000:3000
       - 3001:3001
+      - 3002:3002
     volumes:
       - ./frontend:/app
+      - ./api_server/registration/api/:/app/it-support/openapi/registration
     restart: always
     tty: true
     stdin_open: true
