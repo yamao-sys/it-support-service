@@ -1,8 +1,9 @@
 "use client";
 
 import { FC, useEffect } from "react";
-import SupporterRegistrationForm from "../../SupporterRegistrationForm";
 import { setCsrfToken } from "@/apis/csrf.api";
+import { SupporterSignUpProvider } from "@/app/sign_up/_contexts/useSupporterSignUpContext";
+import SupporterSignUpForm from "../../SupporterSignUpForm";
 
 const SignUpTemplate: FC = () => {
   useEffect(() => {
@@ -14,7 +15,9 @@ const SignUpTemplate: FC = () => {
 
   return (
     <>
-      <SupporterRegistrationForm />
+      <SupporterSignUpProvider>
+        <SupporterSignUpForm />
+      </SupporterSignUpProvider>
     </>
   );
 };

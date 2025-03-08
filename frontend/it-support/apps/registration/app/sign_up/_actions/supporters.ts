@@ -45,3 +45,29 @@ export async function postValidateSignUp(input: SupporterSignUpInput) {
 
   return data;
 }
+
+export async function postSignUp(input: SupporterSignUpInput) {
+  const { data, error } = await client.POST("/supporters/signUp", {
+    ...(await getRequestHeaders()),
+    body: input,
+    bodySerializer(body) {
+      const formData = new FormData();
+
+      if (body) {
+        for (const [key, value] of Object.entries(input)) {
+          if (value instanceof File) {
+            formData.append(key, value, encodeURI(value.name));
+          } else {
+            formData.append(key, value);
+          }
+        }
+      }
+      return formData;
+    },
+  });
+  if (error?.code === 500 || data === undefined) {
+    throw Error("Internal Server Error");
+  }
+
+  return data;
+}
