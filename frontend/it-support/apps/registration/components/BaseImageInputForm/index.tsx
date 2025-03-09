@@ -95,7 +95,7 @@ const BaseImageInputForm: FC<Props> = ({
             style={{ objectFit: "contain", width: "100%", height: "100%" }}
           />
         ) : (
-          "+ 画像をアップロード"
+          `+ ${label}を選択`
         )}
         {/* eslint-enable @next/next/no-img-element */}
         <BaseImageInput ref={fileInputRef} id={id} name={name} onChange={handleFileChange} />
