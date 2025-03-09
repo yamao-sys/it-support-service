@@ -4,11 +4,12 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack --port 3000",
+    "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
     "lint": "next lint --max-warnings 0",
     "check-types": "tsc --noEmit",
+    "dev:test": "NODE_ENV=test next dev --turbopack --port 3100",
     "test:e2e": "playwright test"
   },
   "dependencies": {
