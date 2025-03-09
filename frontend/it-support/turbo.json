@@ -5,6 +5,7 @@
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "env": ["NODE_ENV", "PORT", "API_ENDPOINT_URI"],
       "outputs": [".next/**", "!.next/cache/**"]
     },
     "lint": {
@@ -14,6 +15,8 @@
       "dependsOn": ["^check-types"]
     },
     "dev": {
+      "inputs": ["$TURBO_DEFAULT$", ".env", ".env.test.local", ".env.test"],
+      "env": ["NODE_ENV", "PORT", "API_ENDPOINT_URI"],
       "cache": false,
       "persistent": true
     },
