@@ -8,6 +8,7 @@ services:
       - ./api_server/registration:/app
     ports:
       - 8080:8080
+      - 8083:8083 # テスト用のポート
     depends_on:
       - db
     tty: true # コンテナの永続化
@@ -84,8 +85,11 @@ services:
     ports:
       - 3000:3000
       - 3001:3001
+      - 3002:3002
+      - 3100:3100 # テスト用のポート
     volumes:
       - ./frontend:/app
+      - ./api_server/registration/api/:/app/it-support/openapi/registration
     restart: always
     tty: true
     stdin_open: true

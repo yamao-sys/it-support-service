@@ -7,11 +7,11 @@ export default defineConfig({
   testDir: "./e2e",
   use: {
     ...baseConfig.use,
-    baseURL: "http://localhost:3000",
+    baseURL: "http://localhost:3100",
   },
   webServer: {
-    command: "pnpm dev",
-    url: "http://localhost:3000",
-    reuseExistingServer: true,
+    command: "pnpm dev:test",
+    url: "http://localhost:3100",
+    reuseExistingServer: false,
   },
 });

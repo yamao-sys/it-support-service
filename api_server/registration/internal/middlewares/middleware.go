@@ -21,6 +21,9 @@ func ApplyMiddlewares(e *echo.Echo) *echo.Echo {
 	csrfConfig := middleware.CSRFConfig{
 		TokenLookup: "header:"+echo.HeaderXCSRFToken,
 		CookieMaxAge: 3600,
+		ErrorHandler: func(err error, c echo.Context) error {
+			return echo.NewHTTPError(http.StatusForbidden, err.Error())
+		},
 	}
 	e.Use(middleware.CSRFWithConfig(csrfConfig))
 
