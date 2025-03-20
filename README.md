@@ -78,3 +78,5 @@ cd frontend/it-support && gcloud builds submit --config ./cloudbuild.yaml
   - https://zenn.dev/simo_hr/articles/cbcd036c8814c3
   - https://zenn.dev/anneau/scraps/f2a2b6b9b0f387
   - https://nextjs.org/docs/pages/api-reference/config/next-config-js/output
+- Next.jsのStandaloneビルド
+  - https://zenn.dev/rehabforjapan/articles/save-data-space-dockerfile
