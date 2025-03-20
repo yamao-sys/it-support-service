@@ -6,7 +6,7 @@ import createClient from "openapi-fetch";
 import { SupporterSignUpInput } from "../_components/SupporterRegistrationForm";
 
 const client = createClient<paths>({
-  baseUrl: `${process.env.API_ENDPOINT_URI}/`,
+  baseUrl: `${process.env.REGISTRATION_API_ENDPOINT_URI}/`,
   credentials: "include",
 });
 
