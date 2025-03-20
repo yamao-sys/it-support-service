@@ -1,9 +1,12 @@
 package database
 
 import (
+	"crypto/tls"
 	"database/sql"
 	"log"
 	"os"
+
+	"github.com/go-sql-driver/mysql"
 )
 
 func Init() *sql.DB {
@@ -22,9 +25,22 @@ func Close(db *sql.DB) {
 }
 
 func GetDsn() string {
-	return os.Getenv("MYSQL_USER") +
-		":" + os.Getenv("MYSQL_PASS") +
-		"@tcp(" + os.Getenv("MYSQL_HOST") + ":" + os.Getenv("MYSQL_PORT") + ")/" +
-		os.Getenv("MYSQL_DBNAME") +
-		"?charset=utf8mb4&collation=utf8mb4_general_ci&parseTime=true&loc=Local"
+	baseDsn := os.Getenv("MYSQL_USER") +
+				":" + os.Getenv("MYSQL_PASS") +
+				"@tcp(" + os.Getenv("MYSQL_HOST") + ":" + os.Getenv("MYSQL_PORT") + ")/" +
+				os.Getenv("MYSQL_DBNAME") +
+				"?charset=utf8mb4&collation=utf8mb4_general_ci&parseTime=true&loc=Local"
+	
+	if os.Getenv("APP_ENV") != "production" {
+		return baseDsn
+	}
+	
+	err := mysql.RegisterTLSConfig("tidb", &tls.Config{
+		MinVersion: tls.VersionTLS12,
+		ServerName: os.Getenv("MYSQL_HOST"),
+	})
+	if err != nil {
+		log.Fatalf("failed to register TLS config: %v", err)
+	}
+	return baseDsn+"&tls=tidb"
 }

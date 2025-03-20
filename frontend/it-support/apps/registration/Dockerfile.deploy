@@ -1,0 +1,49 @@
+FROM node:22-alpine AS base
+WORKDIR /app
+
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
+
+# NOTE: registrationのビルド
+FROM base AS builder
+RUN apk add --no-cache libc6-compat
+RUN apk update
+
+WORKDIR /app
+RUN pnpm add -g turbo
+COPY . .
+# registrationと依存先のみを含めるように
+RUN turbo prune --scope=registration --docker
+
+FROM base AS installer
+WORKDIR /app
+
+# First install the dependencies (as they change less often)
+COPY --from=builder /app/out/json/ .
+COPY --from=builder /app/out/pnpm-lock.yaml ./
+RUN pnpm install
+
+# Build the project
+COPY --from=builder /app/out/full/ .
+COPY turbo.json turbo.json
+RUN pnpm turbo run build --filter=registration
+
+FROM base AS runner
+WORKDIR /app
+
+# NOTE: アプリ操作用のグループ・ユーザ作成
+RUN addgroup it-support && adduser -G it-support -h /home/appuser -s /bin/sh -D appuser
+# NOTE: ユーザー権限を変更（アプリケーションディレクトリの所有者を "appuser" に設定）
+RUN chown -R appuser:it-support /app
+# NOTE: 最小特権ユーザーで実行
+USER appuser
+
+COPY --from=installer /app/apps/registration/next.config.js .
+COPY --from=installer /app/apps/registration/package.json .
+
+COPY --from=installer --chown=appuser:it-support /app/apps/registration/.next/standalone ./
+COPY --from=installer --chown=appuser:it-support /app/apps/registration/.next/static ./apps/registration/.next/static
+COPY --from=installer --chown=appuser:it-support /app/apps/registration/public ./apps/registration/public
+ 
+CMD node apps/registration/server.js
