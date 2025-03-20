@@ -15,7 +15,10 @@ import (
 )
 
 func main() {
-	loadEnv()
+	// NOTE: デプロイ先の環境はSecret Managerで環境変数を管理する
+	if os.Getenv("APP_ENV") != "production" {
+		loadEnv()
+	}
 
 	dbCon := database.Init()
 
@@ -41,6 +44,7 @@ func main() {
 }
 
 func loadEnv() {
+	// TODO: godotenvで読み込むのはdevelopmentとtest環境のみにする
 	envFilePath := os.Getenv("ENV_FILE_PATH")
 	if envFilePath == "" {
 		envFilePath = ".env"
