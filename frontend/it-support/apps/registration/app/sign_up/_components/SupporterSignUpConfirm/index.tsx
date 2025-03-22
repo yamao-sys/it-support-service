@@ -1,13 +1,13 @@
 "use client";
 
 import { FC, useCallback } from "react";
-import { Phase } from "../SupporterSignUpForm";
 import { useSupporterSignUpContext } from "../../_contexts/useSupporterSignUpContext";
 import BaseImage from "@/components/BaseImage";
 import { postSignUp } from "../../_actions/supporters";
+import { PhaseType } from "../../_types";
 
 type Props = {
-  togglePhase: (newPhase: Phase) => void;
+  togglePhase: (newPhase: PhaseType) => void;
 };
 
 const SupporterSignUpConfirm: FC<Props> = ({ togglePhase }: Props) => {
