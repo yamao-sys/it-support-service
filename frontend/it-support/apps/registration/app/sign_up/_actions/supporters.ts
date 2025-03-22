@@ -3,7 +3,7 @@
 import { paths } from "@/apis/generated/supporters/apiSchema";
 import { cookies } from "next/headers";
 import createClient from "openapi-fetch";
-import { SupporterSignUpInput } from "../_components/SupporterRegistrationForm";
+import { SupporterSignUpInput } from "../_types";
 
 const client = createClient<paths>({
   baseUrl: `${process.env.REGISTRATION_API_ENDPOINT_URI}/`,
