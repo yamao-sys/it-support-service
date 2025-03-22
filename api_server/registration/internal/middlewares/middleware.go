@@ -31,6 +31,9 @@ func ApplyMiddlewares(e *echo.Echo) *echo.Echo {
 	// 	   : StrictHandlerだとecho.Contextがhandler側で使えずのため
 	e.Use(csrfContextMiddleware)
 
+	// NOTE: Panicが発生してもサーバを停止することを防ぐ
+	e.Use(middleware.Recover())
+
 	return e
 }
 

@@ -5,7 +5,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
 	"mime/multipart"
 	"net/http"
 	"registration/api/generated/supporters"
@@ -68,7 +67,7 @@ func (sh *supportersHandler) PostAuthSignUp(ctx context.Context, request support
 
 	signUpErr := sh.supporterService.SignUp(ctx, supporters.PostAuthSignUpMultipartRequestBody(inputStruct))
 	if signUpErr != nil {
-		log.Fatalln(err)
+		return supporters.PostAuthSignUp500JSONResponse{InternalServerErrorResponseJSONResponse: supporters.InternalServerErrorResponseJSONResponse{Code: http.StatusInternalServerError, Message: signUpErr.Error()}}, nil
 	}
 
 	res := &supporters.SignUpResponse{

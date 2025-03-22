@@ -5,7 +5,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
 	"mime/multipart"
 	"net/http"
 	"registration/api/generated/companies"
@@ -67,7 +66,7 @@ func (ch *companiesHandler) PostAuthSignUp(ctx context.Context, request companie
 
 	signUpErr := ch.companiesService.SignUp(ctx, companies.PostAuthSignUpMultipartRequestBody(inputStruct))
 	if signUpErr != nil {
-		log.Fatalln(err)
+		return companies.PostAuthSignUp500JSONResponse{InternalServerErrorResponseJSONResponse: companies.InternalServerErrorResponseJSONResponse{Code: http.StatusInternalServerError, Message: signUpErr.Error()}}, nil
 	}
 
 	res := &companies.SignUpResponse{
