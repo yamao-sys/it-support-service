@@ -19,7 +19,7 @@ func ValidateSignUpCompany(input *companies.PostAuthValidateSignUpMultipartReque
 		validation.Field(
 			&input.Name,
 			validation.Required.Error("企業名は必須入力です。"),
-			validation.RuneLength(1, 20).Error("名は1 ~ 20文字での入力をお願いします。"),
+			validation.RuneLength(1, 20).Error("企業名は1 ~ 20文字での入力をお願いします。"),
 		),
 		validation.Field(
 			&input.Email,

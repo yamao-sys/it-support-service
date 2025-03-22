@@ -1,9 +1,9 @@
 import BaseContainer from "@/components/BaseContailer";
 import { FC, ReactNode } from "react";
-import { Phase } from "../SupporterSignUpForm";
+import { PhaseType } from "../../_types";
 
 type Props = {
-  phase: Phase;
+  phase: PhaseType;
   children: ReactNode;
 };
 

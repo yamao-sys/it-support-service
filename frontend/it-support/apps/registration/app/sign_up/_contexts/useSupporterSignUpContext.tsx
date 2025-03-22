@@ -1,5 +1,5 @@
 import { createContext, FC, useCallback, useContext, useState } from "react";
-import { SupporterSignUpInput } from "../_components/SupporterRegistrationForm";
+import { SupporterSignUpInput } from "../_types";
 
 type SupporterSignUpSetContextType = {
   updateSignUpInput: (params: Partial<SupporterSignUpInput>) => void;

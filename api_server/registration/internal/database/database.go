@@ -13,7 +13,7 @@ func Init() *sql.DB {
 	// DBインスタンス生成
 	db, err := sql.Open("mysql", GetDsn())
 	if err != nil {
-		log.Fatalln(err)
+		panic(err)
 	}
 	return db
 }

@@ -1,20 +1,20 @@
 "use client";
 
 import { FC, useCallback, useState } from "react";
-import { postValidateSignUp } from "../../_actions/supporters";
-import { components } from "@/apis/generated/supporters/apiSchema";
+import { FormType, PhaseType, SupporterSignUpValidationError } from "../../_types";
+import FormTypeSelector from "../FormTypeSelector";
 import {
   useSupporterSignUpContext,
   useSupporterSignUpSetContext,
 } from "../../_contexts/useSupporterSignUpContext";
-import { Phase } from "../SupporterSignUpForm";
+import { postValidateSignUp } from "../../_actions/supporters";
 import BaseImageInputForm from "@/components/BaseImageInputForm";
 
-export type SupporterSignUpInput =
-  components["requestBodies"]["SignUpInput"]["content"]["multipart/form-data"];
-
-type SupporterSignUpValidationError =
-  components["responses"]["SignUpResponse"]["content"]["application/json"]["errors"];
+type Props = {
+  formType: FormType;
+  togglePhase: (newPhase: PhaseType) => void;
+  switchFormType: (newFormType: FormType) => void;
+};
 
 const INITIAL_VALIDATION_ERRORS = {
   firstName: [],
@@ -26,11 +26,7 @@ const INITIAL_VALIDATION_ERRORS = {
   backIdentification: [],
 };
 
-type Props = {
-  togglePhase: (newPhase: Phase) => void;
-};
-
-const SupporterRegistrationForm: FC<Props> = ({ togglePhase }: Props) => {
+const SupporterSignUpInput: FC<Props> = ({ formType, togglePhase, switchFormType }: Props) => {
   const { supporterSignUpInputs } = useSupporterSignUpContext();
   const { updateSignUpInput, clearIdentificationKey } = useSupporterSignUpSetContext();
 
@@ -78,6 +74,10 @@ const SupporterRegistrationForm: FC<Props> = ({ togglePhase }: Props) => {
 
   return (
     <>
+      <FormTypeSelector formType={formType} switchFormType={switchFormType} />
+
+      <h3 className='mt-16 w-full text-center text-2xl font-bold'>サポータ登録フォーム</h3>
+
       <div className='flex justify-between'>
         <div className='mt-8' style={{ width: "45%" }}>
           <label
@@ -223,4 +223,4 @@ const SupporterRegistrationForm: FC<Props> = ({ togglePhase }: Props) => {
   );
 };
 
-export default SupporterRegistrationForm;
+export default SupporterSignUpInput;

@@ -1,22 +1,22 @@
 "use client";
 
 import { FC, useCallback } from "react";
-import { useSupporterSignUpContext } from "../../_contexts/useSupporterSignUpContext";
 import BaseImage from "@/components/BaseImage";
-import { postSignUp } from "../../_actions/supporters";
+import { postSignUp } from "../../_actions/companies";
 import { PhaseType } from "../../_types";
+import { useCompanySignUpContext } from "../../_contexts/useCompanySignUpContext";
 
 type Props = {
   togglePhase: (newPhase: PhaseType) => void;
 };
 
-const SupporterSignUpConfirm: FC<Props> = ({ togglePhase }: Props) => {
-  const { supporterSignUpInputs } = useSupporterSignUpContext();
+const CompanySignUpConfirm: FC<Props> = ({ togglePhase }: Props) => {
+  const { companySignUpInputs } = useCompanySignUpContext();
 
   const handleBackToInput = () => togglePhase("input");
 
   const handleSignUp = useCallback(async () => {
-    const response = await postSignUp(supporterSignUpInputs);
+    const response = await postSignUp(companySignUpInputs);
 
     // バリデーションエラーがなければ、確認画面へ遷移
     if (Object.keys(response.errors).length === 0) {
@@ -24,37 +24,29 @@ const SupporterSignUpConfirm: FC<Props> = ({ togglePhase }: Props) => {
       return;
     }
 
-    throw Error("invalid supporter sign up input");
-  }, [supporterSignUpInputs, togglePhase]);
+    throw Error("invalid company sign up input");
+  }, [companySignUpInputs, togglePhase]);
 
   return (
     <>
-      <h3 className='w-full text-center text-2xl font-bold'>サポータ登録入力内容</h3>
+      <h3 className='w-full text-center text-2xl font-bold'>企業登録の入力内容</h3>
 
       <div className='flex w-full justify-around mt-16'>
-        <div className='w-1/2 align-middle'>ユーザ名: </div>
-        <div className='w-1/2 align-middle'>{`${supporterSignUpInputs.lastName} ${supporterSignUpInputs.firstName}`}</div>
+        <div className='w-1/2 align-middle'>企業名: </div>
+        <div className='w-1/2 align-middle'>{companySignUpInputs.name}</div>
       </div>
       <div className='flex w-full justify-around mt-8'>
         <div className='w-1/2 align-middle'>メールアドレス: </div>
-        <div className='w-1/2 align-middle'>{supporterSignUpInputs.email}</div>
+        <div className='w-1/2 align-middle'>{companySignUpInputs.email}</div>
       </div>
       <div className='flex w-full justify-around mt-8'>
         <div className='w-1/2 align-middle'>パスワード: </div>
-        <div className='w-1/2 align-middle'>
-          {"*".repeat(supporterSignUpInputs.password.length)}
-        </div>
+        <div className='w-1/2 align-middle'>{"*".repeat(companySignUpInputs.password.length)}</div>
       </div>
       <div className='flex w-full justify-around mt-8'>
-        <div className='w-1/2 align-middle'>身分証明書(表): </div>
+        <div className='w-1/2 align-middle'>確定申告書(コピー): </div>
         <div className='w-1/2 align-middle'>
-          <BaseImage file={supporterSignUpInputs.frontIdentification} />
-        </div>
-      </div>
-      <div className='flex w-full justify-around mt-8'>
-        <div className='w-1/2 align-middle'>身分証明書(裏): </div>
-        <div className='w-1/2 align-middle'>
-          <BaseImage file={supporterSignUpInputs.backIdentification} />
+          <BaseImage file={companySignUpInputs.finalTaxReturn} />
         </div>
       </div>
 
@@ -76,4 +68,4 @@ const SupporterSignUpConfirm: FC<Props> = ({ togglePhase }: Props) => {
   );
 };
 
-export default SupporterSignUpConfirm;
+export default CompanySignUpConfirm;

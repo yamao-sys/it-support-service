@@ -1,9 +1,9 @@
 "use server";
 
-import { paths } from "@/apis/generated/supporters/apiSchema";
+import { paths } from "@/apis/generated/companies/apiSchema";
 import { cookies } from "next/headers";
 import createClient from "openapi-fetch";
-import { SupporterSignUpInput } from "../_types";
+import { CompanySignUpInput } from "../_types";
 
 const client = createClient<paths>({
   baseUrl: `${process.env.REGISTRATION_API_ENDPOINT_URI}/`,
@@ -20,8 +20,8 @@ const getRequestHeaders = async () => {
   };
 };
 
-export async function postValidateSignUp(input: SupporterSignUpInput) {
-  const { data, error } = await client.POST("/supporters/validateSignUp", {
+export async function postValidateSignUp(input: CompanySignUpInput) {
+  const { data, error } = await client.POST("/companies/validateSignUp", {
     ...(await getRequestHeaders()),
     body: input,
     bodySerializer(body) {
@@ -46,8 +46,8 @@ export async function postValidateSignUp(input: SupporterSignUpInput) {
   return data;
 }
 
-export async function postSignUp(input: SupporterSignUpInput) {
-  const { data, error } = await client.POST("/supporters/signUp", {
+export async function postSignUp(input: CompanySignUpInput) {
+  const { data, error } = await client.POST("/companies/signUp", {
     ...(await getRequestHeaders()),
     body: input,
     bodySerializer(body) {
