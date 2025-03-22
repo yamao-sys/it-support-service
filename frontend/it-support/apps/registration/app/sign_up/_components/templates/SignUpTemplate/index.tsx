@@ -3,7 +3,8 @@
 import { FC, useEffect } from "react";
 import { setCsrfToken } from "@/apis/csrf.api";
 import { SupporterSignUpProvider } from "@/app/sign_up/_contexts/useSupporterSignUpContext";
-import SupporterSignUpForm from "../../SupporterSignUpForm";
+import SignUpForm from "../../SignUpForm";
+import { CompanySignUpProvider } from "@/app/sign_up/_contexts/useCompanySignUpContext";
 
 const SignUpTemplate: FC = () => {
   useEffect(() => {
@@ -15,9 +16,11 @@ const SignUpTemplate: FC = () => {
 
   return (
     <>
-      <SupporterSignUpProvider>
-        <SupporterSignUpForm />
-      </SupporterSignUpProvider>
+      <CompanySignUpProvider>
+        <SupporterSignUpProvider>
+          <SignUpForm />
+        </SupporterSignUpProvider>
+      </CompanySignUpProvider>
     </>
   );
 };
