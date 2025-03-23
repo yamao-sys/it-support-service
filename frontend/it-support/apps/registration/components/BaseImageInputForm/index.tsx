@@ -1,5 +1,6 @@
 import { FC, useEffect, useRef, useState } from "react";
 import BaseImageInput from "../BaseImageInput";
+import BaseButton from "../BaseButton";
 
 type Props = {
   id: string;
@@ -102,13 +103,12 @@ const BaseImageInputForm: FC<Props> = ({
       </div>
 
       <div className='w-full flex justify-center'>
-        <button
-          type='button'
-          className='py-2 px-8 mx-auto border-gray-500 bg-gray-500 rounded-xl text-white'
+        <BaseButton
+          borderColor='border-gray-500'
+          bgColor='bg-gray-500'
+          label='× キャンセル'
           onClick={handleClickCancelButton}
-        >
-          × キャンセル
-        </button>
+        />
       </div>
 
       {validationErrorMessages.length > 0 && (

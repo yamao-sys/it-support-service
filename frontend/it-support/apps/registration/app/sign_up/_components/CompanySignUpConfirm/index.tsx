@@ -5,6 +5,7 @@ import BaseImage from "@/components/BaseImage";
 import { postSignUp } from "../../_actions/companies";
 import { PhaseType } from "../../_types";
 import { useCompanySignUpContext } from "../../_contexts/useCompanySignUpContext";
+import BaseButton from "@/components/BaseButton";
 
 type Props = {
   togglePhase: (newPhase: PhaseType) => void;
@@ -51,18 +52,18 @@ const CompanySignUpConfirm: FC<Props> = ({ togglePhase }: Props) => {
       </div>
 
       <div className='flex w-full justify-around mt-16'>
-        <button
-          className='py-2 px-8 border-gray-500 bg-gray-500 rounded-xl text-white'
+        <BaseButton
+          borderColor='border-gray-500'
+          bgColor='bg-gray-500'
+          label='入力へ戻る'
           onClick={handleBackToInput}
-        >
-          入力へ戻る
-        </button>
-        <button
-          className='py-2 px-8 border-green-500 bg-green-500 rounded-xl text-white'
+        />
+        <BaseButton
+          borderColor='border-green-500'
+          bgColor='bg-green-500'
+          label='登録する'
           onClick={handleSignUp}
-        >
-          登録する
-        </button>
+        />
       </div>
     </>
   );
