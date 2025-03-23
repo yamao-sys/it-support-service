@@ -9,6 +9,7 @@ import {
 } from "../../_contexts/useSupporterSignUpContext";
 import { postValidateSignUp } from "../../_actions/supporters";
 import BaseImageInputForm from "@/components/BaseImageInputForm";
+import BaseFormInput from "@/components/BaseFormInput";
 
 type Props = {
   formType: FormType;
@@ -80,108 +81,52 @@ const SupporterSignUpInput: FC<Props> = ({ formType, togglePhase, switchFormType
 
       <div className='flex justify-between'>
         <div className='mt-8' style={{ width: "45%" }}>
-          <label
-            htmlFor='last-name'
-            className='block mb-2 text-sm font-medium text-gray-900 dark:text-white text-left'
-          >
-            <span className='font-bold'>姓</span>
-          </label>
-          <input
+          <BaseFormInput
             id='last-name'
+            label='姓'
             name='lastName'
             type='text'
-            className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'
             value={supporterSignUpInputs.lastName}
             onChange={setSupporterSignUpTextInput}
+            validationErrorMessages={validationErrors.lastName ?? []}
           />
-          {validationErrors.lastName && (
-            <div className='w-full pt-5 text-left'>
-              {validationErrors.lastName.map((message, i) => (
-                <p key={i} className='text-red-400'>
-                  {message}
-                </p>
-              ))}
-            </div>
-          )}
         </div>
 
         <div className='mt-8' style={{ width: "45%" }}>
-          <label
-            htmlFor='first-name'
-            className='block mb-2 text-sm font-medium text-gray-900 dark:text-white text-left'
-          >
-            <span className='font-bold'>名</span>
-          </label>
-          <input
+          <BaseFormInput
             id='first-name'
+            label='名'
             name='firstName'
             type='text'
-            className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'
             value={supporterSignUpInputs.firstName}
             onChange={setSupporterSignUpTextInput}
+            validationErrorMessages={validationErrors.firstName ?? []}
           />
-          {validationErrors.firstName && (
-            <div className='w-full pt-5 text-left'>
-              {validationErrors.firstName.map((message, i) => (
-                <p key={i} className='text-red-400'>
-                  {message}
-                </p>
-              ))}
-            </div>
-          )}
         </div>
       </div>
 
       <div className='mt-8'>
-        <label
-          htmlFor='email'
-          className='block mb-2 text-sm font-medium text-gray-900 dark:text-white text-left'
-        >
-          <span className='font-bold'>Email</span>
-        </label>
-        <input
+        <BaseFormInput
           id='email'
+          label='Email'
           name='email'
           type='email'
-          className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'
           value={supporterSignUpInputs.email}
           onChange={setSupporterSignUpTextInput}
+          validationErrorMessages={validationErrors.email ?? []}
         />
-        {validationErrors.email && (
-          <div className='w-full pt-5 text-left'>
-            {validationErrors.email.map((message, i) => (
-              <p key={i} className='text-red-400'>
-                {message}
-              </p>
-            ))}
-          </div>
-        )}
       </div>
 
       <div className='mt-8'>
-        <label
-          htmlFor='password'
-          className='block mb-2 text-sm font-medium text-gray-900 dark:text-white text-left'
-        >
-          <span className='font-bold'>パスワード</span>
-        </label>
-        <input
+        <BaseFormInput
           id='password'
+          label='パスワード'
           name='password'
           type='password'
-          className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'
           value={supporterSignUpInputs.password}
           onChange={setSupporterSignUpTextInput}
+          validationErrorMessages={validationErrors.password ?? []}
         />
-        {validationErrors.password && (
-          <div className='w-full pt-5 text-left'>
-            {validationErrors.password.map((message, i) => (
-              <p key={i} className='text-red-400'>
-                {message}
-              </p>
-            ))}
-          </div>
-        )}
       </div>
 
       <div className='mt-8'>

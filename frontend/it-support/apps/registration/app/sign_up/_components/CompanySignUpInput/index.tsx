@@ -9,6 +9,7 @@ import {
   useCompanySignUpContext,
   useCompanySignUpSetContext,
 } from "../../_contexts/useCompanySignUpContext";
+import BaseFormInput from "@/components/BaseFormInput";
 
 type Props = {
   formType: FormType;
@@ -69,81 +70,39 @@ const CompanySignUpInput: FC<Props> = ({ formType, togglePhase, switchFormType }
       <h3 className='mt-16 w-full text-center text-2xl font-bold'>企業登録フォーム</h3>
 
       <div className='mt-8'>
-        <label
-          htmlFor='company-name'
-          className='block mb-2 text-sm font-medium text-gray-900 dark:text-white text-left'
-        >
-          <span className='font-bold'>企業名</span>
-        </label>
-        <input
+        <BaseFormInput
           id='company-name'
+          label='企業名'
           name='companyName'
           type='text'
-          className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'
           value={companySignUpInputs.name}
           onChange={(e) => updateSignUpInput({ name: e.target.value })}
+          validationErrorMessages={validationErrors.name ?? []}
         />
-        {validationErrors.name && (
-          <div className='w-full pt-5 text-left'>
-            {validationErrors.name.map((message, i) => (
-              <p key={i} className='text-red-400'>
-                {message}
-              </p>
-            ))}
-          </div>
-        )}
       </div>
 
       <div className='mt-8'>
-        <label
-          htmlFor='company-email'
-          className='block mb-2 text-sm font-medium text-gray-900 dark:text-white text-left'
-        >
-          <span className='font-bold'>Email</span>
-        </label>
-        <input
+        <BaseFormInput
           id='company-email'
+          label='Email'
           name='companyEmail'
           type='email'
-          className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'
           value={companySignUpInputs.email}
           onChange={(e) => updateSignUpInput({ email: e.target.value })}
+          validationErrorMessages={validationErrors.email ?? []}
         />
-        {validationErrors.email && (
-          <div className='w-full pt-5 text-left'>
-            {validationErrors.email.map((message, i) => (
-              <p key={i} className='text-red-400'>
-                {message}
-              </p>
-            ))}
-          </div>
-        )}
       </div>
 
       <div className='mt-8'>
-        <label
-          htmlFor='company-password'
-          className='block mb-2 text-sm font-medium text-gray-900 dark:text-white text-left'
-        >
-          <span className='font-bold'>パスワード</span>
-        </label>
-        <input
+        <BaseFormInput
           id='company-password'
-          name='Companypassword'
+          label='パスワード'
+          name='companyPassword'
           type='password'
-          className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'
           value={companySignUpInputs.password}
           onChange={(e) => updateSignUpInput({ password: e.target.value })}
+          validationErrorMessages={validationErrors.password ?? []}
         />
-        {validationErrors.password && (
-          <div className='w-full pt-5 text-left'>
-            {validationErrors.password.map((message, i) => (
-              <p key={i} className='text-red-400'>
-                {message}
-              </p>
-            ))}
-          </div>
-        )}
       </div>
 
       <div className='mt-8'>
