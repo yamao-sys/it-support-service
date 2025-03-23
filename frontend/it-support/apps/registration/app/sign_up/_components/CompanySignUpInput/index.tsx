@@ -10,6 +10,7 @@ import {
   useCompanySignUpSetContext,
 } from "../../_contexts/useCompanySignUpContext";
 import BaseFormInput from "@/components/BaseFormInput";
+import BaseButton from "@/components/BaseButton";
 
 type Props = {
   formType: FormType;
@@ -119,13 +120,12 @@ const CompanySignUpInput: FC<Props> = ({ formType, togglePhase, switchFormType }
 
       <div className='w-full flex justify-center'>
         <div className='mt-16'>
-          <button
-            type='button'
-            className='py-2 px-8 border-green-500 bg-green-500 rounded-xl text-white'
+          <BaseButton
+            borderColor='border-green-500'
+            bgColor='bg-green-500'
+            label='確認画面へ'
             onClick={handleValidateSignUp}
-          >
-            確認画面へ
-          </button>
+          />
         </div>
       </div>
     </>
