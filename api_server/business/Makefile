@@ -20,4 +20,4 @@ gen-models:
 
 gen-schema:
 	mkdir api/generated/${DOMAIN}
-	@oapi-codegen -config oapi_codegen_config.yaml -package ${DOMAIN} apps/${APP_NAME}/api/${DOMAIN}.yaml > apps/${APP_NAME}/api/generated/${DOMAIN}.go
+	@oapi-codegen -config oapi_codegen_config.yaml -package ${DOMAIN} api/${DOMAIN}.yaml > api/generated/${DOMAIN}/${DOMAIN}.go
