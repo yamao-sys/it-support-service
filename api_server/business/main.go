@@ -1,6 +1,9 @@
 package main
 
 import (
+	"business/api/generated/csrf"
+	"business/internal/handlers"
+	"business/internal/middlewares"
 	"net/http"
 	"os"
 
@@ -9,17 +12,26 @@ import (
 )
 
 func main() {
-	loadEnv()
+	// NOTE: デプロイ先の環境はSecret Managerで環境変数を管理する
+	if os.Getenv("APP_ENV") != "production" {
+		loadEnv()
+	}
 
-	// dbCon := d.Init()
+	// dbCon := database.Init()
+
+	csrfServer := handlers.NewCsrfHandler()
+	csrfStrictHandler := csrf.NewStrictHandler(csrfServer, nil)
 
 	// NOTE: Handlerをルーティングに追加
-	e := echo.New()
+	e := middlewares.ApplyMiddlewares(echo.New())
 	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello, Business!")
+		return c.String(http.StatusOK, "Hello, Registration!")
 	})
+	csrf.RegisterHandlers(e, csrfStrictHandler)
 
-	e.Logger.Fatal(e.Start(":" + os.Getenv("SERVER_PORT")))
+	if err := e.Start(":" + os.Getenv("SERVER_PORT")); err != nil && err != http.ErrServerClosed {
+		e.Logger.Errorf("Echo server error: %v", err)
+	}
 }
 
 func loadEnv() {
