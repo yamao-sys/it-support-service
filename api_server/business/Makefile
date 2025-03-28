@@ -6,7 +6,7 @@ test-local:
 	godotenv -f /app/.env.test.local go test -v ./... -p 1 -shuffle=on
 
 test-ci:
-	godotenv -f /app/.env.test go test -v ./... -p 1 -shuffle=on
+	godotenv -f .env.test go test -v ./... -p 1 -shuffle=on
 
 prepare-sqlboiler:
 	@go get -u github.com/tiendc/sqlboiler-extensions@$(BOIL_EXT_VER)

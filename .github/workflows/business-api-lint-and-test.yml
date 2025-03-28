@@ -1,0 +1,99 @@
+name: Business Api Lint And Test
+
+on:
+  pull_request:
+    paths:
+      - 'api_server/business/**/*.go'
+      - 'api_server/business/**/*.mod'
+
+jobs:
+  Lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.23'
+
+      - name: Install dependencies
+        working-directory: ./api_server/business
+        run: go mod tidy
+
+      - name: Generate reviewdog api token
+        id: generate_token
+        uses: tibdex/github-app-token@v1
+        with:
+          app_id: ${{ secrets.REVIEDOG_APP_ID }}
+          private_key: ${{ secrets.REVIEDOG_PRIVATE_KEY }}
+
+      - name: Setup reviewdog
+        uses: reviewdog/action-setup@v1
+
+      - name: lint
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ steps.generate_token.outputs.token }}
+        working-directory: ./api_server/business
+        run: go install honnef.co/go/tools/cmd/staticcheck@latest && staticcheck ./... | reviewdog -reporter=github-pr-review -f=staticcheck -level=warn -filter-mode=nofilter -fail-level=any
+
+  Test:
+    runs-on: ubuntu-latest
+
+    services:
+      db:
+        image: mysql:8.0.28
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
+        ports:
+          - 3306:3306
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: it_support_test
+          TZ: 'Asia/Tokyo'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.23'
+
+      - name: Install dependencies
+        working-directory: ./api_server/business
+        run: |
+          go mod tidy
+          go install github.com/rubenv/sql-migrate/...@latest
+          go install github.com/joho/godotenv/cmd/godotenv@latest
+
+      - name: Prepare storage directory
+        working-directory: ./api_server/business
+        run: mkdir data/ && mkdir data/it_support_test
+
+      - name: Set up google cloud server
+        uses: fsouza/fake-gcs-action@v0.4.1
+        with:
+          version: '1.37.2'
+          backend: memory
+          data: './api_server/business/data'
+          public-host: 'gcs:4443'
+          external-url: 'http://gcs:4443'
+          scheme: http
+
+      - name: Add GCS to /etc/hosts
+        run: echo "127.0.0.1 gcs" | sudo tee -a /etc/hosts
+
+      - name: migrate
+        working-directory: ./migrations
+        run: make migrate-test
+
+      - name: test
+        working-directory: ./api_server/business
+        run: make test-ci
+
+      - name: Build
+        working-directory: ./api_server/business
+        run: go build -v ./...
