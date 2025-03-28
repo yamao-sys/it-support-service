@@ -1,6 +1,12 @@
 package main
 
 import (
+	"business/api/generated/csrf"
+	"business/api/generated/supporters"
+	"business/internal/database"
+	"business/internal/handlers"
+	"business/internal/middlewares"
+	"business/internal/services"
 	"net/http"
 	"os"
 
@@ -9,17 +15,34 @@ import (
 )
 
 func main() {
-	loadEnv()
+	// NOTE: デプロイ先の環境はSecret Managerで環境変数を管理する
+	if os.Getenv("APP_ENV") != "production" {
+		loadEnv()
+	}
 
-	// dbCon := d.Init()
+	dbCon := database.Init()
+
+	// NOTE: service層のインスタンス
+	supporterService := services.NewSupporterService(dbCon)
+
+	// NOTE: controllerをHandlerに追加
+	supporterServer := handlers.NewSupportersHandler(supporterService)
+	supporterStrictHandler := supporters.NewStrictHandler(supporterServer, nil)
+
+	csrfServer := handlers.NewCsrfHandler()
+	csrfStrictHandler := csrf.NewStrictHandler(csrfServer, nil)
 
 	// NOTE: Handlerをルーティングに追加
-	e := echo.New()
+	e := middlewares.ApplyMiddlewares(echo.New())
 	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello, Business!")
+		return c.String(http.StatusOK, "Hello, Registration!")
 	})
+	supporters.RegisterHandlers(e, supporterStrictHandler)
+	csrf.RegisterHandlers(e, csrfStrictHandler)
 
-	e.Logger.Fatal(e.Start(":" + os.Getenv("SERVER_PORT")))
+	if err := e.Start(":" + os.Getenv("SERVER_PORT")); err != nil && err != http.ErrServerClosed {
+		e.Logger.Errorf("Echo server error: %v", err)
+	}
 }
 
 func loadEnv() {

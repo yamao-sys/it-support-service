@@ -6,7 +6,7 @@ test-local:
 	godotenv -f /app/.env.test.local go test -v ./... -p 1 -shuffle=on
 
 test-ci:
-	godotenv -f /app/.env.test go test -v ./... -p 1 -shuffle=on
+	godotenv -f .env.test go test -v ./... -p 1 -shuffle=on
 
 prepare-sqlboiler:
 	@go get -u github.com/tiendc/sqlboiler-extensions@$(BOIL_EXT_VER)
@@ -14,10 +14,10 @@ prepare-sqlboiler:
 	@go install github.com/volatiletech/sqlboiler/v4/drivers/sqlboiler-mysql@$(BOIL_VER)
 
 gen-models:
-	@sqlboiler mysql \
+	godotenv -f /app/.env sqlboiler mysql \
  		--templates $(GOPATH)/pkg/mod/github.com/volatiletech/sqlboiler/v4@$(BOIL_VER)/templates/main \
  		--templates $(GOPATH)/pkg/mod/github.com/tiendc/sqlboiler-extensions@$(BOIL_EXT_VER)/templates/boilv4/mysql
 
 gen-schema:
 	mkdir api/generated/${DOMAIN}
-	@oapi-codegen -config oapi_codegen_config.yaml -package ${DOMAIN} apps/${APP_NAME}/api/${DOMAIN}.yaml > apps/${APP_NAME}/api/generated/${DOMAIN}.go
+	@oapi-codegen -config oapi_codegen_config.yaml -package ${DOMAIN} api/${DOMAIN}.yaml > api/generated/${DOMAIN}/${DOMAIN}.go
