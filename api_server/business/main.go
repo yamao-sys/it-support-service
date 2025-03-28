@@ -2,8 +2,11 @@ package main
 
 import (
 	"business/api/generated/csrf"
+	"business/api/generated/supporters"
+	"business/internal/database"
 	"business/internal/handlers"
 	"business/internal/middlewares"
+	"business/internal/services"
 	"net/http"
 	"os"
 
@@ -17,7 +20,14 @@ func main() {
 		loadEnv()
 	}
 
-	// dbCon := database.Init()
+	dbCon := database.Init()
+
+	// NOTE: service層のインスタンス
+	supporterService := services.NewSupporterService(dbCon)
+
+	// NOTE: controllerをHandlerに追加
+	supporterServer := handlers.NewSupportersHandler(supporterService)
+	supporterStrictHandler := supporters.NewStrictHandler(supporterServer, nil)
 
 	csrfServer := handlers.NewCsrfHandler()
 	csrfStrictHandler := csrf.NewStrictHandler(csrfServer, nil)
@@ -27,6 +37,7 @@ func main() {
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, Registration!")
 	})
+	supporters.RegisterHandlers(e, supporterStrictHandler)
 	csrf.RegisterHandlers(e, csrfStrictHandler)
 
 	if err := e.Start(":" + os.Getenv("SERVER_PORT")); err != nil && err != http.ErrServerClosed {
