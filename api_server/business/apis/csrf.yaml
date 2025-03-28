@@ -1,0 +1,51 @@
+openapi: 3.1.0
+info:
+  title: csrf
+  version: '1.0'
+  summary: ''
+  description: csrf Token Fetching APIs
+servers:
+  - url: 'http://localhost:8081'
+paths:
+  /csrf:
+    get:
+      summary: Get Csrf
+      responses:
+        '200':
+          $ref: '#/components/responses/CsrfResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      operationId: get-csrf
+      tags:
+        - csrf
+components:
+  responses:
+    CsrfResponse:
+      description: Csrf response
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - csrfToken
+            properties:
+              csrfToken:
+                type: string
+    InternalServerErrorResponse:
+      description: Internal Server Error Response
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - code
+              - message
+            properties:
+              code:
+                type: integer
+                format: int64
+              message:
+                type: string
+tags:
+  - name: csrf
+    description: csrf endpoint
