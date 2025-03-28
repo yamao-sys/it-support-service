@@ -3,8 +3,8 @@ name: Registration Api Lint And Test
 on:
   pull_request:
     paths:
-      - 'api_server/**/*.go'
-      - 'api_server/**/*.mod'
+      - 'api_server/registration/**/*.go'
+      - 'api_server/registration/**/*.mod'
 
 jobs:
   Lint:
