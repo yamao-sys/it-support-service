@@ -1,10 +1,8 @@
+import * as tailwindConfig from "@repo/ui/tailwind.config";
+
 module.exports = {
-  ...require("@repo/ui/tailwind.config"),
-  content: [
-    "./pages/**/*.{js,ts,jsx,tsx}",
-    "./components/**/*.{js,ts,jsx,tsx}",
-    "../../packages/ui/**/*.{js,ts,jsx,tsx}",
-  ],
+  preset: [tailwindConfig],
+  content: ["./app/**/*.tsx", "./components/**/*.tsx", "../../packages/ui/src/**/*.tsx"],
   theme: {
     extend: {},
   },
