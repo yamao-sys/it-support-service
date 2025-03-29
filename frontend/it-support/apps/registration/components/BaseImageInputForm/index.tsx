@@ -1,6 +1,6 @@
 import { FC, useEffect, useRef, useState } from "react";
 import BaseImageInput from "../BaseImageInput";
-import BaseButton from "../BaseButton";
+import BaseButton from "@repo/ui/BaseButton";
 
 type Props = {
   id: string;
