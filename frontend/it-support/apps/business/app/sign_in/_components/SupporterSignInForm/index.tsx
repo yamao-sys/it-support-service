@@ -31,7 +31,7 @@ const SupporterSignInForm: FC<Props> = ({ formType, switchFormType }: Props) => 
       return;
     }
 
-    window.alert("ログインに成功しました!");
+    window.alert("サポータのログインに成功しました!");
     router.push("/");
   });
 

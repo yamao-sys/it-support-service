@@ -31,7 +31,7 @@ const CompanySignInForm: FC<Props> = ({ formType, switchFormType }: Props) => {
       return;
     }
 
-    window.alert("ログインに成功しました!");
+    window.alert("企業のログインに成功しました!");
     router.push("/");
   });
 
