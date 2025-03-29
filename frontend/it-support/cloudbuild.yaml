@@ -5,6 +5,8 @@ substitutions:
 steps:
   # Registration Frontコンテナのビルド・プッシュ
   - name: "gcr.io/cloud-builders/docker"
+    id: "build_registration_front"
+    waitFor: ["-"]
     args:
       [
         "build",
@@ -15,11 +17,15 @@ steps:
         ".",
       ]
   - name: "gcr.io/cloud-builders/docker"
+    id: "push_registration_front_image"
+    waitFor: ["build_registration_front"]
     args: ["push", "$_REGION-docker.pkg.dev/${PROJECT_ID}/${_REGISTRATION_SERVIVE}/latest"]
 
   # Cloud Run へデプロイ
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
     entrypoint: "bash"
+    id: "deploy_registration_front"
+    waitFor: ["push_registration_front_image"]
     args:
       - -c
       - |
@@ -34,6 +40,8 @@ steps:
 
   # Business Frontコンテナのビルド・プッシュ
   - name: "gcr.io/cloud-builders/docker"
+    id: "build_business_front"
+    waitFor: ["-"]
     args:
       [
         "build",
@@ -44,11 +52,15 @@ steps:
         ".",
       ]
   - name: "gcr.io/cloud-builders/docker"
+    id: "push_business_front_image"
+    waitFor: ["build_business_front"]
     args: ["push", "$_REGION-docker.pkg.dev/${PROJECT_ID}/${_BUSINESS_SERVIVE}/latest"]
 
   # Cloud Run へデプロイ
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
     entrypoint: "bash"
+    id: "deploy_business_front"
+    waitFor: ["push_business_front_image"]
     args:
       - -c
       - |
