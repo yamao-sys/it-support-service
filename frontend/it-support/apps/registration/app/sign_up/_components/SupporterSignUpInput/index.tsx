@@ -7,10 +7,10 @@ import {
   useSupporterSignUpContext,
   useSupporterSignUpSetContext,
 } from "../../_contexts/useSupporterSignUpContext";
-import { postValidateSignUp } from "../../_actions/supporters";
 import BaseImageInputForm from "@/components/BaseImageInputForm";
 import BaseFormInput from "@repo/ui/BaseFormInput";
 import BaseButton from "@repo/ui/BaseButton";
+import { postSupporterValidateSignUp } from "@/apis/supporters.api";
 
 type Props = {
   formType: FormType;
@@ -61,7 +61,7 @@ const SupporterSignUpInput: FC<Props> = ({ formType, togglePhase, switchFormType
   const handleValidateSignUp = useCallback(async () => {
     setValidationErrors(INITIAL_VALIDATION_ERRORS);
 
-    const response = await postValidateSignUp(supporterSignUpInputs);
+    const response = await postSupporterValidateSignUp(supporterSignUpInputs);
 
     // バリデーションエラーがなければ、確認画面へ遷移
     if (Object.keys(response.errors).length === 0) {

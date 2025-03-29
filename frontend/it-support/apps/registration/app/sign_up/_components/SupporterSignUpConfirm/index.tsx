@@ -3,9 +3,9 @@
 import { FC, useCallback } from "react";
 import { useSupporterSignUpContext } from "../../_contexts/useSupporterSignUpContext";
 import BaseImage from "@/components/BaseImage";
-import { postSignUp } from "../../_actions/supporters";
 import { PhaseType } from "../../_types";
 import BaseButton from "@repo/ui/BaseButton";
+import { postSupporterSignUp } from "@/apis/supporters.api";
 
 type Props = {
   togglePhase: (newPhase: PhaseType) => void;
@@ -17,7 +17,7 @@ const SupporterSignUpConfirm: FC<Props> = ({ togglePhase }: Props) => {
   const handleBackToInput = () => togglePhase("input");
 
   const handleSignUp = useCallback(async () => {
-    const response = await postSignUp(supporterSignUpInputs);
+    const response = await postSupporterSignUp(supporterSignUpInputs);
 
     // バリデーションエラーがなければ、確認画面へ遷移
     if (Object.keys(response.errors).length === 0) {
