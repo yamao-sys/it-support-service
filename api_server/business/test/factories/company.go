@@ -11,7 +11,7 @@ import (
 
 var CompanyFactory = factory.NewFactory(
 	&models.Company{
-		Name: randomdata.StringSample(),
+		Name: randomdata.RandStringRunes(8),
 		Email: randomdata.Email(),
 	},
 ).Attr("Password", func(args factory.Args) (interface{}, error) {
