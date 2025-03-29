@@ -28,7 +28,7 @@ steps:
           --platform managed \
           --region ${_REGION} \
           --service-account=storage-writer@it-support-453908.iam.gserviceaccount.com \
-          --update-env-vars="MYSQL_DBNAME=$$MYSQL_DBNAME,MYSQL_USER=$$MYSQL_USER,MYSQL_PASS=$$MYSQL_PASS,MYSQL_HOST=$$MYSQL_HOST,MYSQL_PORT=$$MYSQL_PORT,SERVER_PORT=$$SERVER_PORT,STORAGE_BUCKET_NAME=$$STORAGE_BUCKET_NAME,JWT_TOKEN_KEY=$$JWT_TOKEN_KEY,CLIENT_ORIGIN=$$CLIENT_ORIGIN,APP_ENV=$$APP_ENV" \
+          --update-env-vars="MYSQL_DBNAME=$$MYSQL_DBNAME,MYSQL_USER=$$MYSQL_USER,MYSQL_PASS=$$MYSQL_PASS,MYSQL_HOST=$$MYSQL_HOST,MYSQL_PORT=$$MYSQL_PORT,SERVER_PORT=$$SERVER_PORT,STORAGE_BUCKET_NAME=$$STORAGE_BUCKET_NAME,JWT_TOKEN_KEY=$$JWT_TOKEN_KEY,REGISTRATION_CLIENT_ORIGIN=$$REGISTRATION_CLIENT_ORIGIN,APP_ENV=$$APP_ENV" \
     secretEnv:
       [
         'MYSQL_DBNAME',
@@ -39,7 +39,7 @@ steps:
         'SERVER_PORT',
         'STORAGE_BUCKET_NAME',
         'JWT_TOKEN_KEY',
-        'CLIENT_ORIGIN',
+        'REGISTRATION_CLIENT_ORIGIN',
         'APP_ENV',
       ]
 availableSecrets:
@@ -60,7 +60,7 @@ availableSecrets:
       env: STORAGE_BUCKET_NAME
     - versionName: 'projects/${PROJECT_ID}/secrets/JWT_TOKEN_KEY/versions/1'
       env: JWT_TOKEN_KEY
-    - versionName: 'projects/${PROJECT_ID}/secrets/CLIENT_ORIGIN/versions/1'
-      env: CLIENT_ORIGIN
+    - versionName: 'projects/${PROJECT_ID}/secrets/REGISTRATION_CLIENT_ORIGIN/versions/1'
+      env: REGISTRATION_CLIENT_ORIGIN
     - versionName: 'projects/${PROJECT_ID}/secrets/APP_ENV/versions/1'
       env: APP_ENV
