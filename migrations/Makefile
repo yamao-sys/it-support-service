@@ -13,3 +13,6 @@ migrate-test-local:
 
 migrate-test:
 	godotenv -f .env.test sql-migrate up -env=test
+
+migrate-business-test-local:
+	godotenv -f .env.business.test.local sql-migrate up -env=test

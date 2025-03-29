@@ -5,6 +5,9 @@ BOIL_EXT_VER := v0.8.0
 test-local:
 	godotenv -f /app/.env.test.local go test -v ./... -p 1 -shuffle=on
 
+test-seed-local:
+	godotenv -f .env.test.local go run test/seeds/main.go
+
 test-ci:
 	godotenv -f .env.test go test -v ./... -p 1 -shuffle=on
 

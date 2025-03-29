@@ -50,7 +50,7 @@ jobs:
           - 3306:3306
         env:
           MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: it_support_test
+          MYSQL_DATABASE: it_support_business_test
           TZ: 'Asia/Tokyo'
 
     steps:
