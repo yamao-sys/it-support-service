@@ -56,6 +56,12 @@ cd migrations && gcloud builds submit --config ./cloudbuild.yaml
 cd api_server/registration && gcloud builds submit --config ./cloudbuild.yaml
 ```
 
+### Business API
+
+```
+cd api_server/business && gcloud builds submit --config ./cloudbuild.yaml
+```
+
 ### フロントエンド
 
 ```
