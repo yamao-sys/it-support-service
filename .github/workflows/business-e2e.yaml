@@ -1,45 +1,11 @@
-name: Business Api Lint And Test
+name: Business E2E
 
 on:
   pull_request:
-    paths:
-      - 'api_server/business/**/*.go'
-      - 'api_server/business/**/*.mod'
+    types: [opened, synchronize]
 
 jobs:
-  Lint:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: '1.23'
-
-      - name: Install dependencies
-        working-directory: ./api_server/business
-        run: go mod tidy
-
-      - name: Generate reviewdog api token
-        id: generate_token
-        uses: tibdex/github-app-token@v1
-        with:
-          app_id: ${{ secrets.REVIEDOG_APP_ID }}
-          private_key: ${{ secrets.REVIEDOG_PRIVATE_KEY }}
-
-      - name: Setup reviewdog
-        uses: reviewdog/action-setup@v1
-
-      - name: lint
-        env:
-          REVIEWDOG_GITHUB_API_TOKEN: ${{ steps.generate_token.outputs.token }}
-        working-directory: ./api_server/business
-        run: go install honnef.co/go/tools/cmd/staticcheck@latest && staticcheck ./... | reviewdog -reporter=github-pr-review -f=staticcheck -level=warn -filter-mode=nofilter -fail-level=any
-
-  Test:
+  test:
     runs-on: ubuntu-latest
 
     services:
@@ -54,8 +20,7 @@ jobs:
           TZ: 'Asia/Tokyo'
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Set up Go
         uses: actions/setup-go@v4
@@ -90,10 +55,40 @@ jobs:
         working-directory: ./migrations
         run: make migrate-business-test
 
-      - name: test
+      - name: Seeding
         working-directory: ./api_server/business
-        run: make test-ci
+        run: make test-seed-ci
 
-      - name: Build
+      - name: Boot API Server
         working-directory: ./api_server/business
-        run: go build -v ./...
+        run: godotenv -f .env.test go run main.go &
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          cache-dependency-path: ./frontend/it-support/pnpm-lock.yaml
+
+      - name: Install dependencies
+        working-directory: ./frontend/it-support
+        run: pnpm i
+
+      - name: Install Playwright Browsers
+        working-directory: ./frontend/it-support
+        run: pnpm playwright install --with-deps
+
+      - name: Run Playwright tests
+        working-directory: ./frontend/it-support
+        run: pnpm test:e2e:business
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30

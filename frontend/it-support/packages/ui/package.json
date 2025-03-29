@@ -4,9 +4,13 @@
   "private": true,
   "exports": {
     "./tailwind.config": "./tailwind.config.ts",
+    "./styles.css": "./src/styles.css",
     "./button": "./src/button.tsx",
     "./card": "./src/card.tsx",
-    "./code": "./src/code.tsx"
+    "./code": "./src/code.tsx",
+    "./BaseButton": "./src/BaseButton/index.tsx",
+    "./BaseContainer": "./src/BaseContainer/index.tsx",
+    "./BaseFormInput": "./src/BaseFormInput/index.tsx"
   },
   "scripts": {
     "lint": "eslint . --max-warnings 0",

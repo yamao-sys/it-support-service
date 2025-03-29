@@ -12,7 +12,8 @@
     "prepare": "cd ../.. && husky frontend/it-support/.husky",
     "lint-staged": "lint-staged",
     "test:e2e": "turbo run test:e2e",
-    "test:e2e:registration": "turbo test:e2e --filter=registration"
+    "test:e2e:registration": "turbo test:e2e --filter=registration",
+    "test:e2e:business": "turbo test:e2e --filter=business"
   },
   "devDependencies": {
     "@playwright/test": "^1.50.1",
@@ -36,6 +37,7 @@
     "node": ">=18"
   },
   "dependencies": {
-    "openapi-fetch": "^0.13.4"
+    "openapi-fetch": "^0.13.4",
+    "react-hook-form": "^7.54.2"
   }
 }
