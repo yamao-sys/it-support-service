@@ -1,6 +1,7 @@
 package main
 
 import (
+	"business/api/generated/companies"
 	"business/api/generated/csrf"
 	"business/api/generated/supporters"
 	"business/internal/database"
@@ -24,10 +25,13 @@ func main() {
 
 	// NOTE: service層のインスタンス
 	supporterService := services.NewSupporterService(dbCon)
+	companyService := services.NewCompanyService(dbCon)
 
 	// NOTE: controllerをHandlerに追加
 	supporterServer := handlers.NewSupportersHandler(supporterService)
 	supporterStrictHandler := supporters.NewStrictHandler(supporterServer, nil)
+	companyServer := handlers.NewCompaniesHandler(companyService)
+	companyStrictHandler := companies.NewStrictHandler(companyServer, nil)
 
 	csrfServer := handlers.NewCsrfHandler()
 	csrfStrictHandler := csrf.NewStrictHandler(csrfServer, nil)
@@ -38,6 +42,7 @@ func main() {
 		return c.String(http.StatusOK, "Hello, Registration!")
 	})
 	supporters.RegisterHandlers(e, supporterStrictHandler)
+	companies.RegisterHandlers(e, companyStrictHandler)
 	csrf.RegisterHandlers(e, csrfStrictHandler)
 
 	if err := e.Start(":" + os.Getenv("SERVER_PORT")); err != nil && err != http.ErrServerClosed {
