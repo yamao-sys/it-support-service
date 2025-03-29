@@ -18,6 +18,7 @@ func main() {
 	dbCon := database.Init()
 	// NOTE: DBを閉じる
 	defer func(cause error) {
+		fmt.Println(cause)
 		if cause = dbCon.Close(); cause != nil {
 			panic(cause)
 		}
