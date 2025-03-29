@@ -5,7 +5,7 @@ import { paths } from "./generated/csrf/apiSchema";
 import { cookies } from "next/headers";
 
 const client = createClient<paths>({
-  baseUrl: "http://registration_api:8080/",
+  baseUrl: `${process.env.REGISTRATION_API_ENDPOINT_URI}/`,
   credentials: "include",
 });
 
