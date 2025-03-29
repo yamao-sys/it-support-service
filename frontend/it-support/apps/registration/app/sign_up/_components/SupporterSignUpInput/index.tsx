@@ -9,8 +9,8 @@ import {
 } from "../../_contexts/useSupporterSignUpContext";
 import { postValidateSignUp } from "../../_actions/supporters";
 import BaseImageInputForm from "@/components/BaseImageInputForm";
-import BaseFormInput from "@/components/BaseFormInput";
-import BaseButton from "@/components/BaseButton";
+import BaseFormInput from "@repo/ui/BaseFormInput";
+import BaseButton from "@repo/ui/BaseButton";
 
 type Props = {
   formType: FormType;

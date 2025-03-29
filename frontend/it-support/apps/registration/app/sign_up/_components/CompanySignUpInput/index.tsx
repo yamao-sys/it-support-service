@@ -9,8 +9,8 @@ import {
   useCompanySignUpContext,
   useCompanySignUpSetContext,
 } from "../../_contexts/useCompanySignUpContext";
-import BaseFormInput from "@/components/BaseFormInput";
-import BaseButton from "@/components/BaseButton";
+import BaseFormInput from "@repo/ui/BaseFormInput";
+import BaseButton from "@repo/ui/BaseButton";
 
 type Props = {
   formType: FormType;

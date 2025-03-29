@@ -5,7 +5,7 @@ import BaseImage from "@/components/BaseImage";
 import { postSignUp } from "../../_actions/companies";
 import { PhaseType } from "../../_types";
 import { useCompanySignUpContext } from "../../_contexts/useCompanySignUpContext";
-import BaseButton from "@/components/BaseButton";
+import BaseButton from "@repo/ui/BaseButton";
 
 type Props = {
   togglePhase: (newPhase: PhaseType) => void;

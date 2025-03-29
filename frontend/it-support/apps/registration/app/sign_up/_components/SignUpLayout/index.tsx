@@ -1,4 +1,4 @@
-import BaseContainer from "@/components/BaseContailer";
+import BaseContainer from "@repo/ui/BaseContainer";
 import { FC, ReactNode } from "react";
 import { PhaseType } from "../../_types";
 
