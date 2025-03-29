@@ -86,3 +86,5 @@ pnpx tsx generate_api_types.ts <openapi/yaml path> apps/{appName}/apis/generated
   - https://nextjs.org/docs/pages/api-reference/config/next-config-js/output
 - Next.js の Standalone ビルド
   - https://zenn.dev/rehabforjapan/articles/save-data-space-dockerfile
+- Turborepo の packages/ui の Tailwind の使用
+  - https://stackoverflow.com/questions/79416157/how-to-enable-tailwind-css-v4-0-for-the-packages-ui-components-in-turborepo
