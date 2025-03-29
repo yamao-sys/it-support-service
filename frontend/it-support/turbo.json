@@ -5,7 +5,7 @@
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "env": ["NODE_ENV", "PORT", "REGISTRATION_API_ENDPOINT_URI"],
+      "env": ["NODE_ENV", "PORT", "REGISTRATION_API_ENDPOINT_URI", "BUSINESS_API_ENDPOINT_URI"],
       "outputs": [".next/**", "!.next/cache/**"]
     },
     "lint": {
@@ -16,7 +16,7 @@
     },
     "dev": {
       "inputs": ["$TURBO_DEFAULT$", ".env", ".env.test.local", ".env.test"],
-      "env": ["NODE_ENV", "PORT", "REGISTRATION_API_ENDPOINT_URI"],
+      "env": ["NODE_ENV", "PORT", "REGISTRATION_API_ENDPOINT_URI", "BUSINESS_API_ENDPOINT_URI"],
       "cache": false,
       "persistent": true
     },
