@@ -2,10 +2,10 @@
 
 import { FC, useCallback } from "react";
 import BaseImage from "@/components/BaseImage";
-import { postSignUp } from "../../_actions/companies";
 import { PhaseType } from "../../_types";
 import { useCompanySignUpContext } from "../../_contexts/useCompanySignUpContext";
-import BaseButton from "@/components/BaseButton";
+import BaseButton from "@repo/ui/BaseButton";
+import { postCompanySignUp } from "@/apis/companies.api";
 
 type Props = {
   togglePhase: (newPhase: PhaseType) => void;
@@ -17,7 +17,7 @@ const CompanySignUpConfirm: FC<Props> = ({ togglePhase }: Props) => {
   const handleBackToInput = () => togglePhase("input");
 
   const handleSignUp = useCallback(async () => {
-    const response = await postSignUp(companySignUpInputs);
+    const response = await postCompanySignUp(companySignUpInputs);
 
     // バリデーションエラーがなければ、確認画面へ遷移
     if (Object.keys(response.errors).length === 0) {

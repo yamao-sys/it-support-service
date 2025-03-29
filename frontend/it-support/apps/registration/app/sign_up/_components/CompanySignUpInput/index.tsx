@@ -3,14 +3,14 @@
 import { FC, useCallback, useState } from "react";
 import { FormType, PhaseType, CompanySignUpValidationError } from "../../_types";
 import FormTypeSelector from "../FormTypeSelector";
-import { postValidateSignUp } from "../../_actions/companies";
 import BaseImageInputForm from "@/components/BaseImageInputForm";
 import {
   useCompanySignUpContext,
   useCompanySignUpSetContext,
 } from "../../_contexts/useCompanySignUpContext";
-import BaseFormInput from "@/components/BaseFormInput";
-import BaseButton from "@/components/BaseButton";
+import BaseFormInput from "@repo/ui/BaseFormInput";
+import BaseButton from "@repo/ui/BaseButton";
+import { postCompanyValidateSignUp } from "@/apis/companies.api";
 
 type Props = {
   formType: FormType;
@@ -51,7 +51,7 @@ const CompanySignUpInput: FC<Props> = ({ formType, togglePhase, switchFormType }
   const handleValidateSignUp = useCallback(async () => {
     setValidationErrors(INITIAL_VALIDATION_ERRORS);
 
-    const response = await postValidateSignUp(companySignUpInputs);
+    const response = await postCompanyValidateSignUp(companySignUpInputs);
 
     // バリデーションエラーがなければ、確認画面へ遷移
     if (Object.keys(response.errors).length === 0) {

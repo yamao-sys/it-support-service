@@ -1,26 +1,16 @@
 "use server";
 
 import { paths } from "@/apis/generated/companies/apiSchema";
-import { cookies } from "next/headers";
 import createClient from "openapi-fetch";
-import { CompanySignUpInput } from "../_types";
+import { CompanySignUpInput } from "../types";
+import { getRequestHeaders } from "./csrf.api";
 
 const client = createClient<paths>({
   baseUrl: `${process.env.REGISTRATION_API_ENDPOINT_URI}/`,
   credentials: "include",
 });
 
-const getRequestHeaders = async () => {
-  const csrfToken = (await cookies()).get("_csrf")?.value ?? "";
-  return {
-    headers: {
-      "X-CSRF-Token": csrfToken,
-      Cookie: `_csrf=${csrfToken}`,
-    },
-  };
-};
-
-export async function postValidateSignUp(input: CompanySignUpInput) {
+export async function postCompanyValidateSignUp(input: CompanySignUpInput) {
   const { data, error } = await client.POST("/companies/validateSignUp", {
     ...(await getRequestHeaders()),
     body: input,
@@ -46,7 +36,7 @@ export async function postValidateSignUp(input: CompanySignUpInput) {
   return data;
 }
 
-export async function postSignUp(input: CompanySignUpInput) {
+export async function postCompanySignUp(input: CompanySignUpInput) {
   const { data, error } = await client.POST("/companies/signUp", {
     ...(await getRequestHeaders()),
     body: input,
