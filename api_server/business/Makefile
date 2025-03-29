@@ -11,6 +11,9 @@ test-seed-local:
 test-ci:
 	godotenv -f .env.test go test -v ./... -p 1 -shuffle=on
 
+test-seed-ci:
+	godotenv -f .env.test go run test/seeds/main.go
+
 prepare-sqlboiler:
 	@go get -u github.com/tiendc/sqlboiler-extensions@$(BOIL_EXT_VER)
 	@go install github.com/volatiletech/sqlboiler/v4@$(BOIL_VER)

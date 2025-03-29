@@ -55,6 +55,10 @@ jobs:
         working-directory: ./migrations
         run: make migrate-business-test
 
+      - name: Seeding
+        working-directory: ./api_server/business
+        run: make test-seed-ci
+
       - name: Boot API Server
         working-directory: ./api_server/business
         run: godotenv -f .env.test go run main.go &
