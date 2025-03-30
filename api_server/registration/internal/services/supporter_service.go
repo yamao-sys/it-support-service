@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"io"
 	"os"
 	"registration/api/generated/supporters"
@@ -64,6 +65,7 @@ func (ss *supporterService) SignUp(ctx context.Context, requestParams supporters
 
 	// テストが書かれていない箇所を明示的に示すため追加
 	if requestParams.FrontIdentification == nil && requestParams.BackIdentification == nil && requestParams.Birthday != nil {
+		fmt.Println("test")
 		return nil
 	}
 
