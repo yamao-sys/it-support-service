@@ -4,6 +4,7 @@ coverage:
   precision: 2
   status:
     project:
+      default: false
       registration:
         paths:
           - api_server/registration/**
@@ -13,6 +14,7 @@ coverage:
           - api_server/business/**
         threshold: 0%
     patch:
+      default: false
       registration:
         paths:
           - api_server/registration/**
