@@ -44,6 +44,7 @@ func (ss *supporterService) SignIn(ctx context.Context, requestParams supporters
 	})
 	tokenString, err = token.SignedString([]byte(os.Getenv("JWT_TOKEN_KEY")))
 	if err != nil {
+		fmt.Println("Error signing token:", err)
 		return http.StatusInternalServerError, "", err
 	}
 	return http.StatusOK, tokenString, nil

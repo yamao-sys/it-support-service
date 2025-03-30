@@ -62,6 +62,11 @@ func (ss *supporterService) SignUp(ctx context.Context, requestParams supporters
 	}
 	defer client.Close()
 
+	// テストが書かれていない箇所を明示的に示すため追加
+	if requestParams.FrontIdentification == nil && requestParams.BackIdentification == nil && requestParams.Birthday != nil {
+		return nil
+	}
+
 	if requestParams.FrontIdentification == nil && requestParams.BackIdentification == nil {
 		return nil
 	}
