@@ -9,7 +9,7 @@ test-seed-local:
 	godotenv -f .env.test.local go run test/seeds/main.go
 
 test-ci:
-	godotenv -f .env.test go test -v ./... -p 1 -shuffle=on
+	godotenv -f .env.test go test -v ./... -p 1 -shuffle=on -coverprofile=coverage.txt
 
 test-seed-ci:
 	godotenv -f .env.test go run test/seeds/main.go
