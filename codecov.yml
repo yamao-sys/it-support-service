@@ -1,0 +1,19 @@
+coverage:
+  round: down
+  range: 60...90
+  precision: 2
+  status:
+    project:
+      default:
+        threshold: 0%
+      registration:
+        paths:
+          - api_server/registration/**
+        threshold: 0%
+      business:
+        paths:
+          - api_server/business/**
+        threshold: 0%
+    patch:
+      default:
+        target: 60%
