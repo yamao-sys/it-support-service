@@ -162,15 +162,26 @@ var CompanyWhere = struct {
 
 // CompanyRels is where relationship names are stored.
 var CompanyRels = struct {
-}{}
+	Projects string
+}{
+	Projects: "Projects",
+}
 
 // companyR is where relationships are stored.
 type companyR struct {
+	Projects ProjectSlice `boil:"Projects" json:"Projects" toml:"Projects" yaml:"Projects"`
 }
 
 // NewStruct creates a new relationship struct
 func (*companyR) NewStruct() *companyR {
 	return &companyR{}
+}
+
+func (r *companyR) GetProjects() ProjectSlice {
+	if r == nil {
+		return nil
+	}
+	return r.Projects
 }
 
 // companyL is where Load methods for each relationship are stored.
@@ -487,6 +498,186 @@ func (q companyQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bo
 	}
 
 	return count > 0, nil
+}
+
+// Projects retrieves all the project's Projects with an executor.
+func (o *Company) Projects(mods ...qm.QueryMod) projectQuery {
+	var queryMods []qm.QueryMod
+	if len(mods) != 0 {
+		queryMods = append(queryMods, mods...)
+	}
+
+	queryMods = append(queryMods,
+		qm.Where("`projects`.`company_id`=?", o.ID),
+	)
+
+	return Projects(queryMods...)
+}
+
+// LoadProjects allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-M or N-M relationship.
+func (companyL) LoadProjects(ctx context.Context, e boil.ContextExecutor, singular bool, maybeCompany interface{}, mods queries.Applicator) error {
+	var slice []*Company
+	var object *Company
+
+	if singular {
+		var ok bool
+		object, ok = maybeCompany.(*Company)
+		if !ok {
+			object = new(Company)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeCompany)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeCompany))
+			}
+		}
+	} else {
+		s, ok := maybeCompany.(*[]*Company)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeCompany)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeCompany))
+			}
+		}
+	}
+
+	args := make(map[interface{}]struct{})
+	if singular {
+		if object.R == nil {
+			object.R = &companyR{}
+		}
+		args[object.ID] = struct{}{}
+	} else {
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &companyR{}
+			}
+			args[obj.ID] = struct{}{}
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	argsSlice := make([]interface{}, len(args))
+	i := 0
+	for arg := range args {
+		argsSlice[i] = arg
+		i++
+	}
+
+	query := NewQuery(
+		qm.From(`projects`),
+		qm.WhereIn(`projects.company_id in ?`, argsSlice...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load projects")
+	}
+
+	var resultSlice []*Project
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice projects")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results in eager load on projects")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for projects")
+	}
+
+	if len(projectAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+	if singular {
+		object.R.Projects = resultSlice
+		for _, foreign := range resultSlice {
+			if foreign.R == nil {
+				foreign.R = &projectR{}
+			}
+			foreign.R.Company = object
+		}
+		return nil
+	}
+
+	for _, foreign := range resultSlice {
+		for _, local := range slice {
+			if local.ID == foreign.CompanyID {
+				local.R.Projects = append(local.R.Projects, foreign)
+				if foreign.R == nil {
+					foreign.R = &projectR{}
+				}
+				foreign.R.Company = local
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// AddProjects adds the given related objects to the existing relationships
+// of the company, optionally inserting them as new records.
+// Appends related to o.R.Projects.
+// Sets related.R.Company appropriately.
+func (o *Company) AddProjects(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Project) error {
+	var err error
+	for _, rel := range related {
+		if insert {
+			rel.CompanyID = o.ID
+			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
+				return errors.Wrap(err, "failed to insert into foreign table")
+			}
+		} else {
+			updateQuery := fmt.Sprintf(
+				"UPDATE `projects` SET %s WHERE %s",
+				strmangle.SetParamNames("`", "`", 0, []string{"company_id"}),
+				strmangle.WhereClause("`", "`", 0, projectPrimaryKeyColumns),
+			)
+			values := []interface{}{o.ID, rel.ID}
+
+			if boil.IsDebug(ctx) {
+				writer := boil.DebugWriterFrom(ctx)
+				fmt.Fprintln(writer, updateQuery)
+				fmt.Fprintln(writer, values)
+			}
+			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+				return errors.Wrap(err, "failed to update foreign table")
+			}
+
+			rel.CompanyID = o.ID
+		}
+	}
+
+	if o.R == nil {
+		o.R = &companyR{
+			Projects: related,
+		}
+	} else {
+		o.R.Projects = append(o.R.Projects, related...)
+	}
+
+	for _, rel := range related {
+		if rel.R == nil {
+			rel.R = &projectR{
+				Company: o,
+			}
+		} else {
+			rel.R.Company = o
+		}
+	}
+	return nil
 }
 
 // Companies retrieves all the records using an executor.
@@ -1601,6 +1792,33 @@ func (s CompanySlice) UpsertAllByPage(ctx context.Context, exec boil.ContextExec
 		}
 	}
 	return rowsAffected, nil
+}
+
+// LoadProjectsByPage performs eager loading of values by page. This is for a 1-M or N-M relationship.
+func (s CompanySlice) LoadProjectsByPage(ctx context.Context, e boil.ContextExecutor, mods ...qm.QueryMod) error {
+	return s.LoadProjectsByPageEx(ctx, e, DefaultPageSize, mods...)
+}
+func (s CompanySlice) LoadProjectsByPageEx(ctx context.Context, e boil.ContextExecutor, pageSize int, mods ...qm.QueryMod) error {
+	if len(s) == 0 {
+		return nil
+	}
+	for _, chunk := range chunkSlice[*Company](s, pageSize) {
+		if err := chunk[0].L.LoadProjects(ctx, e, false, &chunk, queryMods(mods)); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (s CompanySlice) GetLoadedProjects() ProjectSlice {
+	result := make(ProjectSlice, 0, len(s)*2)
+	for _, item := range s {
+		if item.R == nil || item.R.Projects == nil {
+			continue
+		}
+		result = append(result, item.R.Projects...)
+	}
+	return result
 }
 
 ///////////////////////////////// END EXTENSIONS /////////////////////////////////

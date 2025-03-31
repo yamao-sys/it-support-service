@@ -6,9 +6,11 @@ package models
 var TableNames = struct {
 	Companies      string
 	GorpMigrations string
+	Projects       string
 	Supporters     string
 }{
 	Companies:      "companies",
 	GorpMigrations: "gorp_migrations",
+	Projects:       "projects",
 	Supporters:     "supporters",
 }
