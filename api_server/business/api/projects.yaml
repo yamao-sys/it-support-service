@@ -1,0 +1,138 @@
+openapi: 3.1.0
+info:
+  title: projects
+  version: '1.0'
+  summary: ''
+  description: projects APIs
+servers:
+  - url: 'http://localhost:8081'
+paths:
+  /projects:
+    post:
+      summary: Project Create
+      tags:
+        - projects
+      responses:
+        '200':
+          $ref: '#/components/responses/ProjectStoreResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      operationId: post-projects
+      requestBody:
+        $ref: '#/components/requestBodies/ProjectInput'
+components:
+  schemas:
+    Project:
+      title: Project Model
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+        min_budget:
+          type: integer
+        max_budget:
+          type: integer
+        isActive:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+      description: Project
+    ProjectValidationError:
+      title: ProjectValidationErrors
+      type: object
+      properties:
+        title:
+          type: array
+          items:
+            type: string
+        description:
+          type: array
+          items:
+            type: string
+        startDate:
+          type: array
+          items:
+            type: string
+        endDate:
+          type: array
+          items:
+            type: string
+        minBudget:
+          type: array
+          items:
+            type: string
+        maxBudget:
+          type: array
+          items:
+            type: string
+        isActive:
+          type: array
+          items:
+            type: string
+  requestBodies:
+    ProjectInput:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              title:
+                type: string
+              description:
+                type: string
+              startDate:
+                type: string
+                format: date
+              endDate:
+                type: string
+                format: date
+              minBudget:
+                type: integer
+              maxBudget:
+                type: integer
+              isActive:
+                type: boolean
+      description: Store Project Inputs
+  responses:
+    ProjectStoreResponse:
+      description: Project Store Response
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - project
+              - errors
+            properties:
+              project:
+                $ref: '#/components/schemas/Project'
+              errors:
+                $ref: '#/components/schemas/ProjectValidationError'
+    InternalServerErrorResponse:
+      description: Internal Server Error Response
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - code
+              - message
+            properties:
+              code:
+                type: integer
+              message:
+                type: string
+tags:
+  - name: projects
+    description: projects endpoint
