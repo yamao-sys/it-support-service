@@ -10,7 +10,7 @@ steps:
         '-t',
         '$_REGION-docker.pkg.dev/${PROJECT_ID}/${_SERVIVE}/latest',
         '-f',
-        'Dockerfile.deploy',
+        'Dockerfile.registration.deploy',
         '.',
       ]
   - name: 'gcr.io/cloud-builders/docker'
