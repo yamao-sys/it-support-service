@@ -13,8 +13,12 @@ steps:
         'Dockerfile.registration.deploy',
         '.',
       ]
+    id: build-registration
+    waitFor: ['-']
   - name: 'gcr.io/cloud-builders/docker'
     args: ['push', '$_REGION-docker.pkg.dev/${PROJECT_ID}/${_SERVIVE}/latest']
+    id: push-registration-image
+    waitFor: ['build-registration']
 
   # Cloud Run へデプロイ
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
@@ -29,6 +33,8 @@ steps:
           --region ${_REGION} \
           --service-account=storage-writer@it-support-453908.iam.gserviceaccount.com \
           --update-env-vars="MYSQL_DBNAME=$$MYSQL_DBNAME,MYSQL_USER=$$MYSQL_USER,MYSQL_PASS=$$MYSQL_PASS,MYSQL_HOST=$$MYSQL_HOST,MYSQL_PORT=$$MYSQL_PORT,SERVER_PORT=$$SERVER_PORT,STORAGE_BUCKET_NAME=$$STORAGE_BUCKET_NAME,JWT_TOKEN_KEY=$$JWT_TOKEN_KEY,REGISTRATION_CLIENT_ORIGIN=$$REGISTRATION_CLIENT_ORIGIN,APP_ENV=$$APP_ENV" \
+    id: deploy-registration
+    waitFor: ['push-registration-image']
     secretEnv:
       [
         'MYSQL_DBNAME',
