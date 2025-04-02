@@ -1,0 +1,39 @@
+# syntax=docker/dockerfile:1
+
+FROM golang:1.23.1-alpine3.20 AS builder
+
+WORKDIR /app
+
+# NOTE: アプリケーションに必要なファイルのCOPY
+COPY go.mod go.sum ./
+COPY cmd/business/main.go ./
+COPY api /app/api
+COPY database /app/database
+COPY models /app/models
+COPY business /app/business
+
+RUN go mod tidy && \
+	go install github.com/volatiletech/sqlboiler/v4@latest && \
+	go install github.com/volatiletech/sqlboiler/v4/drivers/sqlboiler-mysql@latest && \
+	go install github.com/joho/godotenv/cmd/godotenv@latest
+
+# NOTE: ビルド
+RUN go build -o main
+
+FROM golang:1.23.1-alpine3.20
+
+WORKDIR /app
+
+# NOTE: ビルドしたバイナリのみをコピー
+COPY --from=builder /app/main .
+
+# NOTE: アプリ操作用のグループ・ユーザ作成
+RUN addgroup it-support && adduser -G it-support -h /home/appuser -s /bin/sh -D appuser
+
+# NOTE: ユーザー権限を変更（アプリケーションディレクトリの所有者を "appuser" に設定）
+RUN chown -R appuser:it-support /app
+
+# NOTE: 最小特権ユーザーで実行
+USER appuser
+
+CMD ["/app/main"]
