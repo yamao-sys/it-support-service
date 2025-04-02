@@ -14,10 +14,6 @@ import (
 	"github.com/volatiletech/sqlboiler/v4/boil"
 )
 
-var (
-	testCompaniesHandler CompaniesHandler
-)
-
 type TestCompaniesHandlerSuite struct {
 	WithDBSuite
 }
