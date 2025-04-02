@@ -16,7 +16,7 @@ jobs:
           - 3306:3306
         env:
           MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: it_support_registration_test
+          MYSQL_DATABASE: it_support_test
           TZ: 'Asia/Tokyo'
 
     steps:
@@ -53,7 +53,7 @@ jobs:
 
       - name: migrate
         working-directory: ./migrations
-        run: make migrate-registration-test
+        run: make migrate-test
 
       - name: Boot API Server
         working-directory: ./api-server
