@@ -1,0 +1,258 @@
+openapi: 3.1.0
+info:
+  title: registration
+  version: '1.0'
+  summary: ''
+  description: registration APIs
+servers:
+  - url: 'http://localhost:8080'
+paths:
+  /csrf:
+    get:
+      summary: Get Csrf
+      responses:
+        '200':
+          $ref: '#/components/responses/CsrfResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      operationId: get-csrf
+      tags:
+        - csrf
+  /supporters/validateSignUp:
+    post:
+      summary: Validate SignUp
+      responses:
+        '200':
+          $ref: '#/components/responses/SupporterSignUpResponse'
+        '400':
+          $ref: '#/components/responses/SupporterSignUpResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      operationId: post-supporter-validate_sign_up
+      requestBody:
+        $ref: '#/components/requestBodies/SupporterSignUpInput'
+      tags:
+        - supporters
+  /supporters/signUp:
+    post:
+      summary: SignUp
+      responses:
+        '200':
+          $ref: '#/components/responses/SupporterSignUpResponse'
+        '400':
+          $ref: '#/components/responses/SupporterSignUpResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      operationId: post-supporter-sign_up
+      requestBody:
+        $ref: '#/components/requestBodies/SupporterSignUpInput'
+      tags:
+        - supporters
+  /companies/validateSignUp:
+    post:
+      summary: Validate SignUp
+      responses:
+        '200':
+          $ref: '#/components/responses/CompanySignUpResponse'
+        '400':
+          $ref: '#/components/responses/CompanySignUpResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      operationId: post-company-validate_sign_up
+      requestBody:
+        $ref: '#/components/requestBodies/CompanySignUpInput'
+      tags:
+        - companies
+  /companies/signUp:
+    post:
+      summary: SignUp
+      responses:
+        '200':
+          $ref: '#/components/responses/CompanySignUpResponse'
+        '400':
+          $ref: '#/components/responses/CompanySignUpResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      operationId: post-company-sign_up
+      requestBody:
+        $ref: '#/components/requestBodies/CompanySignUpInput'
+      tags:
+        - companies
+components:
+  schemas:
+    SuppoterSignUpValidationError:
+      title: SuppoterSignUpValidationError
+      type: object
+      properties:
+        firstName:
+          type: array
+          items:
+            type: string
+        lastName:
+          type: array
+          items:
+            type: string
+        email:
+          type: array
+          items:
+            type: string
+        password:
+          type: array
+          items:
+            type: string
+        birthday:
+          type: array
+          items:
+            type: string
+        frontIdentification:
+          type: array
+          items:
+            type: string
+        backIdentification:
+          type: array
+          items:
+            type: string
+    CompanySignUpValidationError:
+      title: CompanySignUpValidationError
+      type: object
+      properties:
+        name:
+          type: array
+          items:
+            type: string
+        email:
+          type: array
+          items:
+            type: string
+        password:
+          type: array
+          items:
+            type: string
+        finalTaxReturn:
+          type: array
+          items:
+            type: string
+  requestBodies:
+    SupporterSignUpInput:
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            required:
+              - firstName
+              - lastName
+              - email
+              - password
+            properties:
+              firstName:
+                type: string
+              lastName:
+                type: string
+              email:
+                type: string
+              password:
+                type: string
+              birthday:
+                type: string
+                format: date
+              frontIdentification:
+                type: string
+                format: binary
+              backIdentification:
+                type: string
+                format: binary
+      description: Supporter SignUp Iuput
+    CompanySignUpInput:
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            required:
+              - name
+              - email
+              - password
+            properties:
+              name:
+                type: string
+              email:
+                type: string
+              password:
+                type: string
+              finalTaxReturn:
+                type: string
+                format: binary
+      description: Company SignUp Iuput
+  responses:
+    CsrfResponse:
+      description: Csrf response
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - csrfToken
+            properties:
+              csrfToken:
+                type: string
+    SupporterSignUpResponse:
+      description: ''
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - code
+              - errors
+            properties:
+              code:
+                type: integer
+              errors:
+                type: object
+                $ref: '#/components/schemas/SuppoterSignUpValidationError'
+    SupporterSignInOkResponse:
+      description: SignIn Response
+      content:
+        application/json:
+          schema:
+            type: object
+      headers:
+        Set-Cookie:
+          schema:
+            type: string
+    CompanySignUpResponse:
+      description: ''
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - code
+              - errors
+            properties:
+              code:
+                type: integer
+              errors:
+                type: object
+                $ref: '#/components/schemas/CompanySignUpValidationError'
+    InternalServerErrorResponse:
+      description: Internal Server Error Response
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - code
+              - message
+            properties:
+              code:
+                type: integer
+                format: int64
+              message:
+                type: string
+tags:
+  - name: csrf
+    description: csrf endpoint
+  - name: supporters
+    description: supporters endpoint
+  - name: companies
+    description: companies endpoint

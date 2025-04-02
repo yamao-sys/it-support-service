@@ -16,7 +16,7 @@ jobs:
           - 3306:3306
         env:
           MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: it_support_test
+          MYSQL_DATABASE: it_support_registration_test
           TZ: 'Asia/Tokyo'
 
     steps:
@@ -28,14 +28,14 @@ jobs:
           go-version: '1.23'
 
       - name: Install dependencies
-        working-directory: ./api_server/registration
+        working-directory: ./api-server
         run: |
           go mod tidy
           go install github.com/rubenv/sql-migrate/...@latest
           go install github.com/joho/godotenv/cmd/godotenv@latest
 
       - name: Prepare storage directory
-        working-directory: ./api_server/registration
+        working-directory: ./api-server
         run: mkdir data/ && mkdir data/it_support_test
 
       - name: Set up google cloud server
@@ -43,7 +43,7 @@ jobs:
         with:
           version: '1.37.2'
           backend: memory
-          data: './api_server/registration/data'
+          data: './api-server/data'
           public-host: 'gcs:4443'
           external-url: 'http://gcs:4443'
           scheme: http
@@ -53,11 +53,11 @@ jobs:
 
       - name: migrate
         working-directory: ./migrations
-        run: make migrate-test
+        run: make migrate-registration-test
 
       - name: Boot API Server
-        working-directory: ./api_server/registration
-        run: godotenv -f .env.test go run main.go &
+        working-directory: ./api-server
+        run: godotenv -f .env.test go run cmd/registration/main.go &
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4

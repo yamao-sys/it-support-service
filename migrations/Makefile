@@ -8,11 +8,11 @@ create-migration:
 migrate:
 	godotenv -f .env sql-migrate up -env=development
 
-migrate-test-local:
-	godotenv -f .env.test.local sql-migrate up -env=test
+migrate-registration-test-local:
+	godotenv -f .env.registration.test.local sql-migrate up -env=test
 
-migrate-test:
-	godotenv -f .env.test sql-migrate up -env=test
+migrate-registration-test:
+	godotenv -f .env.registration.test sql-migrate up -env=test
 
 migrate-business-test-local:
 	godotenv -f .env.business.test.local sql-migrate up -env=test
