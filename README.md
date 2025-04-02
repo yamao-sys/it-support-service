@@ -50,19 +50,17 @@ Next.js(App Router)を採用
 cd migrations && gcloud builds submit --config ./cloudbuild.yaml
 ```
 
-### Registration API
+### バックエンド
+
+次のコマンドで Registration / Business がそれぞれ別コンテナにデプロイされる
 
 ```
-cd api_server/registration && gcloud builds submit --config ./cloudbuild.yaml
-```
-
-### Business API
-
-```
-cd api_server/business && gcloud builds submit --config ./cloudbuild.yaml
+cd api-server && gcloud builds submit --config ./cloudbuild.yaml
 ```
 
 ### フロントエンド
+
+次のコマンドで Registration / Business がそれぞれ別コンテナにデプロイされる
 
 ```
 cd frontend/it-support && gcloud builds submit --config ./cloudbuild.yaml
