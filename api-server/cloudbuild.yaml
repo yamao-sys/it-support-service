@@ -1,6 +1,7 @@
 substitutions:
   _REGION: 'asia-northeast1'
-  _SERVIVE: 'registration-api'
+  _REGISTRATION_SERVIVE: 'registration-api'
+  _BUSINESS_SERVIVE: 'business-api'
 steps:
   # Registration APIコンテナのビルド・プッシュ
   - name: 'gcr.io/cloud-builders/docker'
@@ -8,7 +9,7 @@ steps:
       [
         'build',
         '-t',
-        '$_REGION-docker.pkg.dev/${PROJECT_ID}/${_SERVIVE}/latest',
+        '$_REGION-docker.pkg.dev/${PROJECT_ID}/${_REGISTRATION_SERVIVE}/latest',
         '-f',
         'Dockerfile.registration.deploy',
         '.',
@@ -16,18 +17,22 @@ steps:
     id: build-registration
     waitFor: ['-']
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', '$_REGION-docker.pkg.dev/${PROJECT_ID}/${_SERVIVE}/latest']
+    args:
+      [
+        'push',
+        '$_REGION-docker.pkg.dev/${PROJECT_ID}/${_REGISTRATION_SERVIVE}/latest',
+      ]
     id: push-registration-image
     waitFor: ['build-registration']
 
-  # Cloud Run へデプロイ
+  # Registration Cloud Run へデプロイ
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
       - -c
       - |
-        gcloud run deploy ${_SERVIVE} \
-          --image ${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_SERVIVE}/latest \
+        gcloud run deploy ${_REGISTRATION_SERVIVE} \
+          --image ${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REGISTRATION_SERVIVE}/latest \
           --project ${PROJECT_ID} \
           --platform managed \
           --region ${_REGION} \
@@ -46,6 +51,58 @@ steps:
         'STORAGE_BUCKET_NAME',
         'JWT_TOKEN_KEY',
         'REGISTRATION_CLIENT_ORIGIN',
+        'APP_ENV',
+      ]
+
+  # Business APIコンテナのビルド・プッシュ
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      [
+        'build',
+        '-t',
+        '$_REGION-docker.pkg.dev/${PROJECT_ID}/${_BUSINESS_SERVIVE}/latest',
+        '-f',
+        'Dockerfile.business.deploy',
+        '.',
+      ]
+    id: build-business
+    waitFor: ['-']
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      [
+        'push',
+        '$_REGION-docker.pkg.dev/${PROJECT_ID}/${_BUSINESS_SERVIVE}/latest',
+      ]
+    id: push-business-image
+    waitFor: ['build-business']
+
+  # Business Cloud Run へデプロイ
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'bash'
+    args:
+      - -c
+      - |
+        gcloud run deploy ${_BUSINESS_SERVIVE} \
+          --image ${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_BUSINESS_SERVIVE}/latest \
+          --project ${PROJECT_ID} \
+          --platform managed \
+          --region ${_REGION} \
+          --service-account=storage-writer@it-support-453908.iam.gserviceaccount.com \
+          --update-env-vars="MYSQL_DBNAME=$$MYSQL_DBNAME,MYSQL_USER=$$MYSQL_USER,MYSQL_PASS=$$MYSQL_PASS,MYSQL_HOST=$$MYSQL_HOST,MYSQL_PORT=$$MYSQL_PORT,BUSINESS_SERVER_PORT=$$BUSINESS_SERVER_PORT,STORAGE_BUCKET_NAME=$$STORAGE_BUCKET_NAME,JWT_TOKEN_KEY=$$JWT_TOKEN_KEY,BUSINESS_CLIENT_ORIGIN=$$BUSINESS_CLIENT_ORIGIN,APP_ENV=$$APP_ENV" \
+    id: deploy-business
+    waitFor: ['push-business-image']
+    secretEnv:
+      [
+        'MYSQL_DBNAME',
+        'MYSQL_USER',
+        'MYSQL_PASS',
+        'MYSQL_HOST',
+        'MYSQL_PORT',
+        'BUSINESS_SERVER_PORT',
+        'STORAGE_BUCKET_NAME',
+        'JWT_TOKEN_KEY',
+        'BUSINESS_CLIENT_ORIGIN',
         'APP_ENV',
       ]
 availableSecrets:
@@ -70,3 +127,7 @@ availableSecrets:
       env: REGISTRATION_CLIENT_ORIGIN
     - versionName: 'projects/${PROJECT_ID}/secrets/APP_ENV/versions/1'
       env: APP_ENV
+    - versionName: 'projects/${PROJECT_ID}/secrets/BUSINESS_SERVER_PORT/versions/1'
+      env: BUSINESS_SERVER_PORT
+    - versionName: 'projects/${PROJECT_ID}/secrets/BUSINESS_CLIENT_ORIGIN/versions/1'
+      env: BUSINESS_CLIENT_ORIGIN
