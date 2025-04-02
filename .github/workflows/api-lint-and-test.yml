@@ -1,10 +1,10 @@
-name: Registration Api Lint And Test
+name: Api Lint And Test
 
 on:
   pull_request:
     paths:
-      - 'api_server/registration/**/*.go'
-      - 'api_server/registration/**/*.mod'
+      - 'api-server/**/*.go'
+      - 'api-server/go.mod'
 
 jobs:
   Lint:
@@ -20,7 +20,7 @@ jobs:
           go-version: '1.23'
 
       - name: Install dependencies
-        working-directory: ./api_server/registration
+        working-directory: ./api-server
         run: go mod tidy
 
       - name: Generate reviewdog api token
@@ -36,7 +36,7 @@ jobs:
       - name: lint
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ steps.generate_token.outputs.token }}
-        working-directory: ./api_server/registration
+        working-directory: ./api-server
         run: go install honnef.co/go/tools/cmd/staticcheck@latest && staticcheck ./... | reviewdog -reporter=github-pr-review -f=staticcheck -level=warn -filter-mode=nofilter -fail-level=any
 
   Test:
@@ -63,14 +63,14 @@ jobs:
           go-version: '1.23'
 
       - name: Install dependencies
-        working-directory: ./api_server/registration
+        working-directory: ./api-server
         run: |
           go mod tidy
           go install github.com/rubenv/sql-migrate/...@latest
           go install github.com/joho/godotenv/cmd/godotenv@latest
 
       - name: Prepare storage directory
-        working-directory: ./api_server/registration
+        working-directory: ./api-server
         run: mkdir data/ && mkdir data/it_support_test
 
       - name: Set up google cloud server
@@ -78,7 +78,7 @@ jobs:
         with:
           version: '1.37.2'
           backend: memory
-          data: './api_server/registration/data'
+          data: './api-server/data'
           public-host: 'gcs:4443'
           external-url: 'http://gcs:4443'
           scheme: http
@@ -91,14 +91,10 @@ jobs:
         run: make migrate-registration-test
 
       - name: test
-        working-directory: ./api_server/registration
+        working-directory: ./api-server
         run: make test-ci
 
       - name: Upload results to Codecov
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-
-      - name: Build
-        working-directory: ./api_server/registration
-        run: go build -v ./...
