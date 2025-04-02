@@ -19,9 +19,9 @@ services:
   business_api:
     container_name: business_api
     build:
-      context: ./api_server/business
+      context: ./api-server
     volumes:
-      - ./api_server/business:/app
+      - ./api-server:/app
     ports:
       - 8081:8081
       - 8084:8084 # テスト用のポート
@@ -30,6 +30,7 @@ services:
     tty: true # コンテナの永続化
     environment:
       - TZ=Asia/Tokyo
+    entrypoint: air -c .air.business.toml
 
   admin_api:
     container_name: admin_api
@@ -44,21 +45,6 @@ services:
     tty: true # コンテナの永続化
     environment:
       - TZ=Asia/Tokyo
-
-  # migrate_api:
-  #   container_name: migrate_api
-  #   build:
-  #     context: ./api-server
-  #   volumes:
-  #     - ./api-server:/app
-  #   ports:
-  #     - 8080:8080
-  #     - 8083:8083 # テスト用のポート
-  #   depends_on:
-  #     - db
-  #   tty: true # コンテナの永続化
-  #   environment:
-  #     - TZ=Asia/Tokyo
 
   migrations:
     container_name: migrations

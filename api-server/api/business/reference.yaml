@@ -1,0 +1,159 @@
+openapi: 3.1.0
+info:
+  title: business
+  version: '1.0'
+  summary: ''
+  description: business APIs
+servers:
+  - url: 'http://localhost:8081'
+paths:
+  /csrf:
+    get:
+      summary: Get Csrf
+      responses:
+        '200':
+          $ref: '#/components/responses/CsrfResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      operationId: get-csrf
+      tags:
+        - csrf
+  /supporters/signIn:
+    post:
+      summary: Supporter SignIn
+      responses:
+        '200':
+          $ref: '#/components/responses/SupporterSignInOkResponse'
+        '400':
+          $ref: '#/components/responses/SupporterSignInBadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      operationId: post-supporters-sign_in
+      requestBody:
+        $ref: '#/components/requestBodies/SupporterSignInInput'
+      tags:
+        - supporters
+  /companies/signIn:
+    post:
+      summary: SignIn
+      responses:
+        '200':
+          $ref: '#/components/responses/CompanySignInOkResponse'
+        '400':
+          $ref: '#/components/responses/CompanySignInBadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      operationId: post-companies-sign_in
+      requestBody:
+        $ref: '#/components/requestBodies/CompanySignInInput'
+      tags:
+        - companies
+components:
+  requestBodies:
+    SupporterSignInInput:
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - email
+              - password
+            properties:
+              email:
+                type: string
+              password:
+                type: string
+      description: Supporter SignIn  Input
+    CompanySignInInput:
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - email
+              - password
+            properties:
+              email:
+                type: string
+              password:
+                type: string
+      description: Company SignIn  Input
+  responses:
+    CsrfResponse:
+      description: Csrf response
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - csrfToken
+            properties:
+              csrfToken:
+                type: string
+    SupporterSignInOkResponse:
+      description: Supporter SignIn Response
+      content:
+        application/json:
+          schema:
+            type: object
+      headers:
+        Set-Cookie:
+          schema:
+            type: string
+    SupporterSignInBadRequestResponse:
+      description: Supporter SignIn BadRequest Response
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - errors
+            properties:
+              errors:
+                type: array
+                items:
+                  type: string
+    CompanySignInOkResponse:
+      description: Company SignIn Response
+      content:
+        application/json:
+          schema:
+            type: object
+      headers:
+        Set-Cookie:
+          schema:
+            type: string
+    CompanySignInBadRequestResponse:
+      description: Company SignIn BadRequest Response
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - errors
+            properties:
+              errors:
+                type: array
+                items:
+                  type: string
+    InternalServerErrorResponse:
+      description: Internal Server Error Response
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - code
+              - message
+            properties:
+              code:
+                type: integer
+              message:
+                type: string
+tags:
+  - name: csrf
+    description: csrf endpoint
+  - name: supporters
+    description: supporters endpoint
+  - name: companies
+    description: companies endpoint

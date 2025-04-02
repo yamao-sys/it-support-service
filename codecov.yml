@@ -11,11 +11,8 @@ coverage:
         target: 60%
 
 ignore:
-  - 'api_server/business/api'
-  - 'api_server/business/models'
-  - 'api_server/business/test'
-  - 'api_server/business/main.go'
   - 'api-server/api'
   - 'api-server/cmd'
   - 'api-server/database'
   - 'api-server/models'
+  - 'api-server/test'

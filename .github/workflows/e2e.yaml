@@ -1,4 +1,4 @@
-name: Registration E2E
+name: E2E
 
 on:
   pull_request:
@@ -55,9 +55,15 @@ jobs:
         working-directory: ./migrations
         run: make migrate-test
 
+      - name: Seeding
+        working-directory: ./api-server
+        run: make test-seed-ci
+
       - name: Boot API Server
         working-directory: ./api-server
-        run: godotenv -f .env.test go run cmd/registration/main.go &
+        run: |
+          godotenv -f .env.test go run cmd/registration/main.go &
+          godotenv -f .env.test go run cmd/business/main.go &
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
@@ -80,7 +86,7 @@ jobs:
 
       - name: Run Playwright tests
         working-directory: ./frontend/it-support
-        run: pnpm test:e2e:registration
+        run: pnpm test:e2e
 
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
