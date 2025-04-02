@@ -39,7 +39,7 @@ func (s *TestSupporterServiceSuite) TestSignIn_StatusOK() {
 
 	statusCode, tokenString, err := testSupporterService.SignIn(ctx, requestParams)
 
-	assert.Equal(s.T(), int64(http.StatusOK), statusCode)
+	assert.Equal(s.T(), int(http.StatusOK), statusCode)
 	assert.NotNil(s.T(), tokenString)
 	assert.Nil(s.T(), err)
 }
@@ -55,7 +55,7 @@ func (s *TestSupporterServiceSuite) TestSignIn_BadRequest() {
 
 	statusCode, tokenString, err := testSupporterService.SignIn(ctx, requestParams)
 
-	assert.Equal(s.T(), int64(http.StatusBadRequest), statusCode)
+	assert.Equal(s.T(), int(http.StatusBadRequest), statusCode)
 	assert.Equal(s.T(), "", tokenString)
 	assert.Equal(s.T(), "メールアドレスまたはパスワードに該当するサポータが存在しません。", err.Error())
 }
