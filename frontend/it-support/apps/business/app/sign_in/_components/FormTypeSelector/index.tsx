@@ -1,6 +1,6 @@
 "useClient";
 
-import { SignInFormType } from "@/apis/types";
+import { SignInFormType } from "@/types";
 import { FC, useCallback } from "react";
 
 type Props = {

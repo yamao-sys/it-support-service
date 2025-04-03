@@ -1,10 +1,10 @@
 "use server";
 
-import { paths } from "@/apis/generated/supporters/apiSchema";
 import createClient from "openapi-fetch";
-import { SupporterSignInInput } from "./types";
+import { SupporterSignInInput } from "../types";
 import { getRequestHeaders } from "./csrf.api";
 import { cookies } from "next/headers";
+import { paths } from "./generated/apiSchema";
 
 const client = createClient<paths>({
   baseUrl: `${process.env.BUSINESS_API_ENDPOINT_URI}/`,

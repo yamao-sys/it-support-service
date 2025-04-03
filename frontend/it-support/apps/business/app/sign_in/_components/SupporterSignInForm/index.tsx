@@ -1,7 +1,7 @@
 "use client";
 
 import { postSupporterSignIn } from "@/apis/supporters.api";
-import { SignInFormType, SupporterSignInInput } from "@/apis/types";
+import { SignInFormType, SupporterSignInInput } from "@/types";
 import { FC, useState } from "react";
 import { useForm } from "react-hook-form";
 import FormTypeSelector from "../FormTypeSelector";

@@ -1,6 +1,6 @@
 "use client";
 
-import { SignInFormType } from "@/apis/types";
+import { SignInFormType } from "@/types";
 import { FC, useState } from "react";
 import SupporterSignInForm from "../SupporterSignInForm";
 import CompanySignInForm from "../CompanySignInForm";
