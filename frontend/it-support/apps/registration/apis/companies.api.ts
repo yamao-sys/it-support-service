@@ -1,9 +1,9 @@
 "use server";
 
-import { paths } from "@/apis/generated/companies/apiSchema";
 import createClient from "openapi-fetch";
 import { CompanySignUpInput } from "../types";
 import { getRequestHeaders } from "./csrf.api";
+import { paths } from "./generated/apiSchema";
 
 const client = createClient<paths>({
   baseUrl: `${process.env.REGISTRATION_API_ENDPOINT_URI}/`,
