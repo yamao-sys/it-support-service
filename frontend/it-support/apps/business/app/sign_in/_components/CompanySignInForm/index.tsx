@@ -1,7 +1,7 @@
 "use client";
 
 import { postCompanySignIn } from "@/apis/companies.api";
-import { SignInFormType, CompanySignInInput } from "@/apis/types";
+import { SignInFormType, CompanySignInInput } from "@/types";
 import { FC, useState } from "react";
 import { useForm } from "react-hook-form";
 import FormTypeSelector from "../FormTypeSelector";

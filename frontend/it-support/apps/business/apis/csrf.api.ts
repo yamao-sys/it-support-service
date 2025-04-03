@@ -1,8 +1,8 @@
 "use server";
 
 import createClient from "openapi-fetch";
-import { paths } from "./generated/csrf/apiSchema";
 import { cookies } from "next/headers";
+import { paths } from "./generated/apiSchema";
 
 const client = createClient<paths>({
   baseUrl: `${process.env.BUSINESS_API_ENDPOINT_URI}/`,
