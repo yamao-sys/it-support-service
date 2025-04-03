@@ -33,11 +33,11 @@ export const SupporterSignUpProvider: FC<{ children: React.ReactNode }> = ({ chi
   });
 
   const updateSignUpInput = useCallback((params: Partial<SupporterSignUpInput>) => {
-    setSupporterSignUpInputs((prev) => ({ ...prev, ...params }));
+    setSupporterSignUpInputs((prev: SupporterSignUpInput) => ({ ...prev, ...params }));
   }, []);
 
   const clearIdentificationKey = (keyToRemove: "frontIdentification" | "backIdentification") => {
-    setSupporterSignUpInputs((prev) => {
+    setSupporterSignUpInputs((prev: SupporterSignUpInput) => {
       const { [keyToRemove]: _, ...rest } = prev; // eslint-disable-line @typescript-eslint/no-unused-vars
       return rest;
     });

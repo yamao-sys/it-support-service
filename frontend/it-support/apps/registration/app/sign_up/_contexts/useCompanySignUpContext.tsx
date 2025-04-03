@@ -32,11 +32,11 @@ export const CompanySignUpProvider: FC<{ children: React.ReactNode }> = ({ child
   });
 
   const updateSignUpInput = useCallback((params: Partial<CompanySignUpInput>) => {
-    setCompanySignUpInputs((prev) => ({ ...prev, ...params }));
+    setCompanySignUpInputs((prev: CompanySignUpInput) => ({ ...prev, ...params }));
   }, []);
 
   const clearIdentificationKey = (keyToRemove: "finalTaxReturn") => {
-    setCompanySignUpInputs((prev) => {
+    setCompanySignUpInputs((prev: CompanySignUpInput) => {
       const { [keyToRemove]: _, ...rest } = prev; // eslint-disable-line @typescript-eslint/no-unused-vars
       return rest;
     });
