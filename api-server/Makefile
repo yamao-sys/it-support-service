@@ -21,6 +21,11 @@ gen-models:
  		--templates $(GOPATH)/pkg/mod/github.com/volatiletech/sqlboiler/v4@$(BOIL_VER)/templates/main \
  		--templates $(GOPATH)/pkg/mod/github.com/tiendc/sqlboiler-extensions@$(BOIL_EXT_VER)/templates/boilv4/mysql
 
+gen-registration-schema:
+	make gen-schema SERVICE=registration
+
+gen-business-schema:
+	make gen-schema SERVICE=business
+
 gen-schema:
-	mkdir -p api/generated/${DOMAIN}
-	@oapi-codegen -config oapi_codegen_config.yaml -package ${DOMAIN} api/${DOMAIN}.yaml > api/generated/${DOMAIN}/${DOMAIN}.go
+	@oapi-codegen -config oapi_codegen_config.yaml -package ${SERVICE}api api/${SERVICE}/reference.yaml > api/${SERVICE}/reference.go
