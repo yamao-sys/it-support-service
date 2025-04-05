@@ -78,6 +78,27 @@ paths:
         - businessAuthentication: []
       requestBody:
         $ref: '#/components/requestBodies/ProjectStoreInput'
+  '/projects/{id}':
+    put:
+      summary: Project Update
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      tags:
+        - projects
+      responses:
+        '200':
+          $ref: '#/components/responses/ProjectStoreResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      operationId: put-projects-id
+      security:
+        - businessAuthentication: []
+      requestBody:
+        $ref: '#/components/requestBodies/ProjectStoreInput'
 components:
   schemas:
     Project:

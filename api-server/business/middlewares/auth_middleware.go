@@ -14,7 +14,7 @@ import (
 
 func AuthMiddleware(f businessapi.StrictHandlerFunc, operationID string) businessapi.StrictHandlerFunc {
     return func(ctx echo.Context, i interface{}) (interface{}, error) {
-		if !needsAuthenticate(ctx) {
+		if !needsAuthenticate(operationID) {
 			// NOTE: 認証が不要なURIは認証をスキップ
 			return f(ctx, i)
 		}
@@ -43,11 +43,17 @@ func AuthMiddleware(f businessapi.StrictHandlerFunc, operationID string) busines
     }
 }
 
-func needsAuthenticate(ctx echo.Context) (bool) {
+func needsAuthenticate(operationID string) (bool) {
 	spec, _ := businessapi.GetSwagger()
-	security := spec.Paths.Value(ctx.Request().RequestURI).Operations()[ctx.Request().Method].Security
-	
-	return len(*security) > 0
+	for _, pathItem := range spec.Paths.Map() {
+		for _, op := range pathItem.Operations() {
+			if op.OperationID != operationID {
+				continue
+			}
+			return len(*op.Security) > 0
+		}
+	}
+	return false
 }
 
 func newWithAuthenticateContext(token *jwt.Token, ctx echo.Context) (context.Context, error) {
