@@ -3,7 +3,7 @@ package main
 import (
 	businessapi "apps/api/business"
 	businesshandlers "apps/business/handlers"
-	"apps/business/middlewares"
+	businessmiddlewares "apps/business/middlewares"
 	businessservices "apps/business/services"
 	"apps/database"
 	"net/http"
@@ -24,19 +24,21 @@ func main() {
 	// NOTE: service層のインスタンス
 	supporterService := businessservices.NewSupporterService(dbCon)
 	companyService := businessservices.NewCompanyService(dbCon)
+	projectService := businessservices.NewProjectService(dbCon)
 
 	// NOTE: Handlerのインスタンス
 	csrfHandler := businesshandlers.NewCsrfHandler()
 	supportersHandler := businesshandlers.NewSupportersHandler(supporterService)
 	companiesHandler := businesshandlers.NewCompaniesHandler(companyService)
+	projectsHandler := businesshandlers.NewProjectsHandler(projectService)
 
 	// NOTE: Handlerをルーティングに追加
-	e := middlewares.ApplyMiddlewares(echo.New())
+	e := businessmiddlewares.ApplyMiddlewares(echo.New())
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, Registration!")
 	})
-	mainHandler := businesshandlers.NewMainHandler(csrfHandler, supportersHandler, companiesHandler)
-	mainStrictHandler := businessapi.NewStrictHandler(mainHandler, nil)
+	mainHandler := businesshandlers.NewMainHandler(csrfHandler, supportersHandler, companiesHandler, projectsHandler)
+	mainStrictHandler := businessapi.NewStrictHandler(mainHandler, []businessapi.StrictMiddlewareFunc{businessmiddlewares.AuthMiddleware})
 	businessapi.RegisterHandlers(e, mainStrictHandler)
 
 	if err := e.Start(":" + os.Getenv("BUSINESS_SERVER_PORT")); err != nil && err != http.ErrServerClosed {

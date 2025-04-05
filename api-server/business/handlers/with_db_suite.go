@@ -2,9 +2,11 @@ package businesshandlers
 
 import (
 	businessapi "apps/api/business"
-	"apps/business/middlewares"
+	businessmiddlewares "apps/business/middlewares"
 	businessservices "apps/business/services"
 	"apps/database"
+	models "apps/models/generated"
+	"apps/test/factories"
 	"context"
 	"database/sql"
 
@@ -12,6 +14,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/oapi-codegen/testutil"
 	"github.com/stretchr/testify/suite"
+	"github.com/volatiletech/sqlboiler/v4/boil"
 )
 
 type WithDBSuite struct {
@@ -38,7 +41,7 @@ func init() {
 	txdb.Register("txdb-controller", "mysql", database.GetDsn())
 	ctx = context.Background()
 
-	e = middlewares.ApplyMiddlewares(echo.New())
+	e = businessmiddlewares.ApplyMiddlewares(echo.New())
 }
 
 func (s *WithDBSuite) SetDBCon() {
@@ -76,8 +79,28 @@ func (s *WithDBSuite) initializeHandlers() {
 	companyService := businessservices.NewCompanyService(DBCon)
 	testCompaniesHandler := NewCompaniesHandler(companyService)
 
-	mainHandler := NewMainHandler(csrfServer, testSupportersHandler, testCompaniesHandler)
+	projectService := businessservices.NewProjectService(DBCon)
+	testProjectsHandler := NewProjectsHandler(projectService)
 
-	strictHandler := businessapi.NewStrictHandler(mainHandler, nil)
+	mainHandler := NewMainHandler(csrfServer, testSupportersHandler, testCompaniesHandler, testProjectsHandler)
+
+	strictHandler := businessapi.NewStrictHandler(mainHandler, []businessapi.StrictMiddlewareFunc{businessmiddlewares.AuthMiddleware})
 	businessapi.RegisterHandlers(e, strictHandler)
+}
+
+func (s *WithDBSuite) companySignIn() (company *models.Company, cookieString string) {
+	// NOTE: テスト用企業の作成
+	company = factories.CompanyFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.Company)
+	if err := company.Insert(ctx, DBCon, boil.Infer()); err != nil {
+		s.T().Fatalf("failed to create test company %v", err)
+	}
+
+	reqBody := businessapi.CompanySignInInput{
+		Email: "test@example.com",
+		Password: "password",
+	}
+	result := testutil.NewRequest().Post("/companies/signIn").WithHeader("Cookie", csrfTokenCookie).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithJsonBody(reqBody).GoWithHTTPHandler(s.T(), e)
+	cookieString = result.Recorder.Result().Header.Values("Set-Cookie")[0]
+
+	return company, cookieString
 }
