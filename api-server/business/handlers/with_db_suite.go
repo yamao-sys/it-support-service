@@ -14,6 +14,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/oapi-codegen/testutil"
 	"github.com/stretchr/testify/suite"
+	"github.com/volatiletech/sqlboiler/v4/boil"
 )
 
 type WithDBSuite struct {
@@ -87,6 +88,7 @@ func (s *WithDBSuite) initializeHandlers() {
 func (s *WithDBSuite) companySignIn() (company *models.Company, cookieString string) {
 	// NOTE: テスト用企業の作成
 	company = factories.CompanyFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.Company)
+	company.Insert(ctx, DBCon, boil.Infer())
 
 	reqBody := businessapi.CompanySignInInput{
 		Email: "test@example.com",
