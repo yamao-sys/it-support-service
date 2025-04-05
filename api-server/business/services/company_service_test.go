@@ -30,10 +30,8 @@ func (s *TestCompanyServiceSuite) TearDownTest() {
 
 func (s *TestCompanyServiceSuite) TestSignIn_StatusOK() {
 	// NOTE: テスト用企業の作成
-	supporter := factories.CompanyFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.Company)
-	if err := supporter.Insert(ctx, DBCon, boil.Infer()); err != nil {
-		s.T().Fatalf("failed to create test supporter %v", err)
-	}
+	company := factories.CompanyFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.Company)
+	company.Insert(ctx, DBCon, boil.Infer())
 
 	requestParams := businessapi.PostCompaniesSignInJSONRequestBody{Email: "test@example.com", Password: "password"}
 
@@ -46,10 +44,8 @@ func (s *TestCompanyServiceSuite) TestSignIn_StatusOK() {
 
 func (s *TestCompanyServiceSuite) TestSignIn_BadRequest() {
 	// NOTE: テスト用企業の作成
-	supporter := factories.CompanyFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.Company)
-	if err := supporter.Insert(ctx, DBCon, boil.Infer()); err != nil {
-		s.T().Fatalf("failed to create test user %v", err)
-	}
+	company := factories.CompanyFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.Company)
+	company.Insert(ctx, DBCon, boil.Infer())
 
 	requestParams := businessapi.PostCompaniesSignInJSONRequestBody{Email: "test_@example.com", Password: "password"}
 

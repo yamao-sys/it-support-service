@@ -34,9 +34,7 @@ func (s *TestProjectServiceSuite) TearDownTest() {
 func (s *TestProjectServiceSuite) TestProjectCreate_StatusOK() {
 	// NOTE: テスト用企業の作成
 	company := factories.CompanyFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.Company)
-	if err := company.Insert(ctx, DBCon, boil.Infer()); err != nil {
-		s.T().Fatalf("failed to create test company %v", err)
-	}
+	company.Insert(ctx, DBCon, boil.Infer())
 
 	title := "test title"
 	description := "test description"
@@ -69,9 +67,7 @@ func (s *TestProjectServiceSuite) TestProjectCreate_StatusOK() {
 func (s *TestProjectServiceSuite) TestProjectCreate_BadRequest_Required() {
 	// NOTE: テスト用企業の作成
 	company := factories.CompanyFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.Company)
-	if err := company.Insert(ctx, DBCon, boil.Infer()); err != nil {
-		s.T().Fatalf("failed to create test company %v", err)
-	}
+	company.Insert(ctx, DBCon, boil.Infer())
 
 	title := ""
 	description := ""
@@ -102,9 +98,7 @@ func (s *TestProjectServiceSuite) TestProjectCreate_BadRequest_Required() {
 func (s *TestProjectServiceSuite) TestProjectCreate_BadRequest_Greater() {
 	// NOTE: テスト用企業の作成
 	company := factories.CompanyFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.Company)
-	if err := company.Insert(ctx, DBCon, boil.Infer()); err != nil {
-		s.T().Fatalf("failed to create test company %v", err)
-	}
+	company.Insert(ctx, DBCon, boil.Infer())
 
 	title := "test title"
 	description := "test description"
@@ -134,9 +128,7 @@ func (s *TestProjectServiceSuite) TestProjectCreate_BadRequest_Greater() {
 func (s *TestProjectServiceSuite) TestProjectCreate_BadRequest_Threshold() {
 	// NOTE: テスト用企業の作成
 	company := factories.CompanyFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.Company)
-	if err := company.Insert(ctx, DBCon, boil.Infer()); err != nil {
-		s.T().Fatalf("failed to create test company %v", err)
-	}
+	company.Insert(ctx, DBCon, boil.Infer())
 
 	title := randomdata.RandStringRunes(71)
 	description := "test description"

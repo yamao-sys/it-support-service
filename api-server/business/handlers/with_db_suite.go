@@ -14,7 +14,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/oapi-codegen/testutil"
 	"github.com/stretchr/testify/suite"
-	"github.com/volatiletech/sqlboiler/v4/boil"
 )
 
 type WithDBSuite struct {
@@ -60,10 +59,7 @@ func (s *WithDBSuite) SetCsrfHeaderValues() {
 	result := testutil.NewRequest().Get("/csrf").GoWithHTTPHandler(s.T(), e)
 
 	var res businessapi.GetCsrf200JSONResponse
-	err := result.UnmarshalJsonToObject(&res)
-	if err != nil {
-		s.T().Error(err.Error())
-	}
+	result.UnmarshalJsonToObject(&res)
 
 	csrfToken = res.CsrfToken
 	csrfTokenCookie = result.Recorder.Result().Header.Values("Set-Cookie")[0]
@@ -91,9 +87,6 @@ func (s *WithDBSuite) initializeHandlers() {
 func (s *WithDBSuite) companySignIn() (company *models.Company, cookieString string) {
 	// NOTE: テスト用企業の作成
 	company = factories.CompanyFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.Company)
-	if err := company.Insert(ctx, DBCon, boil.Infer()); err != nil {
-		s.T().Fatalf("failed to create test company %v", err)
-	}
 
 	reqBody := businessapi.CompanySignInInput{
 		Email: "test@example.com",

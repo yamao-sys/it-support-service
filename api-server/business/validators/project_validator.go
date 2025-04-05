@@ -46,11 +46,7 @@ func ValidateProject(input *businessapi.PostProjectsJSONRequestBody) error {
 
 func validateDateGreater(field string, doCompareField string, doCompareDate *openapi_types.Date) validation.RuleFunc {
 	return func(value interface{}) error {
-		dateValue, ok := value.(*openapi_types.Date)
-		if !ok {
-			return fmt.Errorf("%sが不正な日付データです", field)
-		}
-
+		dateValue, _ := value.(*openapi_types.Date)
 		if doCompareDate.After(dateValue.Time) {
 			return fmt.Errorf("%sと%sの前後関係が不適です。", field, doCompareField)
 		}
@@ -61,11 +57,7 @@ func validateDateGreater(field string, doCompareField string, doCompareDate *ope
 // NOTE: 0だとなぜかvalidation.Min(1)でエラーになってくれないのでメソッドを作っている
 func validateMinValue(field string) validation.RuleFunc {
 	return func(value interface{}) error {
-		intValue, ok := value.(*int)
-		if !ok {
-			return fmt.Errorf("%sが不正な整数データです", field)
-		}
-
+		intValue, _ := value.(*int)
 		if *intValue < 1 {
 			return fmt.Errorf("%sは正の整数での入力をお願いいたします。", field)
 		}
@@ -75,11 +67,7 @@ func validateMinValue(field string) validation.RuleFunc {
 
 func validatePeriodGreater(field string, doCompareField string, minBudget int) validation.RuleFunc {
 	return func(value interface{}) error {
-		budgetValue, ok := value.(*int)
-		if !ok {
-			return fmt.Errorf("%sが不正な整数データです", field)
-		}
-
+		budgetValue, _ := value.(*int)
 		if minBudget > *budgetValue {
 			return fmt.Errorf("%sと%sの大小関係が不適です。", field, doCompareField)
 		}

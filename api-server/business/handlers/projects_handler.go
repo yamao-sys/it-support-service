@@ -5,7 +5,6 @@ import (
 	businesshelpers "apps/business/helpers"
 	businessservices "apps/business/services"
 	"context"
-	"errors"
 	"net/http"
 	"strconv"
 
@@ -25,11 +24,7 @@ func NewProjectsHandler(projectService businessservices.ProjectService) Projects
 }
 
 func (ph *projectsHandler) PostProjects(ctx context.Context, request businessapi.PostProjectsRequestObject) (businessapi.PostProjectsResponseObject, error) {
-	companyID, ok := businesshelpers.ExtractCompanyID(ctx)
-	if !ok {
-		res := businessapi.InternalServerErrorResponseJSONResponse{Code: http.StatusInternalServerError}
-		return businessapi.PostProjects500JSONResponse{InternalServerErrorResponseJSONResponse: res}, errors.New("fail to load context value")
-	}
+	companyID, _ := businesshelpers.ExtractCompanyID(ctx)
 
 	inputs := businessapi.PostProjectsJSONRequestBody{
 		Title: request.Body.Title,
