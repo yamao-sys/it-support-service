@@ -50,6 +50,9 @@ func (s *TestProjectServiceSuite) TestProjectCreate_StatusOK() {
 	requestParams := businessapi.PostProjectsJSONRequestBody{Title: &title, Description: &description, StartDate: &startDate, EndDate: &endDate, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: &isActive}
 
 	createdProject, validatorErrors, err := testProjectService.Create(ctx, &requestParams, company.ID)
+	mappedValidationErrors := testProjectService.MappingValidationErrorStruct(validatorErrors)
+	expectedValidationErrors := businessapi.ProjectValidationError{}
+	assert.Equal(s.T(), expectedValidationErrors, mappedValidationErrors)
 
 	assert.Equal(s.T(), company.ID, createdProject.CompanyID)
 	assert.Equal(s.T(), "test title", createdProject.Title)
