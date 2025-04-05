@@ -2,6 +2,7 @@ package businesshandlers
 
 import (
 	businessapi "apps/api/business"
+	businessservices "apps/business/services"
 	models "apps/models/generated"
 	"apps/test/factories"
 	"net/http"
@@ -21,7 +22,7 @@ type TestCompaniesHandlerSuite struct {
 func (s *TestCompaniesHandlerSuite) SetupTest() {
 	s.SetDBCon()
 
-	s.initializeHandlers()
+	s.initializeHandlers(businessservices.NewProjectService(DBCon))
 
 	// NOTE: CSRFトークンのセット
 	s.SetCsrfHeaderValues()

@@ -2,7 +2,10 @@ package businesshandlers
 
 import (
 	businessapi "apps/api/business"
+	businessservices "apps/business/services"
 	models "apps/models/generated"
+	"context"
+	"errors"
 	"net/http"
 	"testing"
 	"time"
@@ -11,6 +14,7 @@ import (
 	openapi_types "github.com/oapi-codegen/runtime/types"
 	"github.com/oapi-codegen/testutil"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -18,10 +22,25 @@ type TestProjectsHandlerSuite struct {
 	WithDBSuite
 }
 
+type MockProjectService struct {
+    mock.Mock
+}
+
+func (m *MockProjectService) Create(ctx context.Context, requestParams *businessapi.PostProjectsJSONRequestBody, companyID int) (project models.Project, validatorErrors error, error error) {
+    args := m.Called(ctx, requestParams, companyID)
+
+	return args.Get(0).(models.Project), args.Error(1), args.Error(2)
+}
+
+func (m *MockProjectService) MappingValidationErrorStruct(err error) businessapi.ProjectValidationError {
+    args := m.Called(err)
+    return args.Get(0).(businessapi.ProjectValidationError)
+}
+
 func (s *TestProjectsHandlerSuite) SetupTest() {
 	s.SetDBCon()
 
-	s.initializeHandlers()
+	s.initializeHandlers(businessservices.NewProjectService(DBCon))
 
 	// NOTE: CSRFトークンのセット
 	s.SetCsrfHeaderValues()
@@ -111,6 +130,37 @@ func (s *TestProjectsHandlerSuite) TestPostProjectsCreate_StatusUnauthorized() {
 
 	// NOTE: DBの値を確認
 	exists, _ := models.Projects(
+		models.ProjectWhere.Title.EQ(title),
+	).Exists(ctx, DBCon)
+	assert.False(s.T(), exists)
+}
+
+func (s *TestProjectsHandlerSuite) TestPostProjectsCreate_StatusInternalServerError() {
+	company, cookieString := s.companySignIn()
+
+	title := "test title"
+	description := "test description"
+	parsedStartDate := time.Date(2025, 4, 1, 0, 0, 0, 0, time.UTC)
+	startDate := openapi_types.Date{Time: parsedStartDate}
+	parsedEndDate := time.Date(2025, 4, 10, 0, 0, 0, 0, time.UTC)
+	endDate := openapi_types.Date{Time: parsedEndDate}
+	minBudget := 10000
+	maxBudget := 20000
+	isActive := true
+	reqBody := businessapi.PostProjectsJSONRequestBody{Title: &title, Description: &description, StartDate: &startDate, EndDate: &endDate, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: &isActive}
+
+	mockProjectService := new(MockProjectService)
+	mockProjectService.On("Create", mock.AnythingOfType("*context.valueCtx"), mock.AnythingOfType("*businessapi.PostProjectsJSONRequestBody"), mock.AnythingOfType("int") ).Return(models.Project{}, nil, errors.New("internal server error"))
+	mockProjectService.On("MappingValidationErrorStruct", mock.AnythingOfType("error")).Return(businessapi.ProjectValidationError{})
+	s.initializeHandlers(mockProjectService)
+
+	result := testutil.NewRequest().Post("/projects").WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithJsonBody(reqBody).GoWithHTTPHandler(s.T(), e)
+
+	assert.Equal(s.T(), http.StatusInternalServerError, result.Code())
+
+	// NOTE: DBの値を確認
+	exists, _ := models.Projects(
+		models.ProjectWhere.CompanyID.EQ(company.ID),
 		models.ProjectWhere.Title.EQ(title),
 	).Exists(ctx, DBCon)
 	assert.False(s.T(), exists)

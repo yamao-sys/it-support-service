@@ -67,7 +67,7 @@ func (s *WithDBSuite) SetCsrfHeaderValues() {
 }
 
 
-func (s *WithDBSuite) initializeHandlers() {
+func (s *WithDBSuite) initializeHandlers(projectService businessservices.ProjectService) {
 	csrfServer := NewCsrfHandler()
 
 	supporterService := businessservices.NewSupporterService(DBCon)
@@ -76,7 +76,6 @@ func (s *WithDBSuite) initializeHandlers() {
 	companyService := businessservices.NewCompanyService(DBCon)
 	testCompaniesHandler := NewCompaniesHandler(companyService)
 
-	projectService := businessservices.NewProjectService(DBCon)
 	testProjectsHandler := NewProjectsHandler(projectService)
 
 	mainHandler := NewMainHandler(csrfServer, testSupportersHandler, testCompaniesHandler, testProjectsHandler)
