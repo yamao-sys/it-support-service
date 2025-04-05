@@ -16,6 +16,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerErrorResponse'
       operationId: get-csrf
+      security: []
       tags:
         - csrf
   /supporters/signIn:
@@ -29,6 +30,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerErrorResponse'
       operationId: post-supporters-sign_in
+      security: []
       requestBody:
         $ref: '#/components/requestBodies/SupporterSignInInput'
       tags:
@@ -44,6 +46,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerErrorResponse'
       operationId: post-companies-sign_in
+      security: []
       requestBody:
         $ref: '#/components/requestBodies/CompanySignInInput'
       tags:
@@ -59,6 +62,8 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerErrorResponse'
       operationId: post-projects
+      security:
+        - businessAuthentication: []
       requestBody:
         $ref: '#/components/requestBodies/ProjectStoreInput'
 components:
@@ -259,6 +264,11 @@ components:
                 type: integer
               message:
                 type: string
+  securitySchemes:
+    businessAuthentication:
+      name: token
+      type: apiKey
+      in: cookie
 tags:
   - name: csrf
     description: csrf endpoint
