@@ -8,10 +8,36 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/labstack/echo/v4"
 	strictecho "github.com/oapi-codegen/runtime/strictmiddleware/echo"
+	openapi_types "github.com/oapi-codegen/runtime/types"
 )
+
+// Project Project
+type Project struct {
+	CreatedAt   *time.Time          `json:"created_at,omitempty"`
+	Description *string             `json:"description,omitempty"`
+	EndDate     *openapi_types.Date `json:"end_date,omitempty"`
+	Id          *string             `json:"id,omitempty"`
+	IsActive    *bool               `json:"isActive,omitempty"`
+	MaxBudget   *int                `json:"max_budget,omitempty"`
+	MinBudget   *int                `json:"min_budget,omitempty"`
+	StartDate   *openapi_types.Date `json:"start_date,omitempty"`
+	Title       *string             `json:"title,omitempty"`
+}
+
+// ProjectValidationError defines model for ProjectValidationError.
+type ProjectValidationError struct {
+	Description *[]string `json:"description,omitempty"`
+	EndDate     *[]string `json:"endDate,omitempty"`
+	IsActive    *[]string `json:"isActive,omitempty"`
+	MaxBudget   *[]string `json:"maxBudget,omitempty"`
+	MinBudget   *[]string `json:"minBudget,omitempty"`
+	StartDate   *[]string `json:"startDate,omitempty"`
+	Title       *[]string `json:"title,omitempty"`
+}
 
 // CompanySignInBadRequestResponse defines model for CompanySignInBadRequestResponse.
 type CompanySignInBadRequestResponse struct {
@@ -32,6 +58,14 @@ type InternalServerErrorResponse struct {
 	Message string `json:"message"`
 }
 
+// ProjectStoreResponse defines model for ProjectStoreResponse.
+type ProjectStoreResponse struct {
+	Errors ProjectValidationError `json:"errors"`
+
+	// Project Project
+	Project Project `json:"project"`
+}
+
 // SupporterSignInBadRequestResponse defines model for SupporterSignInBadRequestResponse.
 type SupporterSignInBadRequestResponse struct {
 	Errors []string `json:"errors"`
@@ -46,6 +80,17 @@ type CompanySignInInput struct {
 	Password string `json:"password"`
 }
 
+// ProjectStoreInput defines model for ProjectStoreInput.
+type ProjectStoreInput struct {
+	Description *string             `json:"description,omitempty"`
+	EndDate     *openapi_types.Date `json:"endDate,omitempty"`
+	IsActive    *bool               `json:"isActive,omitempty"`
+	MaxBudget   *int                `json:"maxBudget,omitempty"`
+	MinBudget   *int                `json:"minBudget,omitempty"`
+	StartDate   *openapi_types.Date `json:"startDate,omitempty"`
+	Title       *string             `json:"title,omitempty"`
+}
+
 // SupporterSignInInput defines model for SupporterSignInInput.
 type SupporterSignInInput struct {
 	Email    string `json:"email"`
@@ -58,6 +103,17 @@ type PostCompaniesSignInJSONBody struct {
 	Password string `json:"password"`
 }
 
+// PostProjectsJSONBody defines parameters for PostProjects.
+type PostProjectsJSONBody struct {
+	Description *string             `json:"description,omitempty"`
+	EndDate     *openapi_types.Date `json:"endDate,omitempty"`
+	IsActive    *bool               `json:"isActive,omitempty"`
+	MaxBudget   *int                `json:"maxBudget,omitempty"`
+	MinBudget   *int                `json:"minBudget,omitempty"`
+	StartDate   *openapi_types.Date `json:"startDate,omitempty"`
+	Title       *string             `json:"title,omitempty"`
+}
+
 // PostSupportersSignInJSONBody defines parameters for PostSupportersSignIn.
 type PostSupportersSignInJSONBody struct {
 	Email    string `json:"email"`
@@ -66,6 +122,9 @@ type PostSupportersSignInJSONBody struct {
 
 // PostCompaniesSignInJSONRequestBody defines body for PostCompaniesSignIn for application/json ContentType.
 type PostCompaniesSignInJSONRequestBody PostCompaniesSignInJSONBody
+
+// PostProjectsJSONRequestBody defines body for PostProjects for application/json ContentType.
+type PostProjectsJSONRequestBody PostProjectsJSONBody
 
 // PostSupportersSignInJSONRequestBody defines body for PostSupportersSignIn for application/json ContentType.
 type PostSupportersSignInJSONRequestBody PostSupportersSignInJSONBody
@@ -78,6 +137,9 @@ type ServerInterface interface {
 	// Get Csrf
 	// (GET /csrf)
 	GetCsrf(ctx echo.Context) error
+	// Project Create
+	// (POST /projects)
+	PostProjects(ctx echo.Context) error
 	// Supporter SignIn
 	// (POST /supporters/signIn)
 	PostSupportersSignIn(ctx echo.Context) error
@@ -103,6 +165,15 @@ func (w *ServerInterfaceWrapper) GetCsrf(ctx echo.Context) error {
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.GetCsrf(ctx)
+	return err
+}
+
+// PostProjects converts echo context to params.
+func (w *ServerInterfaceWrapper) PostProjects(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.PostProjects(ctx)
 	return err
 }
 
@@ -145,6 +216,7 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 
 	router.POST(baseURL+"/companies/signIn", wrapper.PostCompaniesSignIn)
 	router.GET(baseURL+"/csrf", wrapper.GetCsrf)
+	router.POST(baseURL+"/projects", wrapper.PostProjects)
 	router.POST(baseURL+"/supporters/signIn", wrapper.PostSupportersSignIn)
 
 }
@@ -169,6 +241,13 @@ type CsrfResponseJSONResponse struct {
 type InternalServerErrorResponseJSONResponse struct {
 	Code    int    `json:"code"`
 	Message string `json:"message"`
+}
+
+type ProjectStoreResponseJSONResponse struct {
+	Errors ProjectValidationError `json:"errors"`
+
+	// Project Project
+	Project Project `json:"project"`
 }
 
 type SupporterSignInBadRequestResponseJSONResponse struct {
@@ -253,6 +332,36 @@ func (response GetCsrf500JSONResponse) VisitGetCsrfResponse(w http.ResponseWrite
 	return json.NewEncoder(w).Encode(response)
 }
 
+type PostProjectsRequestObject struct {
+	Body *PostProjectsJSONRequestBody
+}
+
+type PostProjectsResponseObject interface {
+	VisitPostProjectsResponse(w http.ResponseWriter) error
+}
+
+type PostProjects200JSONResponse struct {
+	ProjectStoreResponseJSONResponse
+}
+
+func (response PostProjects200JSONResponse) VisitPostProjectsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostProjects500JSONResponse struct {
+	InternalServerErrorResponseJSONResponse
+}
+
+func (response PostProjects500JSONResponse) VisitPostProjectsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(500)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
 type PostSupportersSignInRequestObject struct {
 	Body *PostSupportersSignInJSONRequestBody
 }
@@ -303,6 +412,9 @@ type StrictServerInterface interface {
 	// Get Csrf
 	// (GET /csrf)
 	GetCsrf(ctx context.Context, request GetCsrfRequestObject) (GetCsrfResponseObject, error)
+	// Project Create
+	// (POST /projects)
+	PostProjects(ctx context.Context, request PostProjectsRequestObject) (PostProjectsResponseObject, error)
 	// Supporter SignIn
 	// (POST /supporters/signIn)
 	PostSupportersSignIn(ctx context.Context, request PostSupportersSignInRequestObject) (PostSupportersSignInResponseObject, error)
@@ -366,6 +478,35 @@ func (sh *strictHandler) GetCsrf(ctx echo.Context) error {
 		return err
 	} else if validResponse, ok := response.(GetCsrfResponseObject); ok {
 		return validResponse.VisitGetCsrfResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("unexpected response type: %T", response)
+	}
+	return nil
+}
+
+// PostProjects operation middleware
+func (sh *strictHandler) PostProjects(ctx echo.Context) error {
+	var request PostProjectsRequestObject
+
+	var body PostProjectsJSONRequestBody
+	if err := ctx.Bind(&body); err != nil {
+		return err
+	}
+	request.Body = &body
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.PostProjects(ctx.Request().Context(), request.(PostProjectsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PostProjects")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(PostProjectsResponseObject); ok {
+		return validResponse.VisitPostProjectsResponse(ctx.Response())
 	} else if response != nil {
 		return fmt.Errorf("unexpected response type: %T", response)
 	}
