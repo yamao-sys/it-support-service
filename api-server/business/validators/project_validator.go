@@ -8,7 +8,7 @@ import (
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
-func ValidateProject(input *businessapi.PostProjectsJSONRequestBody) error {
+func ValidateProject(input *businessapi.ProjectStoreInput) error {
 	return validation.ValidateStruct(input,
 		validation.Field(
 			&input.Title,
