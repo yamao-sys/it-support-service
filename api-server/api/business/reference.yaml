@@ -16,6 +16,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerErrorResponse'
       operationId: get-csrf
+      security: []
       tags:
         - csrf
   /supporters/signIn:
@@ -29,6 +30,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerErrorResponse'
       operationId: post-supporters-sign_in
+      security: []
       requestBody:
         $ref: '#/components/requestBodies/SupporterSignInInput'
       tags:
@@ -44,12 +46,110 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerErrorResponse'
       operationId: post-companies-sign_in
+      security: []
       requestBody:
         $ref: '#/components/requestBodies/CompanySignInInput'
       tags:
         - companies
+  /projects:
+    post:
+      summary: Project Create
+      tags:
+        - projects
+      responses:
+        '200':
+          $ref: '#/components/responses/ProjectStoreResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      operationId: post-projects
+      security:
+        - businessAuthentication: []
+      requestBody:
+        $ref: '#/components/requestBodies/ProjectStoreInput'
 components:
+  schemas:
+    Project:
+      title: Project Model
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+        min_budget:
+          type: integer
+        max_budget:
+          type: integer
+        isActive:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+      description: Project
+    ProjectValidationError:
+      title: ProjectValidationErrors
+      type: object
+      properties:
+        title:
+          type: array
+          items:
+            type: string
+        description:
+          type: array
+          items:
+            type: string
+        startDate:
+          type: array
+          items:
+            type: string
+        endDate:
+          type: array
+          items:
+            type: string
+        minBudget:
+          type: array
+          items:
+            type: string
+        maxBudget:
+          type: array
+          items:
+            type: string
+        isActive:
+          type: array
+          items:
+            type: string
   requestBodies:
+    ProjectStoreInput:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              title:
+                type: string
+              description:
+                type: string
+              startDate:
+                type: string
+                format: date
+              endDate:
+                type: string
+                format: date
+              minBudget:
+                type: integer
+              maxBudget:
+                type: integer
+              isActive:
+                type: boolean
+      description: Project Store Inputs
     SupporterSignInInput:
       content:
         application/json:
@@ -136,6 +236,20 @@ components:
                 type: array
                 items:
                   type: string
+    ProjectStoreResponse:
+      description: Project Store Response
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - project
+              - errors
+            properties:
+              project:
+                $ref: '#/components/schemas/Project'
+              errors:
+                $ref: '#/components/schemas/ProjectValidationError'
     InternalServerErrorResponse:
       description: Internal Server Error Response
       content:
@@ -150,6 +264,11 @@ components:
                 type: integer
               message:
                 type: string
+  securitySchemes:
+    businessAuthentication:
+      name: token
+      type: apiKey
+      in: cookie
 tags:
   - name: csrf
     description: csrf endpoint

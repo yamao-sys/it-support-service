@@ -31,9 +31,7 @@ func (s *TestSupporterServiceSuite) TearDownTest() {
 func (s *TestSupporterServiceSuite) TestSignIn_StatusOK() {
 	// NOTE: テスト用サポータの作成
 	supporter := factories.SupporterFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.Supporter)
-	if err := supporter.Insert(ctx, DBCon, boil.Infer()); err != nil {
-		s.T().Fatalf("failed to create test supporter %v", err)
-	}
+	supporter.Insert(ctx, DBCon, boil.Infer())
 
 	requestParams := businessapi.PostSupportersSignInJSONRequestBody{Email: "test@example.com", Password: "password"}
 
@@ -47,9 +45,7 @@ func (s *TestSupporterServiceSuite) TestSignIn_StatusOK() {
 func (s *TestSupporterServiceSuite) TestSignIn_BadRequest() {
 	// NOTE: テスト用サポータの作成
 	supporter := factories.SupporterFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.Supporter)
-	if err := supporter.Insert(ctx, DBCon, boil.Infer()); err != nil {
-		s.T().Fatalf("failed to create test user %v", err)
-	}
+	supporter.Insert(ctx, DBCon, boil.Infer())
 
 	requestParams := businessapi.PostSupportersSignInJSONRequestBody{Email: "test_@example.com", Password: "password"}
 

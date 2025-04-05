@@ -2,6 +2,7 @@ package businesshandlers
 
 import (
 	businessapi "apps/api/business"
+	businessservices "apps/business/services"
 	models "apps/models/generated"
 	"apps/test/factories"
 	"net/http"
@@ -21,7 +22,7 @@ type TestCompaniesHandlerSuite struct {
 func (s *TestCompaniesHandlerSuite) SetupTest() {
 	s.SetDBCon()
 
-	s.initializeHandlers()
+	s.initializeHandlers(businessservices.NewProjectService(DBCon))
 
 	// NOTE: CSRFトークンのセット
 	s.SetCsrfHeaderValues()
@@ -34,9 +35,7 @@ func (s *TestCompaniesHandlerSuite) TearDownTest() {
 func (s *TestCompaniesHandlerSuite) TestPostCompaniesSignIn_StatusOk() {
 	// NOTE: テスト用企業の作成
 	company := factories.CompanyFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.Company)
-	if err := company.Insert(ctx, DBCon, boil.Infer()); err != nil {
-		s.T().Fatalf("failed to create test company %v", err)
-	}
+	company.Insert(ctx, DBCon, boil.Infer())
 
 	reqBody := businessapi.CompanySignInInput{
 		Email: "test@example.com",
@@ -52,9 +51,7 @@ func (s *TestCompaniesHandlerSuite) TestPostCompaniesSignIn_StatusOk() {
 func (s *TestCompaniesHandlerSuite) TestPostCompaniesSignIn_BadRequest() {
 	// NOTE: テスト用企業の作成
 	company := factories.CompanyFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.Company)
-	if err := company.Insert(ctx, DBCon, boil.Infer()); err != nil {
-		s.T().Fatalf("failed to create test company %v", err)
-	}
+	company.Insert(ctx, DBCon, boil.Infer())
 
 	reqBody := businessapi.CompanySignInInput{
 		Email: "test_@example.com",

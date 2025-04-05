@@ -4,14 +4,51 @@
 package businessapi
 
 import (
+	"bytes"
+	"compress/gzip"
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
+	"path"
+	"strings"
+	"time"
 
+	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/labstack/echo/v4"
 	strictecho "github.com/oapi-codegen/runtime/strictmiddleware/echo"
+	openapi_types "github.com/oapi-codegen/runtime/types"
 )
+
+const (
+	BusinessAuthenticationScopes = "businessAuthentication.Scopes"
+)
+
+// Project Project
+type Project struct {
+	CreatedAt   *time.Time          `json:"created_at,omitempty"`
+	Description *string             `json:"description,omitempty"`
+	EndDate     *openapi_types.Date `json:"end_date,omitempty"`
+	Id          *string             `json:"id,omitempty"`
+	IsActive    *bool               `json:"isActive,omitempty"`
+	MaxBudget   *int                `json:"max_budget,omitempty"`
+	MinBudget   *int                `json:"min_budget,omitempty"`
+	StartDate   *openapi_types.Date `json:"start_date,omitempty"`
+	Title       *string             `json:"title,omitempty"`
+}
+
+// ProjectValidationError defines model for ProjectValidationError.
+type ProjectValidationError struct {
+	Description *[]string `json:"description,omitempty"`
+	EndDate     *[]string `json:"endDate,omitempty"`
+	IsActive    *[]string `json:"isActive,omitempty"`
+	MaxBudget   *[]string `json:"maxBudget,omitempty"`
+	MinBudget   *[]string `json:"minBudget,omitempty"`
+	StartDate   *[]string `json:"startDate,omitempty"`
+	Title       *[]string `json:"title,omitempty"`
+}
 
 // CompanySignInBadRequestResponse defines model for CompanySignInBadRequestResponse.
 type CompanySignInBadRequestResponse struct {
@@ -32,6 +69,14 @@ type InternalServerErrorResponse struct {
 	Message string `json:"message"`
 }
 
+// ProjectStoreResponse defines model for ProjectStoreResponse.
+type ProjectStoreResponse struct {
+	Errors ProjectValidationError `json:"errors"`
+
+	// Project Project
+	Project Project `json:"project"`
+}
+
 // SupporterSignInBadRequestResponse defines model for SupporterSignInBadRequestResponse.
 type SupporterSignInBadRequestResponse struct {
 	Errors []string `json:"errors"`
@@ -46,6 +91,17 @@ type CompanySignInInput struct {
 	Password string `json:"password"`
 }
 
+// ProjectStoreInput defines model for ProjectStoreInput.
+type ProjectStoreInput struct {
+	Description *string             `json:"description,omitempty"`
+	EndDate     *openapi_types.Date `json:"endDate,omitempty"`
+	IsActive    *bool               `json:"isActive,omitempty"`
+	MaxBudget   *int                `json:"maxBudget,omitempty"`
+	MinBudget   *int                `json:"minBudget,omitempty"`
+	StartDate   *openapi_types.Date `json:"startDate,omitempty"`
+	Title       *string             `json:"title,omitempty"`
+}
+
 // SupporterSignInInput defines model for SupporterSignInInput.
 type SupporterSignInInput struct {
 	Email    string `json:"email"`
@@ -58,6 +114,17 @@ type PostCompaniesSignInJSONBody struct {
 	Password string `json:"password"`
 }
 
+// PostProjectsJSONBody defines parameters for PostProjects.
+type PostProjectsJSONBody struct {
+	Description *string             `json:"description,omitempty"`
+	EndDate     *openapi_types.Date `json:"endDate,omitempty"`
+	IsActive    *bool               `json:"isActive,omitempty"`
+	MaxBudget   *int                `json:"maxBudget,omitempty"`
+	MinBudget   *int                `json:"minBudget,omitempty"`
+	StartDate   *openapi_types.Date `json:"startDate,omitempty"`
+	Title       *string             `json:"title,omitempty"`
+}
+
 // PostSupportersSignInJSONBody defines parameters for PostSupportersSignIn.
 type PostSupportersSignInJSONBody struct {
 	Email    string `json:"email"`
@@ -66,6 +133,9 @@ type PostSupportersSignInJSONBody struct {
 
 // PostCompaniesSignInJSONRequestBody defines body for PostCompaniesSignIn for application/json ContentType.
 type PostCompaniesSignInJSONRequestBody PostCompaniesSignInJSONBody
+
+// PostProjectsJSONRequestBody defines body for PostProjects for application/json ContentType.
+type PostProjectsJSONRequestBody PostProjectsJSONBody
 
 // PostSupportersSignInJSONRequestBody defines body for PostSupportersSignIn for application/json ContentType.
 type PostSupportersSignInJSONRequestBody PostSupportersSignInJSONBody
@@ -78,6 +148,9 @@ type ServerInterface interface {
 	// Get Csrf
 	// (GET /csrf)
 	GetCsrf(ctx echo.Context) error
+	// Project Create
+	// (POST /projects)
+	PostProjects(ctx echo.Context) error
 	// Supporter SignIn
 	// (POST /supporters/signIn)
 	PostSupportersSignIn(ctx echo.Context) error
@@ -103,6 +176,17 @@ func (w *ServerInterfaceWrapper) GetCsrf(ctx echo.Context) error {
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.GetCsrf(ctx)
+	return err
+}
+
+// PostProjects converts echo context to params.
+func (w *ServerInterfaceWrapper) PostProjects(ctx echo.Context) error {
+	var err error
+
+	ctx.Set(BusinessAuthenticationScopes, []string{})
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.PostProjects(ctx)
 	return err
 }
 
@@ -145,6 +229,7 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 
 	router.POST(baseURL+"/companies/signIn", wrapper.PostCompaniesSignIn)
 	router.GET(baseURL+"/csrf", wrapper.GetCsrf)
+	router.POST(baseURL+"/projects", wrapper.PostProjects)
 	router.POST(baseURL+"/supporters/signIn", wrapper.PostSupportersSignIn)
 
 }
@@ -169,6 +254,13 @@ type CsrfResponseJSONResponse struct {
 type InternalServerErrorResponseJSONResponse struct {
 	Code    int    `json:"code"`
 	Message string `json:"message"`
+}
+
+type ProjectStoreResponseJSONResponse struct {
+	Errors ProjectValidationError `json:"errors"`
+
+	// Project Project
+	Project Project `json:"project"`
 }
 
 type SupporterSignInBadRequestResponseJSONResponse struct {
@@ -253,6 +345,36 @@ func (response GetCsrf500JSONResponse) VisitGetCsrfResponse(w http.ResponseWrite
 	return json.NewEncoder(w).Encode(response)
 }
 
+type PostProjectsRequestObject struct {
+	Body *PostProjectsJSONRequestBody
+}
+
+type PostProjectsResponseObject interface {
+	VisitPostProjectsResponse(w http.ResponseWriter) error
+}
+
+type PostProjects200JSONResponse struct {
+	ProjectStoreResponseJSONResponse
+}
+
+func (response PostProjects200JSONResponse) VisitPostProjectsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostProjects500JSONResponse struct {
+	InternalServerErrorResponseJSONResponse
+}
+
+func (response PostProjects500JSONResponse) VisitPostProjectsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(500)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
 type PostSupportersSignInRequestObject struct {
 	Body *PostSupportersSignInJSONRequestBody
 }
@@ -303,6 +425,9 @@ type StrictServerInterface interface {
 	// Get Csrf
 	// (GET /csrf)
 	GetCsrf(ctx context.Context, request GetCsrfRequestObject) (GetCsrfResponseObject, error)
+	// Project Create
+	// (POST /projects)
+	PostProjects(ctx context.Context, request PostProjectsRequestObject) (PostProjectsResponseObject, error)
 	// Supporter SignIn
 	// (POST /supporters/signIn)
 	PostSupportersSignIn(ctx context.Context, request PostSupportersSignInRequestObject) (PostSupportersSignInResponseObject, error)
@@ -372,6 +497,35 @@ func (sh *strictHandler) GetCsrf(ctx echo.Context) error {
 	return nil
 }
 
+// PostProjects operation middleware
+func (sh *strictHandler) PostProjects(ctx echo.Context) error {
+	var request PostProjectsRequestObject
+
+	var body PostProjectsJSONRequestBody
+	if err := ctx.Bind(&body); err != nil {
+		return err
+	}
+	request.Body = &body
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.PostProjects(ctx.Request().Context(), request.(PostProjectsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PostProjects")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(PostProjectsResponseObject); ok {
+		return validResponse.VisitPostProjectsResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("unexpected response type: %T", response)
+	}
+	return nil
+}
+
 // PostSupportersSignIn operation middleware
 func (sh *strictHandler) PostSupportersSignIn(ctx echo.Context) error {
 	var request PostSupportersSignInRequestObject
@@ -399,4 +553,98 @@ func (sh *strictHandler) PostSupportersSignIn(ctx echo.Context) error {
 		return fmt.Errorf("unexpected response type: %T", response)
 	}
 	return nil
+}
+
+// Base64 encoded, gzipped, json marshaled Swagger object
+var swaggerSpec = []string{
+
+	"H4sIAAAAAAAC/9RXS2/jNhD+KwLbo3aV7QNY6Ja4xcIoigbropfACBhpbHMjkSw5Smss9N8XQ+ot2Zad",
+	"+LA3W+SM5vvm9ekrS1SulQSJlsVfmYF/C7B4p1IB7sFC5ZrL/Ups5VIupS6QniZKIkj3k2udiYSjUDL6",
+	"YpWkZzbZQc7plzZKg8HKGeRcZPQD9xpYzCwaIbesDJnm1v6nTDpxWIYuKmEgZfFD5aNjsQ5rC/X0BRJk",
+	"JZmkYBMjNIXF4hpF4GEEgQdShuzeKLJZoTLwWnS9V05gBJn+xhHobKNMzpHFLKUH4fiusLcJihfoOHpS",
+	"KgMu6TTn/98V6RawcywkwhaMOxby2LFFbnB2JCgwg+m0nKS9Yjdw9HrSLflcFVorg2C+87JqcAwLyzm3",
+	"Wkk70UV3PP3s2+xzdec12I1Rxv0SCLmdZKF6wI3h+zFw7+CCLmpxBA2QMuxj/ev5IoznhtK8JGQ74Cl4",
+	"RlaA7xZKPQuY9N5UArlfWLN5g3Qk1mz+Vs8gT1dce3UW99ZsAtOheSkRjOTZCswLmN8pi28Rv0rhwFAB",
+	"a/kWZuAiF+39OeBqLIEHEzg0vaLqzuk37ZofDWxYzH6I2j0YeSsbVS/9h2cidX5dXG6u+JOZDkYU1ebh",
+	"Od3XH6Zdcgbj9LudL6NxemDCDPBea8aMwnntlKHd6yuDzu/bGppMNAuHvWmAI6SPHEeL+x2KfHJ7z9Ak",
+	"j+lsUZJO+jipVR6fjouVo+dOrcyP8Zhc8UdNI/2pUsjYqC6bYTPs+1OCb26D9JTgfKMuzfOtelLxDLOu",
+	"hJxv1pOW882apJ0xYwbZHCTLjvNK4UFSGIH7FXWhz+FTYYUEa28L3IHEaly4WKgXE9/YIZM8J2foFnYb",
+	"jhZ/wN4PDyE3atzMtf/g9n5JQdkiz7nZs5ixFkN9iYXsBYz1lh/e3xBwpUFyLVjMfn5Pj0ii4s7F7lYO",
+	"lwJsZN2EciWqrEsaFarDskyJJWVxUd/244yFna+9/aFV1vsgjCa+BodS96ebm8O+qnvRIY1YhuyXs+0n",
+	"9l0Zsl/n+DkmoroFw+KHdTd3DYPIt9aLnopbtia7iMQdvb7qoH4yPgGSnGMXMdfVqdeG+QkwqCJtgNJf",
+	"j7FSMfZ41d3Xty4ot/HX+UXVNiker8Dd4WnysC57xNYraOFWeofehlNPsa0lyLwObxTLK1p88tv8ItoP",
+	"y7S5bX5a2F690QcasJOqNjeULOeDfFtXCIXJWMx2iDqOokwlPNspi/HHm48fGJVC5WS4Lai7ApCpVkJi",
+	"u3Vc05Xh8HYbwYRNJ7yxZTOupl7WjLJyXX4LAAD//2+CyjcgFAAA",
+}
+
+// GetSwagger returns the content of the embedded swagger specification file
+// or error if failed to decode
+func decodeSpec() ([]byte, error) {
+	zipped, err := base64.StdEncoding.DecodeString(strings.Join(swaggerSpec, ""))
+	if err != nil {
+		return nil, fmt.Errorf("error base64 decoding spec: %w", err)
+	}
+	zr, err := gzip.NewReader(bytes.NewReader(zipped))
+	if err != nil {
+		return nil, fmt.Errorf("error decompressing spec: %w", err)
+	}
+	var buf bytes.Buffer
+	_, err = buf.ReadFrom(zr)
+	if err != nil {
+		return nil, fmt.Errorf("error decompressing spec: %w", err)
+	}
+
+	return buf.Bytes(), nil
+}
+
+var rawSpec = decodeSpecCached()
+
+// a naive cached of a decoded swagger spec
+func decodeSpecCached() func() ([]byte, error) {
+	data, err := decodeSpec()
+	return func() ([]byte, error) {
+		return data, err
+	}
+}
+
+// Constructs a synthetic filesystem for resolving external references when loading openapi specifications.
+func PathToRawSpec(pathToFile string) map[string]func() ([]byte, error) {
+	res := make(map[string]func() ([]byte, error))
+	if len(pathToFile) > 0 {
+		res[pathToFile] = rawSpec
+	}
+
+	return res
+}
+
+// GetSwagger returns the Swagger specification corresponding to the generated code
+// in this file. The external references of Swagger specification are resolved.
+// The logic of resolving external references is tightly connected to "import-mapping" feature.
+// Externally referenced files must be embedded in the corresponding golang packages.
+// Urls can be supported but this task was out of the scope.
+func GetSwagger() (swagger *openapi3.T, err error) {
+	resolvePath := PathToRawSpec("")
+
+	loader := openapi3.NewLoader()
+	loader.IsExternalRefsAllowed = true
+	loader.ReadFromURIFunc = func(loader *openapi3.Loader, url *url.URL) ([]byte, error) {
+		pathToFile := url.String()
+		pathToFile = path.Clean(pathToFile)
+		getSpec, ok := resolvePath[pathToFile]
+		if !ok {
+			err1 := fmt.Errorf("path not found: %s", pathToFile)
+			return nil, err1
+		}
+		return getSpec()
+	}
+	var specData []byte
+	specData, err = rawSpec()
+	if err != nil {
+		return
+	}
+	swagger, err = loader.LoadFromData(specData)
+	if err != nil {
+		return
+	}
+	return
 }
