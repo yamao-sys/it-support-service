@@ -77,6 +77,11 @@ type ProjectStoreResponse struct {
 	Project Project `json:"project"`
 }
 
+// ProjectsListResponse defines model for ProjectsListResponse.
+type ProjectsListResponse struct {
+	Projects []Project `json:"projects"`
+}
+
 // SupporterSignInBadRequestResponse defines model for SupporterSignInBadRequestResponse.
 type SupporterSignInBadRequestResponse struct {
 	Errors []string `json:"errors"`
@@ -148,6 +153,9 @@ type ServerInterface interface {
 	// Get Csrf
 	// (GET /csrf)
 	GetCsrf(ctx echo.Context) error
+	// Project List
+	// (GET /projects)
+	GetProjects(ctx echo.Context) error
 	// Project Create
 	// (POST /projects)
 	PostProjects(ctx echo.Context) error
@@ -176,6 +184,17 @@ func (w *ServerInterfaceWrapper) GetCsrf(ctx echo.Context) error {
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.GetCsrf(ctx)
+	return err
+}
+
+// GetProjects converts echo context to params.
+func (w *ServerInterfaceWrapper) GetProjects(ctx echo.Context) error {
+	var err error
+
+	ctx.Set(BusinessAuthenticationScopes, []string{})
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetProjects(ctx)
 	return err
 }
 
@@ -229,6 +248,7 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 
 	router.POST(baseURL+"/companies/signIn", wrapper.PostCompaniesSignIn)
 	router.GET(baseURL+"/csrf", wrapper.GetCsrf)
+	router.GET(baseURL+"/projects", wrapper.GetProjects)
 	router.POST(baseURL+"/projects", wrapper.PostProjects)
 	router.POST(baseURL+"/supporters/signIn", wrapper.PostSupportersSignIn)
 
@@ -261,6 +281,10 @@ type ProjectStoreResponseJSONResponse struct {
 
 	// Project Project
 	Project Project `json:"project"`
+}
+
+type ProjectsListResponseJSONResponse struct {
+	Projects []Project `json:"projects"`
 }
 
 type SupporterSignInBadRequestResponseJSONResponse struct {
@@ -339,6 +363,35 @@ type GetCsrf500JSONResponse struct {
 }
 
 func (response GetCsrf500JSONResponse) VisitGetCsrfResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(500)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetProjectsRequestObject struct {
+}
+
+type GetProjectsResponseObject interface {
+	VisitGetProjectsResponse(w http.ResponseWriter) error
+}
+
+type GetProjects200JSONResponse struct {
+	ProjectsListResponseJSONResponse
+}
+
+func (response GetProjects200JSONResponse) VisitGetProjectsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetProjects500JSONResponse struct {
+	InternalServerErrorResponseJSONResponse
+}
+
+func (response GetProjects500JSONResponse) VisitGetProjectsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(500)
 
@@ -425,6 +478,9 @@ type StrictServerInterface interface {
 	// Get Csrf
 	// (GET /csrf)
 	GetCsrf(ctx context.Context, request GetCsrfRequestObject) (GetCsrfResponseObject, error)
+	// Project List
+	// (GET /projects)
+	GetProjects(ctx context.Context, request GetProjectsRequestObject) (GetProjectsResponseObject, error)
 	// Project Create
 	// (POST /projects)
 	PostProjects(ctx context.Context, request PostProjectsRequestObject) (PostProjectsResponseObject, error)
@@ -497,6 +553,29 @@ func (sh *strictHandler) GetCsrf(ctx echo.Context) error {
 	return nil
 }
 
+// GetProjects operation middleware
+func (sh *strictHandler) GetProjects(ctx echo.Context) error {
+	var request GetProjectsRequestObject
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.GetProjects(ctx.Request().Context(), request.(GetProjectsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetProjects")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(GetProjectsResponseObject); ok {
+		return validResponse.VisitGetProjectsResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("unexpected response type: %T", response)
+	}
+	return nil
+}
+
 // PostProjects operation middleware
 func (sh *strictHandler) PostProjects(ctx echo.Context) error {
 	var request PostProjectsRequestObject
@@ -558,23 +637,24 @@ func (sh *strictHandler) PostSupportersSignIn(ctx echo.Context) error {
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
+	"tKyZe+xlNavn6/zfAAAA//9SWHJnGhYAAA==",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file
