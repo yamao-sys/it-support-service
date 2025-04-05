@@ -4,9 +4,11 @@ import (
 	businessapi "apps/api/business"
 	businessservices "apps/business/services"
 	models "apps/models/generated"
+	"apps/test/factories"
 	"context"
 	"errors"
 	"net/http"
+	"strconv"
 	"testing"
 	"time"
 
@@ -16,6 +18,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
+	"github.com/volatiletech/sqlboiler/v4/boil"
+	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
 type TestProjectsHandlerSuite struct {
@@ -26,9 +30,13 @@ type MockProjectService struct {
     mock.Mock
 }
 
+func (m *MockProjectService) FetchLists(ctx context.Context, companyID int) (projects models.ProjectSlice, error error) {
+    args := m.Called(ctx, companyID)
+	return args.Get(0).(models.ProjectSlice), args.Error(1)
+}
+
 func (m *MockProjectService) Create(ctx context.Context, requestParams *businessapi.PostProjectsJSONRequestBody, companyID int) (project models.Project, validatorErrors error, error error) {
     args := m.Called(ctx, requestParams, companyID)
-
 	return args.Get(0).(models.Project), args.Error(1), args.Error(2)
 }
 
@@ -48,6 +56,81 @@ func (s *TestProjectsHandlerSuite) SetupTest() {
 
 func (s *TestProjectsHandlerSuite) TearDownTest() {
 	s.CloseDB()
+}
+
+func (s *TestProjectsHandlerSuite) TestGetProjectsFetchLists_StatusOk() {
+	company, cookieString := s.companySignIn()
+
+	var projects models.ProjectSlice
+	product1 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
+	product2 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
+	projects = append(projects, product1, product2)
+	projects.InsertAll(ctx, DBCon, boil.Infer())
+	companyProductIDs, _ := models.Projects(
+		qm.Select("projects.id"),
+		qm.Where("company_id = ?", company.ID),
+	).All(ctx, DBCon)
+
+	otherCompany := factories.CompanyFactory.MustCreateWithOption(map[string]interface{}{"Email": "test_other@example.com"}).(*models.Company)
+	otherCompany.Insert(ctx, DBCon, boil.Infer())
+	otherCompanyProduct := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": otherCompany.ID}).(*models.Project)
+	otherCompanyProduct.Insert(ctx, DBCon, boil.Infer())
+
+	result := testutil.NewRequest().Get("/projects").WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).GoWithHTTPHandler(s.T(), e)
+
+	assert.Equal(s.T(), http.StatusOK, result.Code())
+
+	var res businessapi.GetProjects200JSONResponse
+	result.UnmarshalBodyToObject(&res)
+	var projectIDs []int
+	for _, project := range res.Projects {
+		ID, _ := strconv.Atoi(*project.Id)
+		projectIDs = append(projectIDs, ID)
+	}
+	assert.Equal(s.T(), companyProductIDs.GetIDs(), projectIDs)
+}
+
+func (s *TestProjectsHandlerSuite) TestGetProjectsFetchLists_StatusUnauthorized() {
+	company, _ := s.companySignIn()
+
+	var projects models.ProjectSlice
+	product1 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
+	product2 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
+	projects = append(projects, product1, product2)
+	projects.InsertAll(ctx, DBCon, boil.Infer())
+
+	otherCompany := factories.CompanyFactory.MustCreateWithOption(map[string]interface{}{"Email": "test_other@example.com"}).(*models.Company)
+	otherCompany.Insert(ctx, DBCon, boil.Infer())
+	otherCompanyProduct := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": otherCompany.ID}).(*models.Project)
+	otherCompanyProduct.Insert(ctx, DBCon, boil.Infer())
+
+	result := testutil.NewRequest().Get("/projects").WithHeader("Cookie", csrfTokenCookie).WithHeader(echo.HeaderXCSRFToken, csrfToken).GoWithHTTPHandler(s.T(), e)
+
+	assert.Equal(s.T(), http.StatusUnauthorized, result.Code())
+}
+
+func (s *TestProjectsHandlerSuite) TestGetProjectsFetchLists_StatusInternalServerError() {
+	company, cookieString := s.companySignIn()
+
+	var projects models.ProjectSlice
+	product1 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
+	product2 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
+	projects = append(projects, product1, product2)
+	projects.InsertAll(ctx, DBCon, boil.Infer())
+
+	otherCompany := factories.CompanyFactory.MustCreateWithOption(map[string]interface{}{"Email": "test_other@example.com"}).(*models.Company)
+	otherCompany.Insert(ctx, DBCon, boil.Infer())
+	otherCompanyProduct := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": otherCompany.ID}).(*models.Project)
+	otherCompanyProduct.Insert(ctx, DBCon, boil.Infer())
+
+	mockProjectService := new(MockProjectService)
+	mockProjectService.On("FetchLists", mock.AnythingOfType("*context.valueCtx"), mock.AnythingOfType("int")).Return(models.ProjectSlice{}, errors.New("internal server error"))
+	mockProjectService.On("Create", mock.AnythingOfType("*context.valueCtx"), mock.AnythingOfType("*businessapi.PostProjectsJSONRequestBody"), mock.AnythingOfType("int") ).Return(models.Project{}, nil, nil)
+	mockProjectService.On("MappingValidationErrorStruct", mock.AnythingOfType("error")).Return(businessapi.ProjectValidationError{})
+	s.initializeHandlers(mockProjectService)
+	result := testutil.NewRequest().Get("/projects").WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).GoWithHTTPHandler(s.T(), e)
+
+	assert.Equal(s.T(), http.StatusInternalServerError, result.Code())
 }
 
 func (s *TestProjectsHandlerSuite) TestPostProjectsCreate_StatusOk() {
@@ -150,6 +233,7 @@ func (s *TestProjectsHandlerSuite) TestPostProjectsCreate_StatusInternalServerEr
 	reqBody := businessapi.PostProjectsJSONRequestBody{Title: &title, Description: &description, StartDate: &startDate, EndDate: &endDate, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: &isActive}
 
 	mockProjectService := new(MockProjectService)
+	mockProjectService.On("FetchLists", mock.AnythingOfType("*context.valueCtx"), mock.AnythingOfType("int")).Return(models.ProjectSlice{}, nil)
 	mockProjectService.On("Create", mock.AnythingOfType("*context.valueCtx"), mock.AnythingOfType("*businessapi.PostProjectsJSONRequestBody"), mock.AnythingOfType("int") ).Return(models.Project{}, nil, errors.New("internal server error"))
 	mockProjectService.On("MappingValidationErrorStruct", mock.AnythingOfType("error")).Return(businessapi.ProjectValidationError{})
 	s.initializeHandlers(mockProjectService)

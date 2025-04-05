@@ -10,9 +10,11 @@ import (
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
+	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
 type ProjectService interface {
+	FetchLists(ctx context.Context, companyID int) (projects models.ProjectSlice, error error)
 	Create(ctx context.Context, requestParams *businessapi.PostProjectsJSONRequestBody, companyID int) (project models.Project, validatorErrors error, error error)
 	MappingValidationErrorStruct(err error) businessapi.ProjectValidationError
 }
@@ -23,6 +25,10 @@ type projectService struct {
 
 func NewProjectService(db *sql.DB) ProjectService {
 	return &projectService{db}
+}
+
+func (ps *projectService) FetchLists(ctx context.Context, companyID int) (projects models.ProjectSlice, error error) {
+	return models.Projects(qm.Where("company_id = ?", companyID)).All(ctx, ps.db)
 }
 
 func (ps *projectService) Create(ctx context.Context, requestParams *businessapi.PostProjectsJSONRequestBody, companyID int) (project models.Project, validatorErrors error, error error) {

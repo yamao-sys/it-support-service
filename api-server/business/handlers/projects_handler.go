@@ -12,6 +12,7 @@ import (
 )
 
 type ProjectsHandler interface {
+	GetProjects(ctx context.Context, request businessapi.GetProjectsRequestObject) (businessapi.GetProjectsResponseObject, error)
 	PostProjects(ctx context.Context, request businessapi.PostProjectsRequestObject) (businessapi.PostProjectsResponseObject, error)
 }
 
@@ -21,6 +22,34 @@ type projectsHandler struct {
 
 func NewProjectsHandler(projectService businessservices.ProjectService) ProjectsHandler {
 	return &projectsHandler{projectService}
+}
+
+func (ph *projectsHandler) GetProjects(ctx context.Context, request businessapi.GetProjectsRequestObject) (businessapi.GetProjectsResponseObject, error) {
+	companyID, _ := businesshelpers.ExtractCompanyID(ctx)
+
+	projects, err := ph.projectService.FetchLists(ctx, companyID)
+	if err != nil {
+		res := businessapi.InternalServerErrorResponseJSONResponse{Code: http.StatusInternalServerError}
+		return businessapi.GetProjects500JSONResponse{InternalServerErrorResponseJSONResponse: res}, err
+	}
+	var resProducts []businessapi.Project
+	for _, project := range projects { 
+		projectID := strconv.Itoa(project.ID)
+		resProducts = append(resProducts, businessapi.Project{
+			Id: &projectID,
+			Title: &project.Title,
+			Description: &project.Description,
+			StartDate: &openapi_types.Date{Time: project.StartDate},
+			EndDate: &openapi_types.Date{Time: project.EndDate},
+			MinBudget: &project.MinBudget.Int,
+			MaxBudget: &project.MaxBudget.Int,
+			IsActive: &project.IsActive,
+			CreatedAt: &project.CreatedAt,
+		})
+	}
+	return businessapi.GetProjects200JSONResponse{ProjectsListResponseJSONResponse: businessapi.ProjectsListResponseJSONResponse{
+		Projects: resProducts,
+	}}, nil
 }
 
 func (ph *projectsHandler) PostProjects(ctx context.Context, request businessapi.PostProjectsRequestObject) (businessapi.PostProjectsResponseObject, error) {

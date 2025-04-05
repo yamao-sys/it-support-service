@@ -52,6 +52,18 @@ paths:
       tags:
         - companies
   /projects:
+    get:
+      summary: Project List
+      tags:
+        - projects
+      responses:
+        '200':
+          $ref: '#/components/responses/ProjectsListResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      operationId: get-projects
+      security:
+        - businessAuthentication: []
     post:
       summary: Project Create
       tags:
@@ -250,6 +262,19 @@ components:
                 $ref: '#/components/schemas/Project'
               errors:
                 $ref: '#/components/schemas/ProjectValidationError'
+    ProjectsListResponse:
+      description: Projects List Response
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - projects
+            properties:
+              projects:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Project'
     InternalServerErrorResponse:
       description: Internal Server Error Response
       content:

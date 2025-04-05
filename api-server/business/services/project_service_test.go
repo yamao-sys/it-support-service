@@ -13,6 +13,7 @@ import (
 	"github.com/stretchr/testify/suite"
 	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
+	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
 type TestProjectServiceSuite struct {
@@ -29,6 +30,34 @@ func (s *TestProjectServiceSuite) SetupTest() {
 
 func (s *TestProjectServiceSuite) TearDownTest() {
 	s.CloseDB()
+}
+
+func (s *TestProjectServiceSuite) TestProjectFetchLists_StatusOK() {
+	company := factories.CompanyFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.Company)
+	company.Insert(ctx, DBCon, boil.Infer())
+
+	var projects models.ProjectSlice
+	project1 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
+	project2 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
+	projects = append(projects, project1, project2)
+	projects.InsertAll(ctx, DBCon, boil.Infer())
+	companyProductIDs, _ := models.Projects(
+		qm.Select("projects.id"),
+		qm.Where("company_id = ?", company.ID),
+	).All(ctx, DBCon)
+
+	otherCompany := factories.CompanyFactory.MustCreateWithOption(map[string]interface{}{"Email": "test_other@example.com"}).(*models.Company)
+	otherCompany.Insert(ctx, DBCon, boil.Infer())
+	otherCompanyProduct := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": otherCompany.ID}).(*models.Project)
+	otherCompanyProduct.Insert(ctx, DBCon, boil.Infer())
+
+	fetchedProducts, err := testProjectService.FetchLists(ctx, company.ID)
+	var fetchedProductIDs []int
+	for _, fetchedProduct := range fetchedProducts {
+		fetchedProductIDs = append(fetchedProductIDs, fetchedProduct.ID)
+	}
+	assert.ElementsMatch(s.T(), companyProductIDs.GetIDs(), fetchedProductIDs)
+	assert.Nil(s.T(), err)
 }
 
 func (s *TestProjectServiceSuite) TestProjectCreate_StatusOK() {
