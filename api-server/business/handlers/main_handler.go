@@ -16,6 +16,7 @@ type MainHandler interface {
 	PostCompaniesSignIn(ctx context.Context, request businessapi.PostCompaniesSignInRequestObject) (businessapi.PostCompaniesSignInResponseObject, error)
 
 	// handlers /projects
+	GetProjects(ctx context.Context, request businessapi.GetProjectsRequestObject) (businessapi.GetProjectsResponseObject, error)
 	PostProjects(ctx context.Context, request businessapi.PostProjectsRequestObject) (businessapi.PostProjectsResponseObject, error)
 }
 
@@ -47,6 +48,11 @@ func (mh *mainHandler) PostSupportersSignIn(ctx context.Context, request busines
 
 func (mh *mainHandler) PostCompaniesSignIn(ctx context.Context, request businessapi.PostCompaniesSignInRequestObject) (businessapi.PostCompaniesSignInResponseObject, error) {
 	res, err := mh.companiesHandler.PostCompaniesSignIn(ctx, request)
+	return res, err
+}
+
+func (mh *mainHandler) GetProjects(ctx context.Context, request businessapi.GetProjectsRequestObject) (businessapi.GetProjectsResponseObject, error) {
+	res, err := mh.projectsHandler.GetProjects(ctx, request)
 	return res, err
 }
 
