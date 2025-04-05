@@ -14,6 +14,7 @@ import (
 type ProjectsHandler interface {
 	GetProjects(ctx context.Context, request businessapi.GetProjectsRequestObject) (businessapi.GetProjectsResponseObject, error)
 	PostProjects(ctx context.Context, request businessapi.PostProjectsRequestObject) (businessapi.PostProjectsResponseObject, error)
+	PutProjectsId(ctx context.Context, request businessapi.PutProjectsIdRequestObject) (businessapi.PutProjectsIdResponseObject, error)
 }
 
 type projectsHandler struct {
@@ -55,7 +56,7 @@ func (ph *projectsHandler) GetProjects(ctx context.Context, request businessapi.
 func (ph *projectsHandler) PostProjects(ctx context.Context, request businessapi.PostProjectsRequestObject) (businessapi.PostProjectsResponseObject, error) {
 	companyID, _ := businesshelpers.ExtractCompanyID(ctx)
 
-	inputs := businessapi.PostProjectsJSONRequestBody{
+	inputs := businessapi.ProjectStoreInput{
 		Title: request.Body.Title,
 		Description: request.Body.Description,
 		StartDate: request.Body.StartDate,
@@ -89,4 +90,42 @@ func (ph *projectsHandler) PostProjects(ctx context.Context, request businessapi
 
 	res := businessapi.ProjectStoreResponseJSONResponse{Errors: mappedValidationErrors, Project: resProject}
 	return businessapi.PostProjects200JSONResponse{ProjectStoreResponseJSONResponse: res}, nil
+}
+
+//lint:ignore ST1003 oapi-codegenの自動生成メソッド名
+func (ph *projectsHandler) PutProjectsId(ctx context.Context, request businessapi.PutProjectsIdRequestObject) (businessapi.PutProjectsIdResponseObject, error) {
+	projectID := request.Id
+	inputs := businessapi.ProjectStoreInput{
+		Title: request.Body.Title,
+		Description: request.Body.Description,
+		StartDate: request.Body.StartDate,
+		EndDate: request.Body.EndDate,
+		MinBudget: request.Body.MinBudget,
+		MaxBudget: request.Body.MaxBudget,
+		IsActive: request.Body.IsActive,
+	}
+
+	updatedProject, validationErrors, err := ph.projectService.Update(ctx, &inputs, projectID)
+	if err != nil {
+		res := businessapi.InternalServerErrorResponseJSONResponse{Code: http.StatusInternalServerError}
+		return businessapi.PutProjectsId500JSONResponse{InternalServerErrorResponseJSONResponse: res}, err
+	}
+
+	mappedValidationErrors := ph.projectService.MappingValidationErrorStruct(validationErrors)
+	projectIDStr := strconv.Itoa(updatedProject.ID)
+	startDate := openapi_types.Date{Time: updatedProject.StartDate}
+	endDate := openapi_types.Date{Time: updatedProject.EndDate}
+	resProject := businessapi.Project{
+		Id: &projectIDStr,
+		Title: &updatedProject.Title,
+		Description: &updatedProject.Description,
+		StartDate: &startDate,
+		EndDate: &endDate,
+		MinBudget: &updatedProject.MinBudget.Int,
+		MaxBudget: &updatedProject.MaxBudget.Int,
+		IsActive: &updatedProject.IsActive,
+	}
+
+	res := businessapi.ProjectStoreResponseJSONResponse{Errors: mappedValidationErrors, Project: resProject}
+	return businessapi.PutProjectsId200JSONResponse{ProjectStoreResponseJSONResponse: res}, nil
 }

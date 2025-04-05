@@ -18,6 +18,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
+	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
@@ -35,7 +36,12 @@ func (m *MockProjectService) FetchLists(ctx context.Context, companyID int) (pro
 	return args.Get(0).(models.ProjectSlice), args.Error(1)
 }
 
-func (m *MockProjectService) Create(ctx context.Context, requestParams *businessapi.PostProjectsJSONRequestBody, companyID int) (project models.Project, validatorErrors error, error error) {
+func (m *MockProjectService) Create(ctx context.Context, requestParams *businessapi.ProjectStoreInput, companyID int) (project models.Project, validatorErrors error, error error) {
+    args := m.Called(ctx, requestParams, companyID)
+	return args.Get(0).(models.Project), args.Error(1), args.Error(2)
+}
+
+func (m *MockProjectService) Update(ctx context.Context, requestParams *businessapi.ProjectStoreInput, companyID int) (project models.Project, validatorErrors error, error error) {
     args := m.Called(ctx, requestParams, companyID)
 	return args.Get(0).(models.Project), args.Error(1), args.Error(2)
 }
@@ -125,7 +131,8 @@ func (s *TestProjectsHandlerSuite) TestGetProjectsFetchLists_StatusInternalServe
 
 	mockProjectService := new(MockProjectService)
 	mockProjectService.On("FetchLists", mock.AnythingOfType("*context.valueCtx"), mock.AnythingOfType("int")).Return(models.ProjectSlice{}, errors.New("internal server error"))
-	mockProjectService.On("Create", mock.AnythingOfType("*context.valueCtx"), mock.AnythingOfType("*businessapi.PostProjectsJSONRequestBody"), mock.AnythingOfType("int") ).Return(models.Project{}, nil, nil)
+	mockProjectService.On("Create", mock.AnythingOfType("*context.valueCtx"), mock.AnythingOfType("*businessapi.ProjectStoreInput"), mock.AnythingOfType("int") ).Return(models.Project{}, nil, nil)
+	mockProjectService.On("Update", mock.AnythingOfType("*context.valueCtx"), mock.AnythingOfType("*businessapi.ProjectStoreInput"), mock.AnythingOfType("int") ).Return(models.Project{}, nil, nil)
 	mockProjectService.On("MappingValidationErrorStruct", mock.AnythingOfType("error")).Return(businessapi.ProjectValidationError{})
 	s.initializeHandlers(mockProjectService)
 	result := testutil.NewRequest().Get("/projects").WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).GoWithHTTPHandler(s.T(), e)
@@ -234,7 +241,8 @@ func (s *TestProjectsHandlerSuite) TestPostProjectsCreate_StatusInternalServerEr
 
 	mockProjectService := new(MockProjectService)
 	mockProjectService.On("FetchLists", mock.AnythingOfType("*context.valueCtx"), mock.AnythingOfType("int")).Return(models.ProjectSlice{}, nil)
-	mockProjectService.On("Create", mock.AnythingOfType("*context.valueCtx"), mock.AnythingOfType("*businessapi.PostProjectsJSONRequestBody"), mock.AnythingOfType("int") ).Return(models.Project{}, nil, errors.New("internal server error"))
+	mockProjectService.On("Create", mock.AnythingOfType("*context.valueCtx"), mock.AnythingOfType("*businessapi.ProjectStoreInput"), mock.AnythingOfType("int") ).Return(models.Project{}, nil, errors.New("internal server error"))
+	mockProjectService.On("Update", mock.AnythingOfType("*context.valueCtx"), mock.AnythingOfType("*businessapi.ProjectStoreInput"), mock.AnythingOfType("int") ).Return(models.Project{}, nil, nil)
 	mockProjectService.On("MappingValidationErrorStruct", mock.AnythingOfType("error")).Return(businessapi.ProjectValidationError{})
 	s.initializeHandlers(mockProjectService)
 
@@ -282,6 +290,164 @@ func (s *TestProjectsHandlerSuite) TestPostProjectsCreate_BadRequest_Required() 
 		models.ProjectWhere.Title.EQ(title),
 	).Exists(ctx, DBCon)
 	assert.False(s.T(), exists)
+}
+
+func (s *TestProjectsHandlerSuite) TestPutProjectsId_StatusOk() {
+	company, cookieString := s.companySignIn()
+	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
+	project.Insert(ctx, DBCon, boil.Infer())
+	
+	title := "test title"
+	description := "test description"
+	parsedStartDate := time.Date(2025, 4, 1, 0, 0, 0, 0, time.Local)
+	startDate := openapi_types.Date{Time: parsedStartDate}
+	parsedEndDate := time.Date(2025, 4, 10, 0, 0, 0, 0, time.Local)
+	endDate := openapi_types.Date{Time: parsedEndDate}
+	minBudget := 10000
+	maxBudget := 20000
+	isActive := true
+	reqBody := businessapi.PutProjectsIdJSONRequestBody{Title: &title, Description: &description, StartDate: &startDate, EndDate: &endDate, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: &isActive}
+	result := testutil.NewRequest().Put("/projects/"+strconv.Itoa(project.ID)).WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithJsonBody(reqBody).GoWithHTTPHandler(s.T(), e)
+
+	assert.Equal(s.T(), http.StatusOK, result.Code())
+
+	var res businessapi.PostProjects200JSONResponse
+	result.UnmarshalBodyToObject(&res)
+	assert.Equal(s.T(), title, *res.Project.Title)
+	assert.Equal(s.T(), description, *res.Project.Description)
+	assert.Equal(s.T(), startDate.Format("2006-01-02"), res.Project.StartDate.Format("2006-01-02"))
+	assert.Equal(s.T(), endDate.Format("2006-01-02"), res.Project.EndDate.Format("2006-01-02"))
+	assert.Equal(s.T(), minBudget, *res.Project.MinBudget)
+	assert.Equal(s.T(), maxBudget, *res.Project.MaxBudget)
+	assert.Equal(s.T(), isActive, *res.Project.IsActive)
+
+	expectedValidationErrors := businessapi.ProjectValidationError{}
+	assert.Equal(s.T(), expectedValidationErrors, res.Errors)
+
+	// NOTE: DBの値を確認
+	project.Reload(ctx, DBCon)
+	assert.Equal(s.T(), company.ID, project.CompanyID)
+	assert.Equal(s.T(), "test title", project.Title)
+	assert.Equal(s.T(), "test description", project.Description)
+	assert.Equal(s.T(), parsedStartDate.Format("2006-01-02"), project.StartDate.Format("2006-01-02"))
+	assert.Equal(s.T(), parsedEndDate.Format("2006-01-02"), project.EndDate.Format("2006-01-02"))
+	assert.Equal(s.T(), null.Int{Int: minBudget, Valid: true}, project.MinBudget)
+	assert.Equal(s.T(), null.Int{Int: maxBudget, Valid: true}, project.MaxBudget)
+	assert.Equal(s.T(), isActive, project.IsActive)
+}
+
+func (s *TestProjectsHandlerSuite) TestPutProjectsId_StatusForbidden() {
+	company, cookieString := s.companySignIn()
+	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
+	project.Insert(ctx, DBCon, boil.Infer())
+
+	title := "test title"
+	description := "test description"
+	parsedStartDate := time.Date(2025, 4, 1, 0, 0, 0, 0, time.UTC)
+	startDate := openapi_types.Date{Time: parsedStartDate}
+	parsedEndDate := time.Date(2025, 4, 10, 0, 0, 0, 0, time.UTC)
+	endDate := openapi_types.Date{Time: parsedEndDate}
+	minBudget := 10000
+	maxBudget := 20000
+	isActive := true
+	reqBody := businessapi.PutProjectsIdJSONRequestBody{Title: &title, Description: &description, StartDate: &startDate, EndDate: &endDate, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: &isActive}
+	result := testutil.NewRequest().Put("/projects/"+strconv.Itoa(project.ID)).WithHeader("Cookie", cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithJsonBody(reqBody).GoWithHTTPHandler(s.T(), e)
+
+	assert.Equal(s.T(), http.StatusForbidden, result.Code())
+
+	// NOTE: DBの値を確認
+	project.Reload(ctx, DBCon)
+	assert.NotEqual(s.T(), "test title", project.Title)
+}
+
+func (s *TestProjectsHandlerSuite) TestPutProjectsId_StatusUnauthorized() {
+	company := factories.CompanyFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.Company)
+	company.Insert(ctx, DBCon, boil.Infer())
+	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
+	project.Insert(ctx, DBCon, boil.Infer())
+	
+	title := "test title"
+	description := "test description"
+	parsedStartDate := time.Date(2025, 4, 1, 0, 0, 0, 0, time.UTC)
+	startDate := openapi_types.Date{Time: parsedStartDate}
+	parsedEndDate := time.Date(2025, 4, 10, 0, 0, 0, 0, time.UTC)
+	endDate := openapi_types.Date{Time: parsedEndDate}
+	minBudget := 10000
+	maxBudget := 20000
+	isActive := true
+	reqBody := businessapi.PutProjectsIdJSONRequestBody{Title: &title, Description: &description, StartDate: &startDate, EndDate: &endDate, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: &isActive}
+	result := testutil.NewRequest().Put("/projects/"+strconv.Itoa(project.ID)).WithHeader("Cookie", csrfTokenCookie).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithJsonBody(reqBody).GoWithHTTPHandler(s.T(), e)
+
+	assert.Equal(s.T(), http.StatusUnauthorized, result.Code())
+
+	// NOTE: DBの値を確認
+	project.Reload(ctx, DBCon)
+	assert.NotEqual(s.T(), "test title", project.Title)
+}
+
+func (s *TestProjectsHandlerSuite) TestPutProjectsId_StatusInternalServerError() {
+	company, cookieString := s.companySignIn()
+	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
+	project.Insert(ctx, DBCon, boil.Infer())
+
+	title := "test title"
+	description := "test description"
+	parsedStartDate := time.Date(2025, 4, 1, 0, 0, 0, 0, time.UTC)
+	startDate := openapi_types.Date{Time: parsedStartDate}
+	parsedEndDate := time.Date(2025, 4, 10, 0, 0, 0, 0, time.UTC)
+	endDate := openapi_types.Date{Time: parsedEndDate}
+	minBudget := 10000
+	maxBudget := 20000
+	isActive := true
+	reqBody := businessapi.PutProjectsIdJSONRequestBody{Title: &title, Description: &description, StartDate: &startDate, EndDate: &endDate, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: &isActive}
+
+	mockProjectService := new(MockProjectService)
+	mockProjectService.On("FetchLists", mock.AnythingOfType("*context.valueCtx"), mock.AnythingOfType("int")).Return(models.ProjectSlice{}, nil)
+	mockProjectService.On("Create", mock.AnythingOfType("*context.valueCtx"), mock.AnythingOfType("*businessapi.ProjectStoreInput"), mock.AnythingOfType("int") ).Return(models.Project{}, nil, errors.New("internal server error"))
+	mockProjectService.On("Update", mock.AnythingOfType("*context.valueCtx"), mock.AnythingOfType("*businessapi.ProjectStoreInput"), mock.AnythingOfType("int") ).Return(models.Project{}, nil, errors.New("internal server error"))
+	mockProjectService.On("MappingValidationErrorStruct", mock.AnythingOfType("error")).Return(businessapi.ProjectValidationError{})
+	s.initializeHandlers(mockProjectService)
+
+	result := testutil.NewRequest().Put("/projects/"+strconv.Itoa(project.ID)).WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithJsonBody(reqBody).GoWithHTTPHandler(s.T(), e)
+
+	assert.Equal(s.T(), http.StatusInternalServerError, result.Code())
+
+	// NOTE: DBの値を確認
+	project.Reload(ctx, DBCon)
+	assert.NotEqual(s.T(), "test title", project.Title)
+}
+
+func (s *TestProjectsHandlerSuite) TestPutProjectsId_BadRequest_Required() {
+	company, cookieString := s.companySignIn()
+	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
+	project.Insert(ctx, DBCon, boil.Infer())
+
+	title := ""
+	description := ""
+	minBudget := 10000
+	maxBudget := 20000
+	reqBody := businessapi.PutProjectsIdJSONRequestBody{Title: &title, Description: &description, StartDate: nil, EndDate: nil, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: nil}
+	result := testutil.NewRequest().Put("/projects/"+strconv.Itoa(project.ID)).WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithJsonBody(reqBody).GoWithHTTPHandler(s.T(), e)
+
+	assert.Equal(s.T(), http.StatusOK, result.Code())
+
+	var res businessapi.PostProjects200JSONResponse
+	result.UnmarshalBodyToObject(&res)
+
+	titleErrorMessages := []string{"案件タイトルは必須入力です。"}
+	descriptionErrorMessages := []string{"案件概要は必須入力です。"}
+	startDateErrorMessages := []string{"案件開始日は必須入力です。"}
+	endDateErrorMessages := []string{"案件終了日は必須入力です。"}
+	isActiveErrorMessages := []string{"公開フラグは必須入力です。"}
+	assert.Equal(s.T(), titleErrorMessages, *res.Errors.Title)
+	assert.Equal(s.T(), descriptionErrorMessages, *res.Errors.Description)
+	assert.Equal(s.T(), startDateErrorMessages, *res.Errors.StartDate)
+	assert.Equal(s.T(), endDateErrorMessages, *res.Errors.EndDate)
+	assert.Equal(s.T(), isActiveErrorMessages, *res.Errors.IsActive)
+
+	// NOTE: DBの値を確認
+	project.Reload(ctx, DBCon)
+	assert.NotEqual(s.T(), "", project.Title)
 }
 
 func TestProjectsHandler(t *testing.T) {
