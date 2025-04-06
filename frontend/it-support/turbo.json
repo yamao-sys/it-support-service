@@ -23,6 +23,9 @@
     "test:e2e": {
       "dependsOn": ["^build"],
       "passThroughEnv": ["PLAYWRIGHT_*"]
+    },
+    "gen:schema": {
+      "dependsOn": ["^gen:schema"]
     }
   }
 }

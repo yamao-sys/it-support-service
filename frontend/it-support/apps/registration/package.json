@@ -10,7 +10,8 @@
     "lint": "next lint --max-warnings 0",
     "check-types": "tsc --noEmit",
     "dev:test": "NODE_ENV=test next dev --turbopack --port 3100",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "gen:schema": "pnpx tsx /app/it-support/generate_api_types.ts /app/it-support/openapi/registration/reference.yaml /app/it-support/apps/registration/apis/generated/"
   },
   "dependencies": {
     "@repo/ui": "workspace:*",
