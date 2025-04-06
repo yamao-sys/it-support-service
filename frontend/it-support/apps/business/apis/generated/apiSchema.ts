@@ -50,10 +50,74 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/projects": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Project List */
+    get: operations["get-projects"];
+    put?: never;
+    /** Project Create */
+    post: operations["post-projects"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/projects/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /** Project Update */
+    put: operations["put-projects-id"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
-  schemas: never;
+  schemas: {
+    /**
+     * Project Model
+     * @description Project
+     */
+    Project: {
+      id?: string;
+      title?: string;
+      description?: string;
+      /** Format: date */
+      start_date?: Date;
+      /** Format: date */
+      end_date?: Date;
+      min_budget?: number;
+      max_budget?: number;
+      isActive?: boolean;
+      /** Format: date-time */
+      created_at?: string;
+    };
+    /** ProjectValidationErrors */
+    ProjectValidationError: {
+      title?: string[];
+      description?: string[];
+      startDate?: string[];
+      endDate?: string[];
+      minBudget?: string[];
+      maxBudget?: string[];
+      isActive?: string[];
+    };
+  };
   responses: {
     /** @description Csrf response */
     CsrfResponse: {
@@ -108,6 +172,29 @@ export interface components {
         };
       };
     };
+    /** @description Project Store Response */
+    ProjectStoreResponse: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        "application/json": {
+          project: components["schemas"]["Project"];
+          errors: components["schemas"]["ProjectValidationError"];
+        };
+      };
+    };
+    /** @description Projects List Response */
+    ProjectsListResponse: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        "application/json": {
+          projects: components["schemas"]["Project"][];
+        };
+      };
+    };
     /** @description Internal Server Error Response */
     InternalServerErrorResponse: {
       headers: {
@@ -123,6 +210,22 @@ export interface components {
   };
   parameters: never;
   requestBodies: {
+    /** @description Project Store Inputs */
+    ProjectStoreInput: {
+      content: {
+        "application/json": {
+          title?: string;
+          description?: string;
+          /** Format: date */
+          startDate?: Date;
+          /** Format: date */
+          endDate?: Date;
+          minBudget?: number;
+          maxBudget?: number;
+          isActive?: boolean;
+        };
+      };
+    };
     /** @description Supporter SignIn  Input */
     SupporterSignInInput: {
       content: {
@@ -185,6 +288,47 @@ export interface operations {
     responses: {
       200: components["responses"]["CompanySignInOkResponse"];
       400: components["responses"]["CompanySignInBadRequestResponse"];
+      500: components["responses"]["InternalServerErrorResponse"];
+    };
+  };
+  "get-projects": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: components["responses"]["ProjectsListResponse"];
+      500: components["responses"]["InternalServerErrorResponse"];
+    };
+  };
+  "post-projects": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: components["requestBodies"]["ProjectStoreInput"];
+    responses: {
+      200: components["responses"]["ProjectStoreResponse"];
+      500: components["responses"]["InternalServerErrorResponse"];
+    };
+  };
+  "put-projects-id": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: components["requestBodies"]["ProjectStoreInput"];
+    responses: {
+      200: components["responses"]["ProjectStoreResponse"];
       500: components["responses"]["InternalServerErrorResponse"];
     };
   };
