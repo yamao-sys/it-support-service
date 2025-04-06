@@ -9,14 +9,20 @@ const outPutPath = process.argv[3];
 const mySchema = fs.readFileSync(schemaPath, "utf-8");
 
 const BLOB = ts.factory.createTypeReferenceNode(ts.factory.createIdentifier("Blob"));
+const Date = ts.factory.createTypeReferenceNode(ts.factory.createIdentifier("Date"));
 const NULL = ts.factory.createLiteralTypeNode(ts.factory.createNull());
 
 // NOTE: 型生成オプションを設定
 /* eslint-disable @typescript-eslint/no-unused-vars */
 const typeFileContent = await openapiTS(mySchema, {
   transform(schemaObject, metadata) {
-    if ("format" in schemaObject && schemaObject.format === "binary") {
-      return schemaObject.nullable ? ts.factory.createUnionTypeNode([BLOB, NULL]) : BLOB;
+    if ("format" in schemaObject) {
+      switch (schemaObject.format) {
+        case "binary":
+          return schemaObject.nullable ? ts.factory.createUnionTypeNode([BLOB, NULL]) : BLOB;
+        case "date":
+          return schemaObject.nullable ? ts.factory.createUnionTypeNode([Date, NULL]) : Date;
+      }
     }
     return undefined; // NOTE: 他の型に関してはデフォルト処理
   },
