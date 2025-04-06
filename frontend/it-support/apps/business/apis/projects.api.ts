@@ -31,11 +31,9 @@ export async function postProjectCreate(input: ProjectStoreInput) {
           }
         }
       }
-      console.log(JSON.stringify(reqBody));
       return JSON.stringify(reqBody);
     },
   });
-  console.log(response);
   if (data === undefined || response.status === 500) {
     throw Error("Internal Server Error");
   }
