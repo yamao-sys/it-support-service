@@ -39,6 +39,7 @@
   },
   "dependencies": {
     "openapi-fetch": "^0.13.4",
+    "react-datepicker": "^8.2.1",
     "react-hook-form": "^7.54.2"
   }
 }
