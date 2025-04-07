@@ -92,3 +92,8 @@ pnpx tsx generate_api_types.ts <openapi/yaml path> apps/{appName}/apis/generated
   - https://zenn.dev/rehabforjapan/articles/save-data-space-dockerfile
 - Turborepo の packages/ui の Tailwind の使用
   - https://stackoverflow.com/questions/79416157/how-to-enable-tailwind-css-v4-0-for-the-packages-ui-components-in-turborepo
+- CI の Playwright ブラウザのキャッシュ
+  - https://dev.to/ayomiku222/how-to-cache-playwright-browser-on-github-actions-51o6
+- CI の setup-go の go mod キャッシュ
+  - https://trap.jp/post/1655/
+  - https://docs.github.com/en/actions/use-cases-and-examples/building-and-testing/building-and-testing-go?ref=trap.jp#caching-dependencies
