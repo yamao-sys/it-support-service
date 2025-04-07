@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkou
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Set up Go
