@@ -97,3 +97,5 @@ pnpx tsx generate_api_types.ts <openapi/yaml path> apps/{appName}/apis/generated
 - CI の setup-go の go mod キャッシュ
   - https://trap.jp/post/1655/
   - https://docs.github.com/en/actions/use-cases-and-examples/building-and-testing/building-and-testing-go?ref=trap.jp#caching-dependencies
+- actions/cache のスコープ
+  - https://zenn.dev/mallowlabs/articles/github-actions-cache-scope
