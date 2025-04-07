@@ -67,10 +67,6 @@ func validateMinValue(field string) validation.RuleFunc {
 
 func validateGreater(field string, doCompareField string, minBudget *int) validation.RuleFunc {
 	return func(value interface{}) error {
-		if minBudget == nil {
-			return nil
-		}
-
 		budgetValue, _ := value.(*int)
 		if *minBudget > *budgetValue {
 			return fmt.Errorf("%sと%sの大小関係が不適です。", field, doCompareField)
