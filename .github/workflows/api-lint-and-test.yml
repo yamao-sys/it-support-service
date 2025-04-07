@@ -75,11 +75,14 @@ jobs:
           cache: true
           cache-dependency-path: ./api-server/go.sum
 
-      - name: Install dependencies
+      - name: go mod tidy
         working-directory: ./api-server
         if: ${{ steps.setup-go-test.outputs.cache-hit != 'true' }}
+        run: go mod tidy
+
+      - name: Install dependencies
+        working-directory: ./api-server
         run: |
-          go mod tidy
           go install github.com/rubenv/sql-migrate/...@latest
           go install github.com/joho/godotenv/cmd/godotenv@latest
 
