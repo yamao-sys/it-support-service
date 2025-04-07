@@ -46,8 +46,12 @@ func (ps *projectService) Create(ctx context.Context, requestParams *businessapi
 	project.Description = *requestParams.Description
 	project.StartDate = requestParams.StartDate.Time
 	project.EndDate = requestParams.EndDate.Time
-	project.MinBudget = null.Int{Int: *requestParams.MinBudget, Valid: true}
-	project.MaxBudget = null.Int{Int: *requestParams.MaxBudget, Valid: true}
+	if requestParams.MinBudget != nil {
+		project.MinBudget = null.Int{Int: *requestParams.MinBudget, Valid: true}
+	}
+	if requestParams.MaxBudget != nil {
+		project.MaxBudget = null.Int{Int: *requestParams.MaxBudget, Valid: true}
+	}
 	project.IsActive = *requestParams.IsActive
 
 	createErr := project.Insert(ctx, ps.db, boil.Infer())
@@ -73,16 +77,21 @@ func (ps *projectService) Update(ctx context.Context, requestParams *businessapi
 	doUpdateProject.Description = *requestParams.Description
 	doUpdateProject.StartDate = requestParams.StartDate.Time
 	doUpdateProject.EndDate = requestParams.EndDate.Time
-	doUpdateProject.MinBudget = null.Int{Int: *requestParams.MinBudget, Valid: true}
-	doUpdateProject.MaxBudget = null.Int{Int: *requestParams.MaxBudget, Valid: true}
+	if requestParams.MinBudget != nil {
+		doUpdateProject.MinBudget = null.Int{Int: *requestParams.MinBudget, Valid: true}
+	}
+	if requestParams.MaxBudget != nil {
+		doUpdateProject.MaxBudget = null.Int{Int: *requestParams.MaxBudget, Valid: true}
+	}
 	doUpdateProject.IsActive = *requestParams.IsActive
 
 	_, updateErr := doUpdateProject.Update(ctx, ps.db, boil.Infer())
 	if updateErr != nil {
 		return models.Project{}, nil, updateErr
 	}
+	project = *doUpdateProject
 
-	return *doUpdateProject, nil, nil
+	return project, nil, nil
 }
 
 func (ps *projectService) MappingValidationErrorStruct(err error) businessapi.ProjectValidationError {

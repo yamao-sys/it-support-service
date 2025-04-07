@@ -21,6 +21,8 @@ export async function postSupporterValidateSignUp(input: SupporterSignUpInput) {
         for (const [key, value] of Object.entries(input)) {
           if (value instanceof File) {
             formData.append(key, value, encodeURI(value.name));
+          } else if (value instanceof Date) {
+            formData.append(key, value.toString());
           } else {
             formData.append(key, value);
           }
@@ -47,6 +49,8 @@ export async function postSupporterSignUp(input: SupporterSignUpInput) {
         for (const [key, value] of Object.entries(input)) {
           if (value instanceof File) {
             formData.append(key, value, encodeURI(value.name));
+          } else if (value instanceof Date) {
+            formData.append(key, value.toString());
           } else {
             formData.append(key, value);
           }

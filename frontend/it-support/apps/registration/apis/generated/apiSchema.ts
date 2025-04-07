@@ -175,7 +175,7 @@ export interface components {
           email: string;
           password: string;
           /** Format: date */
-          birthday?: string;
+          birthday?: Date;
           /** Format: binary */
           frontIdentification?: Blob;
           /** Format: binary */

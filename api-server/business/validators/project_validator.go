@@ -35,7 +35,7 @@ func ValidateProject(input *businessapi.ProjectStoreInput) error {
 		validation.Field(
 			&input.MaxBudget,
 			validation.When(input.MaxBudget != nil, validation.By(validateMinValue("予算(上限)"))),
-			validation.When(input.MaxBudget != nil && input.MinBudget != nil, validation.By(validatePeriodGreater("予算(上限)", "予算(下限)", *input.MinBudget))),
+			validation.When(input.MaxBudget != nil && input.MinBudget != nil, validation.By(validateGreater("予算(上限)", "予算(下限)", input.MinBudget))),
 		),
 		validation.Field(
 			&input.IsActive,
@@ -65,10 +65,10 @@ func validateMinValue(field string) validation.RuleFunc {
 	}
 }
 
-func validatePeriodGreater(field string, doCompareField string, minBudget int) validation.RuleFunc {
+func validateGreater(field string, doCompareField string, minBudget *int) validation.RuleFunc {
 	return func(value interface{}) error {
 		budgetValue, _ := value.(*int)
-		if minBudget > *budgetValue {
+		if *minBudget > *budgetValue {
 			return fmt.Errorf("%sと%sの大小関係が不適です。", field, doCompareField)
 		}
 		return nil

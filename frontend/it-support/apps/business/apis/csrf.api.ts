@@ -37,10 +37,11 @@ export async function setCsrfToken() {
 
 export const getRequestHeaders = async () => {
   const csrfToken = (await cookies()).get("_csrf")?.value ?? "";
+  const authenticateToken = (await cookies()).get("token")?.value ?? "";
   return {
     headers: {
       "X-CSRF-Token": csrfToken,
-      Cookie: `_csrf=${csrfToken}`,
+      Cookie: `_csrf=${csrfToken}; token=${authenticateToken}`,
     },
   };
 };

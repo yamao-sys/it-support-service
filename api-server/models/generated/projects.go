@@ -196,8 +196,8 @@ type projectL struct{}
 
 var (
 	projectAllColumns            = []string{"id", "company_id", "title", "description", "start_date", "end_date", "min_budget", "max_budget", "is_active", "created_at", "updated_at"}
-	projectColumnsWithoutDefault = []string{"company_id", "title", "description", "start_date", "end_date", "min_budget", "max_budget", "created_at", "updated_at"}
-	projectColumnsWithDefault    = []string{"id", "is_active"}
+	projectColumnsWithoutDefault = []string{"company_id", "title", "description", "start_date", "end_date", "min_budget", "max_budget", "is_active", "created_at", "updated_at"}
+	projectColumnsWithDefault    = []string{"id"}
 	projectPrimaryKeyColumns     = []string{"id"}
 	projectGeneratedColumns      = []string{}
 )

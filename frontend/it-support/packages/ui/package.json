@@ -10,7 +10,8 @@
     "./code": "./src/code.tsx",
     "./BaseButton": "./src/BaseButton/index.tsx",
     "./BaseContainer": "./src/BaseContainer/index.tsx",
-    "./BaseFormInput": "./src/BaseFormInput/index.tsx"
+    "./BaseFormInput": "./src/BaseFormInput/index.tsx",
+    "./BaseFormTextarea": "./src/BaseFormTextarea/index.tsx"
   },
   "scripts": {
     "lint": "eslint . --max-warnings 0",
