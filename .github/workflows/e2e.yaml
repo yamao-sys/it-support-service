@@ -27,6 +27,7 @@ jobs:
 
       - name: Set up Go
         uses: actions/setup-go@v4
+        id: setup-go-e2e
         with:
           go-version: '1.23'
           go-version-file: ./api-server/go.mod
@@ -35,6 +36,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: ./api-server
+        if: ${{ steps.setup-go-e2e.outputs.cache-hit != 'true' }}
         run: |
           go mod tidy
           go install github.com/rubenv/sql-migrate/...@latest

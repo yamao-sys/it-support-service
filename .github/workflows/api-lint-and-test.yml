@@ -20,6 +20,7 @@ jobs:
 
       - name: Set up Go
         uses: actions/setup-go@v4
+        id: setup-go-lint
         with:
           go-version: '1.23'
           go-version-file: ./api-server/go.mod
@@ -28,6 +29,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: ./api-server
+        if: ${{ steps.setup-go-lint.outputs.cache-hit != 'true' }}
         run: go mod tidy
 
       - name: Generate reviewdog api token
@@ -66,6 +68,7 @@ jobs:
 
       - name: Set up Go
         uses: actions/setup-go@v4
+        id: setup-go-test
         with:
           go-version: '1.23'
           go-version-file: ./api-server/go.mod
@@ -74,6 +77,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: ./api-server
+        if: ${{ steps.setup-go-test.outputs.cache-hit != 'true' }}
         run: |
           go mod tidy
           go install github.com/rubenv/sql-migrate/...@latest
