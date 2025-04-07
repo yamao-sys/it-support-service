@@ -5,6 +5,7 @@ on:
     paths:
       - 'api-server/**/*.go'
       - 'api-server/go.mod'
+      - 'api-lint-and-test.yaml'
 
 jobs:
   Lint:
@@ -18,6 +19,8 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: '1.23'
+          go-version-file: ./api-server/go.mod
+          cache: true
 
       - name: Install dependencies
         working-directory: ./api-server
