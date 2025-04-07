@@ -7,7 +7,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"fmt"
 
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/volatiletech/null/v8"
@@ -54,15 +53,11 @@ func (ps *projectService) Create(ctx context.Context, requestParams *businessapi
 		project.MaxBudget = null.Int{Int: *requestParams.MaxBudget, Valid: true}
 	}
 	project.IsActive = *requestParams.IsActive
-	fmt.Println(*requestParams.IsActive)
-	fmt.Println(project.IsActive)
 
-	boil.DebugMode = true
 	createErr := project.Insert(ctx, ps.db, boil.Infer())
 	if createErr != nil {
 		return models.Project{}, nil, createErr
 	}
-	boil.DebugMode = false
 
 	return project, nil, nil
 }
