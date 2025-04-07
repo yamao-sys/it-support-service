@@ -1,11 +1,11 @@
 #!/bin/bash
 
 # シーディング
-docker-compose run --rm business_api sh -c 'make test-seed-local'
+docker-compose exec -d business_api make test-seed-local
 
 # テスト用の環境でAPIサーバを起動
-docker-compose exec -d registration_api godotenv -f .env.test.local go run main.go
-docker-compose exec -d business_api godotenv -f .env.test.local go run main.go
+docker-compose exec -d registration_api godotenv -f .env.test.local go run cmd/registration/main.go
+docker-compose exec -d business_api godotenv -f .env.test.local go run cmd/business/main.go
 
 # テスト実行
 docker-compose exec frontend pnpm test:e2e
