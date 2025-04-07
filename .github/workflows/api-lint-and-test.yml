@@ -26,7 +26,7 @@ jobs:
           cache: true
           cache-dependency-path: ./api-server/go.sum
 
-      - name: Install dependencies
+      - name: Install dependencie
         working-directory: ./api-server
         run: go mod tidy
 
