@@ -5,7 +5,7 @@ on:
     paths:
       - 'api-server/**/*.go'
       - 'api-server/go.mod'
-      - 'api-lint-and-test.yaml'
+      - '.github/workflows/api-lint-and-test.yaml'
 
 jobs:
   Lint:
@@ -21,6 +21,7 @@ jobs:
           go-version: '1.23'
           go-version-file: ./api-server/go.mod
           cache: true
+          cache-dependency-path: ./api-server/go.sum
 
       - name: Install dependencies
         working-directory: ./api-server
