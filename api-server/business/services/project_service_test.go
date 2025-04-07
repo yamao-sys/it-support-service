@@ -60,7 +60,38 @@ func (s *TestProjectServiceSuite) TestProjectFetchLists_StatusOK() {
 	assert.Nil(s.T(), err)
 }
 
-func (s *TestProjectServiceSuite) TestProjectCreate_StatusOK() {
+func (s *TestProjectServiceSuite) TestProjectCreate_WithOnlyRequired_StatusOK() {
+	// NOTE: テスト用企業の作成
+	company := factories.CompanyFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.Company)
+	company.Insert(ctx, DBCon, boil.Infer())
+
+	title := "test title"
+	description := "test description"
+	parsedStartDate := time.Date(2025, 4, 1, 0, 0, 0, 0, time.Local)
+	startDate := openapi_types.Date{Time: parsedStartDate}
+	parsedEndDate := time.Date(2025, 4, 10, 0, 0, 0, 0, time.Local)
+	endDate := openapi_types.Date{Time: parsedEndDate}
+	isActive := true
+	requestParams := businessapi.ProjectStoreInput{Title: &title, Description: &description, StartDate: &startDate, EndDate: &endDate, IsActive: &isActive}
+
+	createdProject, validatorErrors, err := testProjectService.Create(ctx, &requestParams, company.ID)
+	mappedValidationErrors := testProjectService.MappingValidationErrorStruct(validatorErrors)
+	expectedValidationErrors := businessapi.ProjectValidationError{}
+	assert.Equal(s.T(), expectedValidationErrors, mappedValidationErrors)
+
+	assert.Equal(s.T(), company.ID, createdProject.CompanyID)
+	assert.Equal(s.T(), "test title", createdProject.Title)
+	assert.Equal(s.T(), "test description", createdProject.Description)
+	assert.Equal(s.T(), parsedStartDate, createdProject.StartDate)
+	assert.Equal(s.T(), parsedEndDate, createdProject.EndDate)
+	assert.Equal(s.T(), null.Int(null.Int{Int:0, Valid:false}), createdProject.MinBudget)
+	assert.Equal(s.T(), null.Int(null.Int{Int:0, Valid:false}), createdProject.MaxBudget)
+	assert.Equal(s.T(), isActive, createdProject.IsActive)
+	assert.Nil(s.T(), validatorErrors)
+	assert.Nil(s.T(), err)
+}
+
+func (s *TestProjectServiceSuite) TestProjectCreate_WithOptional_StatusOK() {
 	// NOTE: テスト用企業の作成
 	company := factories.CompanyFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.Company)
 	company.Insert(ctx, DBCon, boil.Infer())
@@ -186,11 +217,58 @@ func (s *TestProjectServiceSuite) TestProjectCreate_BadRequest_Threshold() {
 	assert.Nil(s.T(), err)
 }
 
-func (s *TestProjectServiceSuite) TestProjectUpdate_StatusOK() {
+func (s *TestProjectServiceSuite) TestProjectUpdate_WithOnlyRequired_StatusOK() {
 	// NOTE: テスト用企業の作成
 	company := factories.CompanyFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.Company)
 	company.Insert(ctx, DBCon, boil.Infer())
-	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
+	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID, "MinBudget": null.Int{Int: 0, Valid: false}, "MaxBudget": null.Int{Int: 0, Valid: false}}).(*models.Project)
+	project.Insert(ctx, DBCon, boil.Infer())
+	project.Reload(ctx, DBCon)
+
+	title := "test title"
+	description := "test description"
+	parsedStartDate := time.Date(2025, 4, 1, 0, 0, 0, 0, time.Local)
+	startDate := openapi_types.Date{Time: parsedStartDate}
+	parsedEndDate := time.Date(2025, 4, 10, 0, 0, 0, 0, time.Local)
+	endDate := openapi_types.Date{Time: parsedEndDate}
+	isActive := true
+	requestParams := businessapi.ProjectStoreInput{Title: &title, Description: &description, StartDate: &startDate, EndDate: &endDate, IsActive: &isActive}
+
+	updatedProject, validatorErrors, err := testProjectService.Update(ctx, &requestParams, project.ID)
+	mappedValidationErrors := testProjectService.MappingValidationErrorStruct(validatorErrors)
+	expectedValidationErrors := businessapi.ProjectValidationError{}
+	assert.Equal(s.T(), expectedValidationErrors, mappedValidationErrors)
+
+	// NOTE: レスポンスのprojectの値の確認
+	assert.Equal(s.T(), project.ID, updatedProject.ID)
+	assert.Equal(s.T(), company.ID, updatedProject.CompanyID)
+	assert.Equal(s.T(), "test title", updatedProject.Title)
+	assert.Equal(s.T(), "test description", updatedProject.Description)
+	assert.Equal(s.T(), parsedStartDate, updatedProject.StartDate)
+	assert.Equal(s.T(), parsedEndDate, updatedProject.EndDate)
+	assert.Equal(s.T(), null.Int{Int: 0, Valid: false}, updatedProject.MinBudget)
+	assert.Equal(s.T(), null.Int{Int: 0, Valid: false}, updatedProject.MaxBudget)
+	assert.Equal(s.T(), isActive, updatedProject.IsActive)
+	assert.Nil(s.T(), validatorErrors)
+	assert.Nil(s.T(), err)
+
+	// NOTE: DBの値が更新されていること
+	project.Reload(ctx, DBCon)
+	assert.Equal(s.T(), company.ID, project.CompanyID)
+	assert.Equal(s.T(), "test title", project.Title)
+	assert.Equal(s.T(), "test description", project.Description)
+	assert.Equal(s.T(), parsedStartDate, project.StartDate)
+	assert.Equal(s.T(), parsedEndDate, project.EndDate)
+	assert.Equal(s.T(), null.Int{Int: 0, Valid: false}, project.MinBudget)
+	assert.Equal(s.T(), null.Int{Int: 0, Valid: false}, project.MaxBudget)
+	assert.Equal(s.T(), isActive, project.IsActive)
+}
+
+func (s *TestProjectServiceSuite) TestProjectUpdate_WithOptional_StatusOK() {
+	// NOTE: テスト用企業の作成
+	company := factories.CompanyFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.Company)
+	company.Insert(ctx, DBCon, boil.Infer())
+	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID, "MinBudget": null.Int{Int: 0, Valid: false}, "MaxBudget": null.Int{Int: 0, Valid: false}}).(*models.Project)
 	project.Insert(ctx, DBCon, boil.Infer())
 	project.Reload(ctx, DBCon)
 
