@@ -65,6 +65,9 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: '1.23'
+          go-version-file: ./api-server/go.mod
+          cache: true
+          cache-dependency-path: ./api-server/go.sum
 
       - name: Install dependencies
         working-directory: ./api-server
