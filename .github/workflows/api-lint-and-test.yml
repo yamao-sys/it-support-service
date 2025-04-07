@@ -20,14 +20,16 @@ jobs:
 
       - name: Set up Go
         uses: actions/setup-go@v4
+        id: setup-go-lint
         with:
           go-version: '1.23'
           go-version-file: ./api-server/go.mod
           cache: true
           cache-dependency-path: ./api-server/go.sum
 
-      - name: Install dependencies
+      - name: go mod tidy
         working-directory: ./api-server
+        if: ${{ steps.setup-go-lint.outputs.cache-hit != 'true' }}
         run: go mod tidy
 
       - name: Generate reviewdog api token
@@ -66,14 +68,33 @@ jobs:
 
       - name: Set up Go
         uses: actions/setup-go@v4
+        id: setup-go-test
         with:
           go-version: '1.23'
           go-version-file: ./api-server/go.mod
           cache: true
           cache-dependency-path: ./api-server/go.sum
 
+      - name: Cache Go tools
+        uses: actions/cache@v4
+        id: cache-go-tools
+        with:
+          path: |
+            ~/go/bin
+          key: go-tools-${{ runner.os }}-${{ hashFiles('go.mod') }}-tools
+
+      - name: go mod tidy
+        working-directory: ./api-server
+        if: ${{ steps.setup-go-test.outputs.cache-hit != 'true' }}
+        run: go mod tidy
+
+      - name: Add go bin to PATH
+        if: ${{ steps.cache-go-tools.outputs.cache-hit == 'true' }}
+        run: echo "$HOME/go/bin" >> $GITHUB_PATH
+
       - name: Install dependencies
         working-directory: ./api-server
+        if: ${{ steps.cache-go-tools.outputs.cache-hit != 'true' }}
         run: |
           go mod tidy
           go install github.com/rubenv/sql-migrate/...@latest
