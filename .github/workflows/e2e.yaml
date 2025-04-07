@@ -101,12 +101,8 @@ jobs:
           cache: 'pnpm'
           cache-dependency-path: ./frontend/it-support/pnpm-lock.yaml
 
-      - name: Install yq
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y yq
-
       - name: Get installed Playwright version
+        uses: chrisdickinson/setup-yq@latest
         id: playwright-version
         run: |
           VERSION=$(yq '.importers.".".devDependencies."@playwright/test".version' frontend/it-support/pnpm-lock.yaml)
