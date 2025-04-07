@@ -12,21 +12,25 @@ import (
 )
 
 var ProjectFactory = factory.NewFactory(
-	&models.Project{
-		Title: randomdata.RandStringRunes(15),
-		Description: randomdata.RandStringRunes(50),
-		MinBudget: null.Int{Int: 10000, Valid: true},
-		MaxBudget: null.Int{Int: 20000, Valid: true},
-		IsActive: true,
-	},
+	&models.Project{},
 ).Attr("CompanyID", func(args factory.Args) (interface{}, error) {
 	company := CompanyFactory.MustCreate().(*models.Company)
 	company.Insert(args.Context(), args.Instance().(*sql.DB), boil.Infer())
 	return company.ID, nil
+}).Attr("Title", func(args factory.Args) (interface{}, error) {
+	return randomdata.RandStringRunes(15), nil
+}).Attr("Description", func(args factory.Args) (interface{}, error) {
+	return randomdata.RandStringRunes(50), nil
 }).Attr("StartDate", func(args factory.Args) (interface{}, error) {
 	date := time.Date(2025, 4, 1, 0, 0, 0, 0, time.UTC)
 	return date, nil
 }).Attr("EndDate", func(args factory.Args) (interface{}, error) {
 	date := time.Date(2025, 4, 10, 0, 0, 0, 0, time.UTC)
 	return date, nil
+}).Attr("MinBudget", func(args factory.Args) (interface{}, error) {
+	return null.Int{Int: 10000, Valid: true}, nil
+}).Attr("MaxBudget", func(args factory.Args) (interface{}, error) {
+	return null.Int{Int: 20000, Valid: true}, nil
+}).Attr("IsActive", func(args factory.Args) (interface{}, error) {
+	return true, nil
 })
