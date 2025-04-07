@@ -104,8 +104,8 @@ jobs:
       - name: Get installed Playwright version
         id: playwright-version
         run: |
-          VERSION=$(grep -A 2 '@playwright/test:' ./frontend/it-support/pnpm-lock.yaml | grep version: | head -n 1 | sed -E 's/^[[:space:]]*version:[[:space:]]*//')
-          echo "PLAYWRIGHT_VERSION=$VERSION" >> $GITHUB_ENV
+          VERSION=$(yq '.importers.".".devDependencies."@playwright/test".version' frontend/it-support/pnpm-lock.yaml)
+          echo "PLAYWRIGHT_VERSION=$VERSION" >> "$GITHUB_ENV"
 
       - name: Cache playwright binaries
         uses: actions/cache@v4
