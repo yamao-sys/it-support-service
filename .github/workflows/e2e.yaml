@@ -102,11 +102,10 @@ jobs:
           cache-dependency-path: ./frontend/it-support/pnpm-lock.yaml
 
       - name: Get installed Playwright version
-        uses: chrisdickinson/setup-yq@latest
         id: playwright-version
         run: |
-          VERSION=$(yq '.importers.".".devDependencies."@playwright/test".version' frontend/it-support/pnpm-lock.yaml)
-          echo "PLAYWRIGHT_VERSION=$VERSION" >> "$GITHUB_ENV"
+          VERSION=$(grep -A 2 '@playwright/test:' pnpm-lock.yaml | grep version: | head -n 1 | sed -E 's/^[[:space:]]*version:[[:space:]]*//')
+          echo "PLAYWRIGHT_VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Cache playwright binaries
         uses: actions/cache@v4
