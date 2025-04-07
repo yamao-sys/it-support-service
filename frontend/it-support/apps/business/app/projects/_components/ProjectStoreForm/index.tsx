@@ -82,7 +82,7 @@ const ProjectStoreForm: FC = () => {
                 />
               )}
             />
-            {validationErrors.startDate?.length && (
+            {!!validationErrors.startDate?.length && (
               <div className='w-full pt-5 text-left'>
                 {validationErrors.startDate.map((message, i) => (
                   <p key={i} className='text-red-400'>
@@ -111,7 +111,7 @@ const ProjectStoreForm: FC = () => {
                 />
               )}
             />
-            {validationErrors.endDate?.length && (
+            {!!validationErrors.endDate?.length && (
               <div className='w-full pt-5 text-left'>
                 {validationErrors.endDate.map((message, i) => (
                   <p key={i} className='text-red-400'>
@@ -145,29 +145,30 @@ const ProjectStoreForm: FC = () => {
         </div>
 
         <div className='mt-8'>
-          <label
-            htmlFor='end-date'
-            className='block mb-2 text-sm font-medium text-gray-900 dark:text-white text-left'
-          >
+          <label className='block mb-2 text-sm font-medium text-gray-900 dark:text-white text-left'>
             <span className='font-bold'>公開フラグ</span>
           </label>
 
           <div className='flex space-x-2'>
             {[
-              { label: "公開", value: 1 },
-              { label: "非公開", value: 0 },
+              { id: "active", label: "公開", value: 1 },
+              { id: "notActive", label: "非公開", value: 0 },
             ].map((option) => (
-              <label key={option.label} className='cursor-pointer'>
+              <div key={option.label} className='cursor-pointer'>
                 <input
+                  id={option.id}
                   type='radio'
                   value={option.value}
                   {...register("isActive", { required: "公開フラグは必須です。" })}
                   className='peer hidden'
                 />
-                <div className='px-4 py-2 rounded-full bg-gray-200 peer-checked:bg-blue-500 peer-checked:text-white'>
+                <label
+                  htmlFor={option.id}
+                  className='px-4 py-2 rounded-full bg-gray-200 peer-checked:bg-blue-500 peer-checked:text-white'
+                >
                   {option.label}
-                </div>
-              </label>
+                </label>
+              </div>
             ))}
           </div>
         </div>
