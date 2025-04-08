@@ -14,6 +14,7 @@ import (
 type ProjectsHandler interface {
 	GetProjects(ctx context.Context, request businessapi.GetProjectsRequestObject) (businessapi.GetProjectsResponseObject, error)
 	PostProjects(ctx context.Context, request businessapi.PostProjectsRequestObject) (businessapi.PostProjectsResponseObject, error)
+	GetProjectsId(ctx context.Context, request businessapi.GetProjectsIdRequestObject) (businessapi.GetProjectsIdResponseObject, error)
 	PutProjectsId(ctx context.Context, request businessapi.PutProjectsIdRequestObject) (businessapi.PutProjectsIdResponseObject, error)
 }
 
@@ -90,6 +91,32 @@ func (ph *projectsHandler) PostProjects(ctx context.Context, request businessapi
 
 	res := businessapi.ProjectStoreResponseJSONResponse{Errors: mappedValidationErrors, Project: resProject}
 	return businessapi.PostProjects200JSONResponse{ProjectStoreResponseJSONResponse: res}, nil
+}
+
+//lint:ignore ST1003 oapi-codegenの自動生成メソッド名
+func (ph *projectsHandler) GetProjectsId(ctx context.Context, request businessapi.GetProjectsIdRequestObject) (businessapi.GetProjectsIdResponseObject, error) {
+	projectID := request.Id
+	project, err := ph.projectService.Fetch(ctx, projectID)
+	if err != nil {
+		res := businessapi.NotFoundErrorResponseJSONResponse{Code: http.StatusNotFound}
+		return businessapi.GetProjectsId404JSONResponse{NotFoundErrorResponseJSONResponse: res}, nil
+	}
+
+	projectIDStr := strconv.Itoa(project.ID)
+	startDate := openapi_types.Date{Time: project.StartDate}
+	endDate := openapi_types.Date{Time: project.EndDate}
+	resProject := businessapi.Project{
+		Id: &projectIDStr,
+		Title: &project.Title,
+		Description: &project.Description,
+		StartDate: &startDate,
+		EndDate: &endDate,
+		MinBudget: &project.MinBudget.Int,
+		MaxBudget: &project.MaxBudget.Int,
+		IsActive: &project.IsActive,
+	}
+	res := businessapi.ProjectResponseJSONResponse{Project: resProject}
+	return businessapi.GetProjectsId200JSONResponse{ProjectResponseJSONResponse: res}, nil
 }
 
 //lint:ignore ST1003 oapi-codegenの自動生成メソッド名

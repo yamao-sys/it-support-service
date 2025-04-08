@@ -18,6 +18,7 @@ type MainHandler interface {
 	// handlers /projects
 	GetProjects(ctx context.Context, request businessapi.GetProjectsRequestObject) (businessapi.GetProjectsResponseObject, error)
 	PostProjects(ctx context.Context, request businessapi.PostProjectsRequestObject) (businessapi.PostProjectsResponseObject, error)
+	GetProjectsId(ctx context.Context, request businessapi.GetProjectsIdRequestObject) (businessapi.GetProjectsIdResponseObject, error)
 	PutProjectsId(ctx context.Context, request businessapi.PutProjectsIdRequestObject) (businessapi.PutProjectsIdResponseObject, error)
 }
 
@@ -59,6 +60,12 @@ func (mh *mainHandler) GetProjects(ctx context.Context, request businessapi.GetP
 
 func (mh *mainHandler) PostProjects(ctx context.Context, request businessapi.PostProjectsRequestObject) (businessapi.PostProjectsResponseObject, error) {
 	res, err := mh.projectsHandler.PostProjects(ctx, request)
+	return res, err
+}
+
+//lint:ignore ST1003 oapi-codegenの自動生成メソッド名
+func (mh *mainHandler) GetProjectsId(ctx context.Context, request businessapi.GetProjectsIdRequestObject) (businessapi.GetProjectsIdResponseObject, error) {
+	res, err := mh.projectsHandler.GetProjectsId(ctx, request)
 	return res, err
 }
 
