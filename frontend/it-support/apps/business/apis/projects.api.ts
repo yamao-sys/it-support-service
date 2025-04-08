@@ -40,3 +40,54 @@ export async function postProjectCreate(input: ProjectStoreInput) {
 
   return data.errors;
 }
+
+export async function getProject(id: number) {
+  const { data, response } = await client.GET("/projects/{id}", {
+    ...(await getRequestHeaders()),
+    params: {
+      path: {
+        id,
+      },
+    },
+  });
+  if (data === undefined || response.status === 404) {
+    throw Error("Not Found Error");
+  }
+
+  return data.project;
+}
+
+export async function putUpdateProject(id: number, input: ProjectStoreInput) {
+  console.log(input);
+  const { data, response } = await client.PUT("/projects/{id}", {
+    ...(await getRequestHeaders()),
+    params: {
+      path: {
+        id,
+      },
+    },
+    body: input,
+    bodySerializer() {
+      const reqBody: { [key: string]: string | number | boolean } = {};
+      for (const [key, value] of Object.entries(input)) {
+        if (value instanceof Date) {
+          reqBody[key] = value
+            .toLocaleDateString("ja-JP", { year: "numeric", month: "2-digit", day: "2-digit" })
+            .replaceAll("/", "-");
+        } else if (["minBudget", "maxBudget"].includes(key)) {
+          if (value) {
+            reqBody[key] = Number(value);
+          }
+        } else {
+          reqBody[key] = value;
+        }
+      }
+      return JSON.stringify(reqBody);
+    },
+  });
+  if (data === undefined || response.status === 404 || response.status === 500) {
+    throw Error("Internal Server Error");
+  }
+
+  return data.errors;
+}
