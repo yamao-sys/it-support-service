@@ -70,6 +70,18 @@ type InternalServerErrorResponse struct {
 	Message string `json:"message"`
 }
 
+// NotFoundErrorResponse defines model for NotFoundErrorResponse.
+type NotFoundErrorResponse struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+}
+
+// ProjectResponse defines model for ProjectResponse.
+type ProjectResponse struct {
+	// Project Project
+	Project Project `json:"project"`
+}
+
 // ProjectStoreResponse defines model for ProjectStoreResponse.
 type ProjectStoreResponse struct {
 	Errors ProjectValidationError `json:"errors"`
@@ -174,6 +186,9 @@ type ServerInterface interface {
 	// Project Create
 	// (POST /projects)
 	PostProjects(ctx echo.Context) error
+	// Project Show
+	// (GET /projects/{id})
+	GetProjectsId(ctx echo.Context, id int) error
 	// Project Update
 	// (PUT /projects/{id})
 	PutProjectsId(ctx echo.Context, id int) error
@@ -224,6 +239,24 @@ func (w *ServerInterfaceWrapper) PostProjects(ctx echo.Context) error {
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.PostProjects(ctx)
+	return err
+}
+
+// GetProjectsId converts echo context to params.
+func (w *ServerInterfaceWrapper) GetProjectsId(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "id" -------------
+	var id int
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, ctx.Param("id"), &id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
+	}
+
+	ctx.Set(BusinessAuthenticationScopes, []string{})
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetProjectsId(ctx, id)
 	return err
 }
 
@@ -286,6 +319,7 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.GET(baseURL+"/csrf", wrapper.GetCsrf)
 	router.GET(baseURL+"/projects", wrapper.GetProjects)
 	router.POST(baseURL+"/projects", wrapper.PostProjects)
+	router.GET(baseURL+"/projects/:id", wrapper.GetProjectsId)
 	router.PUT(baseURL+"/projects/:id", wrapper.PutProjectsId)
 	router.POST(baseURL+"/supporters/signIn", wrapper.PostSupportersSignIn)
 
@@ -311,6 +345,16 @@ type CsrfResponseJSONResponse struct {
 type InternalServerErrorResponseJSONResponse struct {
 	Code    int    `json:"code"`
 	Message string `json:"message"`
+}
+
+type NotFoundErrorResponseJSONResponse struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+}
+
+type ProjectResponseJSONResponse struct {
+	// Project Project
+	Project Project `json:"project"`
 }
 
 type ProjectStoreResponseJSONResponse struct {
@@ -465,6 +509,34 @@ func (response PostProjects500JSONResponse) VisitPostProjectsResponse(w http.Res
 	return json.NewEncoder(w).Encode(response)
 }
 
+type GetProjectsIdRequestObject struct {
+	Id int `json:"id"`
+}
+
+type GetProjectsIdResponseObject interface {
+	VisitGetProjectsIdResponse(w http.ResponseWriter) error
+}
+
+type GetProjectsId200JSONResponse struct{ ProjectResponseJSONResponse }
+
+func (response GetProjectsId200JSONResponse) VisitGetProjectsIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetProjectsId404JSONResponse struct {
+	NotFoundErrorResponseJSONResponse
+}
+
+func (response GetProjectsId404JSONResponse) VisitGetProjectsIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
 type PutProjectsIdRequestObject struct {
 	Id   int `json:"id"`
 	Body *PutProjectsIdJSONRequestBody
@@ -552,6 +624,9 @@ type StrictServerInterface interface {
 	// Project Create
 	// (POST /projects)
 	PostProjects(ctx context.Context, request PostProjectsRequestObject) (PostProjectsResponseObject, error)
+	// Project Show
+	// (GET /projects/{id})
+	GetProjectsId(ctx context.Context, request GetProjectsIdRequestObject) (GetProjectsIdResponseObject, error)
 	// Project Update
 	// (PUT /projects/{id})
 	PutProjectsId(ctx context.Context, request PutProjectsIdRequestObject) (PutProjectsIdResponseObject, error)
@@ -676,6 +751,31 @@ func (sh *strictHandler) PostProjects(ctx echo.Context) error {
 	return nil
 }
 
+// GetProjectsId operation middleware
+func (sh *strictHandler) GetProjectsId(ctx echo.Context, id int) error {
+	var request GetProjectsIdRequestObject
+
+	request.Id = id
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.GetProjectsId(ctx.Request().Context(), request.(GetProjectsIdRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetProjectsId")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(GetProjectsIdResponseObject); ok {
+		return validResponse.VisitGetProjectsIdResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("unexpected response type: %T", response)
+	}
+	return nil
+}
+
 // PutProjectsId operation middleware
 func (sh *strictHandler) PutProjectsId(ctx echo.Context, id int) error {
 	var request PutProjectsIdRequestObject
@@ -739,25 +839,26 @@ func (sh *strictHandler) PostSupportersSignIn(ctx echo.Context) error {
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/+xY3W7jNhN9FYHfd6ldZfsDLHSXpMXCaIsG67Y3gREw4tjmRiJVcpTWCPTuxZD6l2zL",
-	"dgJ0gd7JImc0Z4Zz5tAvLNFZrhUotCx+YQb+LMDijRYS3ItbneVc7ZZyoxZqofIC6W2iFYJyjzzPU5lw",
-	"lFpFX6xW9M4mW8g4PeVG52CwcgYZlyk94C4HFjOLRqoNK0OWc2v/0kZMLJahi0oaECy+r3x0LFZhbaEf",
-	"v0CCrCQTATYxMqewWFyjCDyMIPBAypDdGU02S9QGLkXX++QERlDiB45Aa2ttMo4sZoJehOO90l4nKJ+h",
-	"4+hR6xS4otWM/31TiA1gZ1kqhA0YtyzVoWWL3ODsSFBiCtNlOZr2KruBS69PuiWfyyLPtUEwX/mxanAM",
-	"D5ZzbnOt7EQX3XDx2bfZ52rPJdiN0cY9SYTMTmahesGN4bsxcO/gjC5qcQQNkDLsY/316SyMp4bSfCRk",
-	"W+ACfEaWgO9utX6SMOm9OQnk/taa9SuUI7Fm/Zt+AnX8xLVbZ+XemnVgOmleKASjeLoE8wzmR6ria8Sv",
-	"BewhFbCWb2AGLnLR7p8DrsYSeDCBQ9M7VF2eftWu+b+BNYvZ/6J2DkbeykbVR//gqRTOr4vL8Ypfmelg",
-	"lKLaPDyl+/pkOpEc+7N8FUqpouuTyiyYR6imcXwCXBsQqh7cwfT4aul0ND32EOoA71tR6iicS0mVpIY/",
-	"IbR+17bMZKFZOKQiAxxBPHAc6ZR3KLNJsTJDgj2I2RpMTPo4Ks0eHg9rs4PrTpzNj/GQOvNLDW/8ogWk",
-	"bHQuG/oY0twxfTu3QXrCd75RN83zrXrK+ASzrmKeb9ZT0vPNmqKdwDGDag6KZcd1pfAgKYzE3ZK60Nfw",
-	"sbBSgbXXBW5BYUUXLhbqxcQ3dsgUz8gZOn3ShpPLn2DnyUOqtR43c+0/uL5bUFC2yDJudixmrMVQb2Ih",
-	"ewZjveWH91cEXOegeC5ZzL59T69IkePWxe5GD1cSbGQdQ7kjqq0rGh1Uh2UhKEva4m2929MZCzuX292+",
-	"kda7/0YTl9+hsv/m6mq/r2pftE8SlyH77mT7iXlXhuz7OX4OacbugWHx/apbuyaDyDfWa7wqt2xFdhFp",
-	"Wfp81UH9YnwCJPXKzspcV5a/NcxPgEEVaQOUfnqMXVm0D2ctWs7COinj3gDzfha4X5W9hNSjgyLqJKXV",
-	"cSSF9zZgLxkndt74f5nygpT2rw3/ipTeOnUzndTuaYtepCgd0RVTaS6aLC+E40rDM0An1e4rTif+bBld",
-	"CtYVrGgKCMcqrhEkFPx/xRsW7/dcHCyeraX0vEnVKO8LRtXkX2pnpX3/dWPuuDp+QXvzgTW4y3RK1daG",
-	"iuV8kG/fMIVJWcy2iHkcRalOeLrVFuOPVx8/MDoKlZOh6qEpEYASuZYK215zw6MMh7vbCCZsOuGNLZux",
-	"O/WxZiSXq/KfAAAA///CdcTz1xcAAA==",
+	"H4sIAAAAAAAC/+xY227jNhN+FYH/f6ldZdstsNBd4rYLo+02WLe9CYyAEcc2NxapkqNsjUDvXgwl60jb",
+	"8iFFA/TOFjmj+eb4jZ5ZotNMK1BoWfzMDPyZg8UbLSS4BxOdZlxtZnKppmqqshzpaaIVgnI/eZatZcJR",
+	"ahV9sVrRM5usIOX0KzM6A4OVMki5XNMP3GTAYmbRSLVkRcgybu1XbYTnsAidVdKAYPFdpaMlMQ+3Evrh",
+	"CyTIChIRYBMjMzKLxVsUQQkjCEogRchujSaZGWoD56LrvNKDEZT4niPQ2UKblCOLmaAH4fCutNcJyido",
+	"KXrQeg1c0WnK/7rJxRKwdSwVwhKMO5Zq37FFbnC0JShxDf6wHHR75d3Aubd0uiWdszzLtEEwrzytahz9",
+	"xHLKbaaV9VTRDRefyzL7XN05B7sx2rhfEiG1Xi9UD7gxfDMEXio4oYoaHEENpAi7WH99PAnjsabULwnZ",
+	"CriA0iMzwDcTrR8leLXXmUDqJ9YsLhCOxJrFb/oR1OGMa66O8r01i8C03DxVCEbx9QzME5gfKIqXsF8L",
+	"2NFUwFq+hBG4SEVzfwy4LZagBBM4NJ2k+qTxR50r8bpxftIYOBgehFWvvAC2rNREP/9vYMFi9r+omfJR",
+	"KWaj6oUDXFvx+REN3gPE9fyLNrgRYP7gaymcXudgNwIu443wmEbZnXse59ifpb1gqLv9fxTMA1OhVnwE",
+	"XBsQqg7c3qB/tZNvMOh3zL4e3peafgNzzp1/xArLDKHz26ZkvIFmYb+bGuAI4p7jgFK+QZl6eeUItnwv",
+	"RtNl4dVxkEXfP+yn0XvPHY8eb+M+Il0e1X3jFy1gzQZ5WbePfps7tIqMLZDOjjJeqO3m8VKdJeYIsfZy",
+	"M16ss/SMF6uDdkSP6UWzFyw7jCuZB0luJG5mVIVlDB9yKxVYe53jChRW7cLZQrWYlIUdMsVTUoaOSjbm",
+	"ZPIn2JTNQ6qFHhbzVn9wfTslo2yeptxsWMxYg2F7iYXsCYwtJd+9vSLgOgPFM8li9u1bekTLE66c7W70",
+	"cCXBRtZ1KJei2rqgUaI6LFNBXtIWJ9vbZTtjYes7xGbXSOt8qog83yn6S9g3V1e7dVX3ol3bSxGy90fL",
+	"e+ZdEbLvxujZR+/bCcPiu3k7drUHkS9tSVMr37I5yUW0dtDrqwrqBuMjIC0a7CTPtTeol4b5ETCoLK2B",
+	"0t8SY5sW7cK5JS0nYfXSuBfAvLsL3M2LjkO2o4Msajml4XFEhXcWYMcZR1be8BNacYZLu2vDv8KlE8du",
+	"/E5tZ1v0LEUxJuWmwvVKw1NAR9Xuqp5O/bPp6FKwNmFFk0M4ZHE1ISHjT3Z7t8+9PyznX8jP9vVspb/u",
+	"TN/cl735P+LW/2qiG6ffM7G3Jux2QxlHAOqF5gwG4P2ofJLbd29xY1nA4b33xXlAb0VshaqJDQXL6SDd",
+	"ZcHkZs1itkLM4iha64SvV9pi/OHqwztGqVAp6ZNJGr4BKJFpqbCpNTeTi7B/u7HAI9MybyhZsxnfy2qm",
+	"U8yLvwMAAP//gJRPadkaAAA=",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

@@ -79,6 +79,24 @@ paths:
       requestBody:
         $ref: '#/components/requestBodies/ProjectStoreInput'
   '/projects/{id}':
+    get:
+      summary: Project Show
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      tags:
+        - projects
+      responses:
+        '200':
+          $ref: '#/components/responses/ProjectResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundErrorResponse'
+      operationId: get-projects-id
+      security:
+        - businessAuthentication: []
     put:
       summary: Project Update
       parameters:
@@ -296,6 +314,31 @@ components:
                 type: array
                 items:
                   $ref: '#/components/schemas/Project'
+    ProjectResponse:
+      description: Project Response
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - project
+            properties:
+              project:
+                $ref: '#/components/schemas/Project'
+    NotFoundErrorResponse:
+      description: Not Found Error Response
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - code
+              - message
+            properties:
+              code:
+                type: integer
+              message:
+                type: string
     InternalServerErrorResponse:
       description: Internal Server Error Response
       content:
