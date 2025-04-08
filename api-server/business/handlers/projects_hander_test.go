@@ -41,6 +41,11 @@ func (m *MockProjectService) Create(ctx context.Context, requestParams *business
 	return args.Get(0).(models.Project), args.Error(1), args.Error(2)
 }
 
+func (m *MockProjectService) Fetch(ctx context.Context, ID int) (project models.Project, error error) {
+    args := m.Called(ctx, ID)
+	return args.Get(0).(models.Project), args.Error(1)
+}
+
 func (m *MockProjectService) Update(ctx context.Context, requestParams *businessapi.ProjectStoreInput, companyID int) (project models.Project, validatorErrors error, error error) {
     args := m.Called(ctx, requestParams, companyID)
 	return args.Get(0).(models.Project), args.Error(1), args.Error(2)
@@ -290,6 +295,51 @@ func (s *TestProjectsHandlerSuite) TestPostProjectsCreate_BadRequest_Required() 
 		models.ProjectWhere.Title.EQ(title),
 	).Exists(ctx, DBCon)
 	assert.False(s.T(), exists)
+}
+
+func (s *TestProjectsHandlerSuite) TestGetProjectsId_StatusOk() {
+	company, cookieString := s.companySignIn()
+	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
+	project.Insert(ctx, DBCon, boil.Infer())
+	
+	result := testutil.NewRequest().Get("/projects/"+strconv.Itoa(project.ID)).WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).GoWithHTTPHandler(s.T(), e)
+
+	assert.Equal(s.T(), http.StatusOK, result.Code())
+
+	var res businessapi.PostProjects200JSONResponse
+	result.UnmarshalBodyToObject(&res)
+	assert.Equal(s.T(), project.Title, *res.Project.Title)
+	assert.Equal(s.T(), project.Description, *res.Project.Description)
+	assert.Equal(s.T(), project.StartDate.Format("2006-01-02"), res.Project.StartDate.Format("2006-01-02"))
+	assert.Equal(s.T(), project.EndDate.Format("2006-01-02"), res.Project.EndDate.Format("2006-01-02"))
+	assert.Equal(s.T(), project.MinBudget.Int, *res.Project.MinBudget)
+	assert.Equal(s.T(), project.MaxBudget.Int, *res.Project.MaxBudget)
+	assert.Equal(s.T(), project.IsActive, *res.Project.IsActive)
+}
+
+func (s *TestProjectsHandlerSuite) TestGetProjectsId_StatusNotFound() {
+	company, cookieString := s.companySignIn()
+	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
+	project.Insert(ctx, DBCon, boil.Infer())
+	
+	result := testutil.NewRequest().Get("/projects/"+strconv.Itoa(project.ID+1)).WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).GoWithHTTPHandler(s.T(), e)
+
+	assert.Equal(s.T(), http.StatusNotFound, result.Code())
+
+	var res businessapi.GetProjectsId404JSONResponse
+	result.UnmarshalBodyToObject(&res)
+	assert.Equal(s.T(), http.StatusNotFound, res.Code)
+}
+
+func (s *TestProjectsHandlerSuite) TestGetProjectsId_StatusUnauthorized() {
+	company := factories.CompanyFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.Company)
+	company.Insert(ctx, DBCon, boil.Infer())
+	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
+	project.Insert(ctx, DBCon, boil.Infer())
+	
+	result := testutil.NewRequest().Get("/projects/"+strconv.Itoa(project.ID)).WithHeader("Cookie", csrfTokenCookie).WithHeader(echo.HeaderXCSRFToken, csrfToken).GoWithHTTPHandler(s.T(), e)
+
+	assert.Equal(s.T(), http.StatusUnauthorized, result.Code())
 }
 
 func (s *TestProjectsHandlerSuite) TestPutProjectsId_StatusOk() {

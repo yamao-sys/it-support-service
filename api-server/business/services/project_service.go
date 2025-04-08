@@ -17,6 +17,7 @@ import (
 type ProjectService interface {
 	FetchLists(ctx context.Context, companyID int) (projects models.ProjectSlice, error error)
 	Create(ctx context.Context, requestParams *businessapi.ProjectStoreInput, companyID int) (project models.Project, validatorErrors error, error error)
+	Fetch(ctx context.Context, ID int) (project models.Project, error error)
 	Update(ctx context.Context, requestParams *businessapi.ProjectStoreInput, ID int) (project models.Project, validatorErrors error, error error)
 	MappingValidationErrorStruct(err error) businessapi.ProjectValidationError
 }
@@ -60,6 +61,15 @@ func (ps *projectService) Create(ctx context.Context, requestParams *businessapi
 	}
 
 	return project, nil, nil
+}
+
+func (ps *projectService) Fetch(ctx context.Context, ID int) (project models.Project, error error) {
+	fetchedProject, _ := models.Projects(qm.Where("id = ?", ID)).One(ctx, ps.db)
+	if fetchedProject == nil {
+		return models.Project{}, errors.New("not found")
+	}
+	
+	return *fetchedProject, nil
 }
 
 func (ps *projectService) Update(ctx context.Context, requestParams *businessapi.ProjectStoreInput, ID int) (project models.Project, validatorErrors error, error error) {
