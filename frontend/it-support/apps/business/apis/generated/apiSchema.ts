@@ -75,7 +75,8 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    get?: never;
+    /** Project Show */
+    get: operations["get-projects-id"];
     /** Project Update */
     put: operations["put-projects-id"];
     post?: never;
@@ -192,6 +193,29 @@ export interface components {
       content: {
         "application/json": {
           projects: components["schemas"]["Project"][];
+        };
+      };
+    };
+    /** @description Project Response */
+    ProjectResponse: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        "application/json": {
+          project: components["schemas"]["Project"];
+        };
+      };
+    };
+    /** @description Not Found Error Response */
+    NotFoundErrorResponse: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        "application/json": {
+          code: number;
+          message: string;
         };
       };
     };
@@ -315,6 +339,21 @@ export interface operations {
     responses: {
       200: components["responses"]["ProjectStoreResponse"];
       500: components["responses"]["InternalServerErrorResponse"];
+    };
+  };
+  "get-projects-id": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: components["responses"]["ProjectResponse"];
+      404: components["responses"]["NotFoundErrorResponse"];
     };
   };
   "put-projects-id": {
