@@ -4,6 +4,7 @@ import (
 	businessapi "apps/api/business"
 	models "apps/models/generated"
 	"apps/test/factories"
+	"errors"
 	"testing"
 	"time"
 
@@ -215,6 +216,42 @@ func (s *TestProjectServiceSuite) TestProjectCreate_BadRequest_Threshold() {
 	assert.ElementsMatch(s.T(), maxBudgetErrorMessages, *mappedValidationErrors.MaxBudget)
 
 	assert.Nil(s.T(), err)
+}
+
+func (s *TestProjectServiceSuite) TestProjectFetch_StatusOK() {
+	// NOTE: テスト用企業の作成
+	company := factories.CompanyFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.Company)
+	company.Insert(ctx, DBCon, boil.Infer())
+	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
+	project.Insert(ctx, DBCon, boil.Infer())
+	project.Reload(ctx, DBCon)
+
+	fetchedProduct, err := testProjectService.Fetch(ctx, project.ID)
+	
+	// NOTE: レスポンスのprojectの値の確認
+	assert.Equal(s.T(), project.ID, fetchedProduct.ID)
+	assert.Equal(s.T(), company.ID, fetchedProduct.CompanyID)
+	assert.Equal(s.T(), project.Title, fetchedProduct.Title)
+
+	assert.Nil(s.T(), err)
+}
+
+func (s *TestProjectServiceSuite) TestProjectFetch_NotFound() {
+	// NOTE: テスト用企業の作成
+	company := factories.CompanyFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.Company)
+	company.Insert(ctx, DBCon, boil.Infer())
+	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
+	project.Insert(ctx, DBCon, boil.Infer())
+	project.Reload(ctx, DBCon)
+
+	fetchedProduct, err := testProjectService.Fetch(ctx, project.ID+1)
+	
+	// NOTE: レスポンスのprojectの値の確認
+	assert.Equal(s.T(), 0, fetchedProduct.ID)
+	assert.Equal(s.T(), 0, fetchedProduct.CompanyID)
+	assert.Equal(s.T(), "", fetchedProduct.Title)
+
+	assert.Equal(s.T(), errors.New("not found"), err)
 }
 
 func (s *TestProjectServiceSuite) TestProjectUpdate_WithOnlyRequired_StatusOK() {
