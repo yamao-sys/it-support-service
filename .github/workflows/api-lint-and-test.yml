@@ -22,7 +22,6 @@ jobs:
         uses: actions/setup-go@v4
         id: setup-go-lint
         with:
-          go-version: '1.23'
           go-version-file: ./api-server/go.mod
           cache: true
           cache-dependency-path: ./api-server/go.sum
@@ -70,7 +69,6 @@ jobs:
         uses: actions/setup-go@v4
         id: setup-go-test
         with:
-          go-version: '1.23'
           go-version-file: ./api-server/go.mod
           cache: true
           cache-dependency-path: ./api-server/go.sum
