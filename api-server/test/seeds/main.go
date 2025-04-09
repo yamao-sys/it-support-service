@@ -38,10 +38,12 @@ func main() {
 	}
 
 	// NOTE: ログイン企業の案件の追加
-	emptyBudgetProject := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID, "MinBudget": null.Int{Int: 0, Valid: false}, "MaxBudget": null.Int{Int: 0, Valid: false}}).(*models.Project)
-	havingBudgetProject := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
+	emptyBudgetProject1 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID, "MinBudget": null.Int{Int: 0, Valid: false}, "MaxBudget": null.Int{Int: 0, Valid: false}}).(*models.Project)
+	havingBudgetProject1 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
+	emptyBudgetProject2 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID, "MinBudget": null.Int{Int: 0, Valid: false}, "MaxBudget": null.Int{Int: 0, Valid: false}, "IsActive": false}).(*models.Project)
+	havingBudgetProject2 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID, "IsActive": false}).(*models.Project)
 	var projects models.ProjectSlice
-	projects = append(projects, emptyBudgetProject, havingBudgetProject)
+	projects = append(projects, emptyBudgetProject1, havingBudgetProject1, emptyBudgetProject2, havingBudgetProject2)
 	if _, err := projects.InsertAll(context.Background(), dbCon, boil.Infer()); err != nil {
 		fmt.Println("failed to create projects", err)
 	}
