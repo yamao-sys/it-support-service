@@ -9,6 +9,7 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
+	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 )
 
@@ -34,6 +35,15 @@ func main() {
 	company := factories.CompanyFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.Company)
 	if err := company.Insert(context.Background(), dbCon, boil.Infer()); err != nil {
 		fmt.Println("failed to create test company", err)
+	}
+
+	// NOTE: ログイン企業の案件の追加
+	emptyBudgetProject := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID, "MinBudget": null.Int{Int: 0, Valid: false}, "MaxBudget": null.Int{Int: 0, Valid: false}}).(*models.Project)
+	havingBudgetProject := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
+	var projects models.ProjectSlice
+	projects = append(projects, emptyBudgetProject, havingBudgetProject)
+	if _, err := projects.InsertAll(context.Background(), dbCon, boil.Infer()); err != nil {
+		fmt.Println("failed to create projects", err)
 	}
 }
 
