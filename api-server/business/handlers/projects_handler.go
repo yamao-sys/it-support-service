@@ -34,23 +34,35 @@ func (ph *projectsHandler) GetProjects(ctx context.Context, request businessapi.
 		res := businessapi.InternalServerErrorResponseJSONResponse{Code: http.StatusInternalServerError}
 		return businessapi.GetProjects500JSONResponse{InternalServerErrorResponseJSONResponse: res}, err
 	}
-	var resProducts []businessapi.Project
+	var resProjects []businessapi.Project
 	for _, project := range projects { 
+		resProject := businessapi.Project{}
+
 		projectID := strconv.Itoa(project.ID)
-		resProducts = append(resProducts, businessapi.Project{
-			Id: &projectID,
-			Title: &project.Title,
-			Description: &project.Description,
-			StartDate: &openapi_types.Date{Time: project.StartDate},
-			EndDate: &openapi_types.Date{Time: project.EndDate},
-			MinBudget: &project.MinBudget.Int,
-			MaxBudget: &project.MaxBudget.Int,
-			IsActive: &project.IsActive,
-			CreatedAt: &project.CreatedAt,
-		})
+		resProject.Id = &projectID
+		resProject.Title = &project.Title
+		resProject.Description = &project.Description
+		resProject.StartDate = &openapi_types.Date{Time: project.StartDate}
+		resProject.EndDate = &openapi_types.Date{Time: project.EndDate}
+		minBudget := &project.MinBudget.Int
+		if *minBudget != 0 {
+			resProject.MinBudget = minBudget
+		} else {
+			resProject.MinBudget = nil
+		}
+		maxBudget := &project.MaxBudget.Int
+		if *maxBudget != 0 {
+			resProject.MaxBudget = maxBudget
+		} else {
+			resProject.MaxBudget = nil
+		}
+		resProject.IsActive = &project.IsActive
+		resProject.CreatedAt = &project.CreatedAt
+
+		resProjects = append(resProjects, resProject)
 	}
 	return businessapi.GetProjects200JSONResponse{ProjectsListResponseJSONResponse: businessapi.ProjectsListResponseJSONResponse{
-		Projects: resProducts,
+		Projects: resProjects,
 	}}, nil
 }
 
@@ -102,19 +114,27 @@ func (ph *projectsHandler) GetProjectsId(ctx context.Context, request businessap
 		return businessapi.GetProjectsId404JSONResponse{NotFoundErrorResponseJSONResponse: res}, nil
 	}
 
+	resProject := businessapi.Project{}
 	projectIDStr := strconv.Itoa(project.ID)
-	startDate := openapi_types.Date{Time: project.StartDate}
-	endDate := openapi_types.Date{Time: project.EndDate}
-	resProject := businessapi.Project{
-		Id: &projectIDStr,
-		Title: &project.Title,
-		Description: &project.Description,
-		StartDate: &startDate,
-		EndDate: &endDate,
-		MinBudget: &project.MinBudget.Int,
-		MaxBudget: &project.MaxBudget.Int,
-		IsActive: &project.IsActive,
+	resProject.Id = &projectIDStr
+	resProject.Title = &project.Title
+	resProject.Description = &project.Description
+	resProject.StartDate = &openapi_types.Date{Time: project.StartDate}
+	resProject.EndDate = &openapi_types.Date{Time: project.EndDate}
+	minBudget := &project.MinBudget.Int
+	if *minBudget != 0 {
+		resProject.MinBudget = minBudget
+	} else {
+		resProject.MinBudget = nil
 	}
+	maxBudget := &project.MaxBudget.Int
+	if *maxBudget != 0 {
+		resProject.MaxBudget = maxBudget
+	} else {
+		resProject.MaxBudget = nil
+	}
+	resProject.IsActive = &project.IsActive
+	resProject.CreatedAt = &project.CreatedAt
 	res := businessapi.ProjectResponseJSONResponse{Project: resProject}
 	return businessapi.GetProjectsId200JSONResponse{ProjectResponseJSONResponse: res}, nil
 }
