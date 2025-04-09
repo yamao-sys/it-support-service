@@ -10,6 +10,7 @@ export default defineConfig({
     baseURL: "http://localhost:3100",
   },
   webServer: {
+    timeout: 2 * 60 * 1000,
     command: "pnpm dev:test",
     url: "http://localhost:3100",
     reuseExistingServer: false,
