@@ -1,10 +1,10 @@
-import ProjectStoreForm from "@/app/projects/_components/ProjectStoreForm";
 import { FC } from "react";
+import ProjectNewContainer from "../ProjectNewContainer";
 
 const ProjectNewTemplate: FC = () => {
   return (
     <>
-      <ProjectStoreForm />
+      <ProjectNewContainer />
     </>
   );
 };

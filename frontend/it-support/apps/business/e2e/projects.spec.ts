@@ -25,12 +25,12 @@ test.describe("/projects", () => {
       await page.locator('[aria-label="Choose Monday, April 7th, 2025"]').click();
       await page.click('input[name="endDate"]');
       await page.locator('[aria-label="Choose Tuesday, April 8th, 2025"]').click();
-      await page.locator('label[for="active"]').click();
+      await page.locator('label:has-text("公開フラグ")').click();
 
       await page.getByRole("button", { name: "保存する" }).click();
 
       page.on("dialog", async (dialog) => {
-        expect(dialog.message()).toContain("案件を更新しました!");
+        expect(dialog.message()).toContain("案件を追加しました!");
         await dialog.accept();
       });
       await page.waitForURL("/");
@@ -62,12 +62,12 @@ test.describe("/projects", () => {
       await page.locator('[aria-label="Choose Tuesday, April 8th, 2025"]').click();
       await page.getByRole("spinbutton", { name: "予算(下限)" }).fill("100000");
       await page.getByRole("spinbutton", { name: "予算(上限)" }).fill("100001");
-      await page.locator('label[for="active"]').click();
+      await page.locator('label:has-text("公開フラグ")').click();
 
       await page.getByRole("button", { name: "保存する" }).click();
 
       page.on("dialog", async (dialog) => {
-        expect(dialog.message()).toContain("案件を更新しました!");
+        expect(dialog.message()).toContain("案件を追加しました!");
         await dialog.accept();
       });
       await page.waitForURL("/");
@@ -97,7 +97,7 @@ test.describe("/projects", () => {
       await page.locator('[aria-label="Choose Tuesday, April 8th, 2025"]').click();
       await page.click('input[name="endDate"]');
       await page.locator('[aria-label="Choose Monday, April 7th, 2025"]').click();
-      await page.locator('label[for="active"]').click();
+      await page.locator('label:has-text("公開フラグ")').click();
 
       await page.getByRole("button", { name: "保存する" }).click();
 
@@ -114,7 +114,7 @@ test.describe("/projects", () => {
       await page.getByRole("button", { name: "保存する" }).click();
 
       page.on("dialog", async (dialog) => {
-        expect(dialog.message()).toContain("案件を更新しました!");
+        expect(dialog.message()).toContain("案件を追加しました!");
         await dialog.accept();
       });
       await page.waitForURL("/");
@@ -146,7 +146,7 @@ test.describe("/projects", () => {
       await page.locator('[aria-label="Choose Tuesday, April 8th, 2025"]').click();
       await page.getByRole("spinbutton", { name: "予算(下限)" }).fill("100001");
       await page.getByRole("spinbutton", { name: "予算(上限)" }).fill("100000");
-      await page.locator('label[for="active"]').click();
+      await page.locator('label:has-text("公開フラグ")').click();
 
       await page.getByRole("button", { name: "保存する" }).click();
 
@@ -161,7 +161,7 @@ test.describe("/projects", () => {
       await page.getByRole("button", { name: "保存する" }).click();
 
       page.on("dialog", async (dialog) => {
-        expect(dialog.message()).toContain("案件を更新しました!");
+        expect(dialog.message()).toContain("案件を追加しました!");
         await dialog.accept();
       });
       await page.waitForURL("/");

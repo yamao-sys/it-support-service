@@ -1,6 +1,6 @@
 import { FC } from "react";
-import ProjectStoreForm from "../ProjectStoreForm";
 import { getProject } from "@/apis/projects.api";
+import ProjectEditContainer from "../ProjectEditContainer";
 
 type Props = {
   projectId: number;
@@ -11,7 +11,7 @@ const ProjectEditTemplate: FC<Props> = async ({ projectId }: Props) => {
 
   return (
     <>
-      <ProjectStoreForm project={project} />
+      <ProjectEditContainer project={project} />
     </>
   );
 };
