@@ -13,7 +13,7 @@ const INITIAL_VALIDATION_ERRORS = {
 };
 
 export const useProjectStore = (doStoreProjectInput: ProjectStoreInput) => {
-  const { register, control, handleSubmit } = useForm<ProjectStoreInput>({
+  const { control, handleSubmit } = useForm<ProjectStoreInput>({
     defaultValues: doStoreProjectInput,
   });
 
@@ -21,7 +21,6 @@ export const useProjectStore = (doStoreProjectInput: ProjectStoreInput) => {
     useState<ProjectValidationError>(INITIAL_VALIDATION_ERRORS);
 
   return {
-    register,
     control,
     handleSubmit,
     validationErrors,

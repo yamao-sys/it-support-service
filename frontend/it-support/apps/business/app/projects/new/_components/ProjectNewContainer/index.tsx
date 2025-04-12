@@ -10,7 +10,7 @@ import { FC } from "react";
 const ProjectNewContainer: FC = () => {
   // NOTE: booleanはControlで制御する上で初期値が要るので設定
   const doCreateProjectInput: ProjectStoreInput = { isActive: true };
-  const { register, control, handleSubmit, validationErrors, setValidationErrors } =
+  const { control, handleSubmit, validationErrors, setValidationErrors } =
     useProjectStore(doCreateProjectInput);
 
   const router = useRouter();
@@ -28,12 +28,7 @@ const ProjectNewContainer: FC = () => {
 
   return (
     <>
-      <ProjectStoreForm
-        register={register}
-        control={control}
-        onSubmit={onSubmit}
-        validationErrors={validationErrors}
-      />
+      <ProjectStoreForm control={control} onSubmit={onSubmit} validationErrors={validationErrors} />
     </>
   );
 };

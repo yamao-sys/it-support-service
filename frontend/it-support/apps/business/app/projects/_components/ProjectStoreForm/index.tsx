@@ -2,7 +2,7 @@
 
 import { ProjectStoreInput, ProjectValidationError } from "@/types";
 import { FC } from "react";
-import { Control, Controller, UseFormRegister } from "react-hook-form";
+import { Control, Controller } from "react-hook-form";
 import BaseFormInput from "@repo/ui/BaseFormInput";
 import BaseButton from "@repo/ui/BaseButton";
 import BaseFormTextarea from "@repo/ui/BaseFormTextarea";
@@ -10,13 +10,12 @@ import BaseFormDatePicker from "@repo/ui/BaseFormDatePicker";
 import BaseFormSlider from "@repo/ui/BaseFormSlider";
 
 type Props = {
-  register: UseFormRegister<ProjectStoreInput>;
   control: Control<ProjectStoreInput>;
   onSubmit: (e?: React.BaseSyntheticEvent) => Promise<void>;
   validationErrors: ProjectValidationError;
 };
 
-const ProjectStoreForm: FC<Props> = ({ register, control, onSubmit, validationErrors }: Props) => {
+const ProjectStoreForm: FC<Props> = ({ control, onSubmit, validationErrors }: Props) => {
   return (
     <>
       <form onSubmit={onSubmit}>
