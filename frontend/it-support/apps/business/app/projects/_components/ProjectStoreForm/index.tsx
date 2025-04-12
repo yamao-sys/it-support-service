@@ -3,11 +3,11 @@
 import { ProjectStoreInput, ProjectValidationError } from "@/types";
 import { FC } from "react";
 import { Control, Controller } from "react-hook-form";
-import BaseFormInput from "@repo/ui/BaseFormInput";
 import BaseButton from "@repo/ui/BaseButton";
 import BaseFormTextarea from "@repo/ui/BaseFormTextarea";
 import BaseFormDatePicker from "@repo/ui/BaseFormDatePicker";
 import BaseFormSlider from "@repo/ui/BaseFormSlider";
+import BaseControlFormInput from "@repo/ui/BaseControlFormInput";
 
 type Props = {
   control: Control<ProjectStoreInput>;
@@ -20,19 +20,12 @@ const ProjectStoreForm: FC<Props> = ({ control, onSubmit, validationErrors }: Pr
     <>
       <form onSubmit={onSubmit}>
         <div className='mt-8'>
-          <Controller
+          <BaseControlFormInput
+            id='title'
+            label='案件タイトル'
             control={control}
             name='title'
-            render={({ field }) => (
-              <BaseFormInput
-                id='title'
-                label='案件タイトル'
-                type='text'
-                {...field}
-                value={field.value ?? ""}
-                validationErrorMessages={validationErrors.title ?? []}
-              />
-            )}
+            validationErrors={validationErrors.title ?? []}
           />
         </div>
 
@@ -75,35 +68,23 @@ const ProjectStoreForm: FC<Props> = ({ control, onSubmit, validationErrors }: Pr
 
         <div className='mt-8 flex items-between'>
           <div className='mr-4 w-1/3'>
-            <Controller
+            <BaseControlFormInput
+              id='min-budget'
+              type='number'
+              label='予算(下限)'
               control={control}
               name='minBudget'
-              render={({ field }) => (
-                <BaseFormInput
-                  id='minBudget'
-                  label='予算(下限)'
-                  type='number'
-                  {...field}
-                  value={field.value ?? ""}
-                  validationErrorMessages={validationErrors.minBudget ?? []}
-                />
-              )}
+              validationErrors={validationErrors.minBudget ?? []}
             />
           </div>
           <div className='w-1/3'>
-            <Controller
+            <BaseControlFormInput
+              id='max-budget'
+              type='number'
+              label='予算(上限)'
               control={control}
               name='maxBudget'
-              render={({ field }) => (
-                <BaseFormInput
-                  id='maxBudget'
-                  label='予算(上限)'
-                  type='number'
-                  {...field}
-                  value={field.value ?? ""}
-                  validationErrorMessages={validationErrors.maxBudget ?? []}
-                />
-              )}
+              validationErrors={validationErrors.maxBudget ?? []}
             />
           </div>
         </div>
