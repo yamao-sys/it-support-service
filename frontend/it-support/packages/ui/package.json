@@ -12,7 +12,9 @@
     "./BaseContainer": "./src/BaseContainer/index.tsx",
     "./BaseFormInput": "./src/BaseFormInput/index.tsx",
     "./BaseFormTextarea": "./src/BaseFormTextarea/index.tsx",
-    "./BaseFormDatePicker": "./src/BaseFormDatePicker/index.tsx"
+    "./BaseFormDatePicker": "./src/BaseFormDatePicker/index.tsx",
+    "./BaseSlider": "./src/BaseSlider/index.tsx",
+    "./BaseFormSlider": "./src/BaseFormSlider/index.tsx"
   },
   "scripts": {
     "lint": "eslint . --max-warnings 0",
