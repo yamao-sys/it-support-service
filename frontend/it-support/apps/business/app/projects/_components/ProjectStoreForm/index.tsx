@@ -20,19 +20,13 @@ const ProjectStoreForm: FC<Props> = ({ control, onSubmit, validationErrors }: Pr
     <>
       <form onSubmit={onSubmit}>
         <div className='mt-8'>
-          <Controller
+          <BaseFormInput
+            id='title'
+            label='案件タイトル'
+            type='text'
             control={control}
             name='title'
-            render={({ field }) => (
-              <BaseFormInput
-                id='title'
-                label='案件タイトル'
-                type='text'
-                {...field}
-                value={field.value ?? ""}
-                validationErrorMessages={validationErrors.title ?? []}
-              />
-            )}
+            validationErrorMessages={validationErrors.title ?? []}
           />
         </div>
 
@@ -75,35 +69,23 @@ const ProjectStoreForm: FC<Props> = ({ control, onSubmit, validationErrors }: Pr
 
         <div className='mt-8 flex items-between'>
           <div className='mr-4 w-1/3'>
-            <Controller
+            <BaseFormInput
+              id='min-budget'
+              label='予算(下限)'
+              type='number'
               control={control}
               name='minBudget'
-              render={({ field }) => (
-                <BaseFormInput
-                  id='minBudget'
-                  label='予算(下限)'
-                  type='number'
-                  {...field}
-                  value={field.value ?? ""}
-                  validationErrorMessages={validationErrors.minBudget ?? []}
-                />
-              )}
+              validationErrorMessages={validationErrors.minBudget ?? []}
             />
           </div>
           <div className='w-1/3'>
-            <Controller
+            <BaseFormInput
+              id='max-budget'
+              label='予算(上限)'
+              type='number'
               control={control}
               name='maxBudget'
-              render={({ field }) => (
-                <BaseFormInput
-                  id='maxBudget'
-                  label='予算(上限)'
-                  type='number'
-                  {...field}
-                  value={field.value ?? ""}
-                  validationErrorMessages={validationErrors.maxBudget ?? []}
-                />
-              )}
+              validationErrorMessages={validationErrors.maxBudget ?? []}
             />
           </div>
         </div>
