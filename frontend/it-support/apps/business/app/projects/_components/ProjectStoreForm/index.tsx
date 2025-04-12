@@ -6,7 +6,7 @@ import { Control, Controller, UseFormRegister } from "react-hook-form";
 import BaseFormInput from "@repo/ui/BaseFormInput";
 import BaseButton from "@repo/ui/BaseButton";
 import BaseFormTextarea from "@repo/ui/BaseFormTextarea";
-import ReactDatePicker from "react-datepicker";
+import BaseFormDatePicker from "@repo/ui/BaseFormDatePicker";
 
 type Props = {
   register: UseFormRegister<ProjectStoreInput>;
@@ -54,62 +54,20 @@ const ProjectStoreForm: FC<Props> = ({ register, control, onSubmit, validationEr
 
         <div className='mt-8 flex items-between'>
           <div className='mr-4 w-1/3'>
-            <label
-              htmlFor='start-date'
-              className='block mb-2 text-sm font-medium text-gray-900 dark:text-white text-left'
-            >
-              <span className='font-bold'>案件開始日</span>
-            </label>
-            <Controller
+            <BaseFormDatePicker
+              label='案件開始日'
               control={control}
               name='startDate'
-              render={({ field: { value, ...fieldProps } }) => (
-                <ReactDatePicker
-                  {...fieldProps}
-                  dateFormat='yyyy-MM-dd'
-                  className='w-full px-3 py-2.5 focus-visible:outline-none bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'
-                  selected={value}
-                />
-              )}
+              validationErrors={validationErrors.startDate ?? []}
             />
-            {!!validationErrors.startDate?.length && (
-              <div className='w-full pt-5 text-left'>
-                {validationErrors.startDate.map((message, i) => (
-                  <p key={i} className='text-red-400'>
-                    {message}
-                  </p>
-                ))}
-              </div>
-            )}
           </div>
           <div className='w-1/3'>
-            <label
-              htmlFor='end-date'
-              className='block mb-2 text-sm font-medium text-gray-900 dark:text-white text-left'
-            >
-              <span className='font-bold'>案件終了日</span>
-            </label>
-            <Controller
+            <BaseFormDatePicker
+              label='案件終了日'
               control={control}
               name='endDate'
-              render={({ field: { value, ...fieldProps } }) => (
-                <ReactDatePicker
-                  {...fieldProps}
-                  dateFormat='yyyy-MM-dd'
-                  className='w-full px-3 py-2.5 focus-visible:outline-none bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'
-                  selected={value}
-                />
-              )}
+              validationErrors={validationErrors.endDate ?? []}
             />
-            {!!validationErrors.endDate?.length && (
-              <div className='w-full pt-5 text-left'>
-                {validationErrors.endDate.map((message, i) => (
-                  <p key={i} className='text-red-400'>
-                    {message}
-                  </p>
-                ))}
-              </div>
-            )}
           </div>
         </div>
 
