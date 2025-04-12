@@ -25,8 +25,6 @@ export async function postProjectCreate(input: ProjectStoreInput) {
           if (value) {
             reqBody[key] = Number(value);
           }
-        } else if (["isActive"].includes(key)) {
-          reqBody[key] = value === "1" ? true : false;
         } else {
           reqBody[key] = value;
         }

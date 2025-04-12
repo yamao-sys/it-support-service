@@ -21,7 +21,7 @@ const ProjectEditContainer: FC<Props> = ({ project }: Props) => {
     maxBudget: project.max_budget,
     isActive: project.isActive,
   };
-  const { register, control, handleSubmit, validationErrors, setValidationErrors } =
+  const { control, handleSubmit, validationErrors, setValidationErrors } =
     useProjectStore(doUpdateProjectInput);
 
   const router = useRouter();
@@ -39,12 +39,7 @@ const ProjectEditContainer: FC<Props> = ({ project }: Props) => {
 
   return (
     <>
-      <ProjectStoreForm
-        register={register}
-        control={control}
-        onSubmit={onSubmit}
-        validationErrors={validationErrors}
-      />
+      <ProjectStoreForm control={control} onSubmit={onSubmit} validationErrors={validationErrors} />
     </>
   );
 };

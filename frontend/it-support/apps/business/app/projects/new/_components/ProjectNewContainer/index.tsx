@@ -8,8 +8,9 @@ import { useRouter } from "next/navigation";
 import { FC } from "react";
 
 const ProjectNewContainer: FC = () => {
-  const doCreateProjectInput: ProjectStoreInput = {};
-  const { register, control, handleSubmit, validationErrors, setValidationErrors } =
+  // NOTE: booleanはControlで制御する上で初期値が要るので設定
+  const doCreateProjectInput: ProjectStoreInput = { isActive: true };
+  const { control, handleSubmit, validationErrors, setValidationErrors } =
     useProjectStore(doCreateProjectInput);
 
   const router = useRouter();
@@ -27,12 +28,7 @@ const ProjectNewContainer: FC = () => {
 
   return (
     <>
-      <ProjectStoreForm
-        register={register}
-        control={control}
-        onSubmit={onSubmit}
-        validationErrors={validationErrors}
-      />
+      <ProjectStoreForm control={control} onSubmit={onSubmit} validationErrors={validationErrors} />
     </>
   );
 };
