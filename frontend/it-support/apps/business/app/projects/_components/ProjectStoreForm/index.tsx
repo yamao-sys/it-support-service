@@ -55,6 +55,7 @@ const ProjectStoreForm: FC<Props> = ({ control, onSubmit, validationErrors }: Pr
         <div className='mt-8 flex items-between'>
           <div className='mr-4 w-1/3'>
             <BaseFormDatePicker
+              id='start-date'
               label='案件開始日'
               control={control}
               name='startDate'
@@ -63,6 +64,7 @@ const ProjectStoreForm: FC<Props> = ({ control, onSubmit, validationErrors }: Pr
           </div>
           <div className='w-1/3'>
             <BaseFormDatePicker
+              id='end-date'
               label='案件終了日'
               control={control}
               name='endDate'
