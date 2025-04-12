@@ -15,7 +15,8 @@
     "./BaseFormDatePicker": "./src/BaseFormDatePicker/index.tsx",
     "./BaseSlider": "./src/BaseSlider/index.tsx",
     "./BaseFormSlider": "./src/BaseFormSlider/index.tsx",
-    "./BaseControlFormInput": "./src/BaseControlFormInput/index.tsx"
+    "./BaseControlFormInput": "./src/BaseControlFormInput/index.tsx",
+    "./BaseControlFormTextarea": "./src/BaseControlFormTextarea/index.tsx"
   },
   "scripts": {
     "lint": "eslint . --max-warnings 0",

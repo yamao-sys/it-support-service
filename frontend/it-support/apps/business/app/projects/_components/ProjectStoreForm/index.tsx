@@ -2,12 +2,12 @@
 
 import { ProjectStoreInput, ProjectValidationError } from "@/types";
 import { FC } from "react";
-import { Control, Controller } from "react-hook-form";
+import { Control } from "react-hook-form";
 import BaseButton from "@repo/ui/BaseButton";
-import BaseFormTextarea from "@repo/ui/BaseFormTextarea";
 import BaseFormDatePicker from "@repo/ui/BaseFormDatePicker";
 import BaseFormSlider from "@repo/ui/BaseFormSlider";
 import BaseControlFormInput from "@repo/ui/BaseControlFormInput";
+import BaseControlFormTextarea from "@repo/ui/BaseControlFormTextarea";
 
 type Props = {
   control: Control<ProjectStoreInput>;
@@ -30,18 +30,12 @@ const ProjectStoreForm: FC<Props> = ({ control, onSubmit, validationErrors }: Pr
         </div>
 
         <div className='mt-8'>
-          <Controller
+          <BaseControlFormTextarea
+            id='description'
+            label='案件概要'
             control={control}
             name='description'
-            render={({ field }) => (
-              <BaseFormTextarea
-                id='description'
-                label='案件概要'
-                {...field}
-                value={field.value ?? ""}
-                validationErrorMessages={validationErrors.description ?? []}
-              />
-            )}
+            validationErrors={validationErrors.description ?? []}
           />
         </div>
 
