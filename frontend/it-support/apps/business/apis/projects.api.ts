@@ -39,6 +39,17 @@ export async function postProjectCreate(input: ProjectStoreInput) {
   return data.errors;
 }
 
+export async function getProjects() {
+  const { data, response } = await client.GET("/projects", {
+    ...(await getRequestHeaders()),
+  });
+  if (data === undefined || response.status === 404) {
+    throw Error("Not Found Error");
+  }
+
+  return data.projects;
+}
+
 export async function getProject(id: number) {
   const { data, response } = await client.GET("/projects/{id}", {
     ...(await getRequestHeaders()),
