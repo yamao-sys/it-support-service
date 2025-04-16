@@ -14,8 +14,10 @@ import (
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
+const perPage = 5
+
 type ProjectService interface {
-	FetchLists(ctx context.Context, companyID int) (projects models.ProjectSlice, error error)
+	FetchLists(ctx context.Context, companyID int, pageToken int) (projects models.ProjectSlice, nextPageToken int, error error)
 	Create(ctx context.Context, requestParams *businessapi.ProjectStoreInput, companyID int) (project models.Project, validatorErrors error, error error)
 	Fetch(ctx context.Context, ID int) (project models.Project, error error)
 	Update(ctx context.Context, requestParams *businessapi.ProjectStoreInput, ID int) (project models.Project, validatorErrors error, error error)
@@ -30,8 +32,27 @@ func NewProjectService(db *sql.DB) ProjectService {
 	return &projectService{db}
 }
 
-func (ps *projectService) FetchLists(ctx context.Context, companyID int) (projects models.ProjectSlice, error error) {
-	return models.Projects(qm.Where("company_id = ?", companyID)).All(ctx, ps.db)
+func (ps *projectService) FetchLists(ctx context.Context, companyID int, pageToken int) (projects models.ProjectSlice, nextPageToken int, error error) {
+	var conditions []qm.QueryMod
+	conditions = append(conditions, qm.Where("company_id = ?", companyID))
+	if pageToken > 0 {
+		conditions = append(conditions, qm.Where("id >= ?", pageToken))
+	}
+	// NOTE: nextPageTokenの検出のため、1ページの件数+1を取得
+	conditions = append(conditions, qm.Limit(perPage + 1))
+
+	fetchedProjects, err := models.Projects(conditions...).All(ctx, ps.db)
+	if err != nil {
+		return models.ProjectSlice{}, 0, err
+	}
+
+	// NOTE: nextPageTokenのprojectをsliceから切り出し
+	if len(fetchedProjects) == perPage + 1 {
+		nextPageToken := fetchedProjects[len(fetchedProjects)-1].ID
+		return fetchedProjects[:len(fetchedProjects)-1], nextPageToken, nil
+	}
+	
+	return fetchedProjects, 0, nil
 }
 
 func (ps *projectService) Create(ctx context.Context, requestParams *businessapi.ProjectStoreInput, companyID int) (project models.Project, validatorErrors error, error error) {

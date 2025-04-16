@@ -64,6 +64,11 @@ paths:
       operationId: get-projects
       security:
         - businessAuthentication: []
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: pageToken
     post:
       summary: Project Create
       tags:
@@ -309,11 +314,14 @@ components:
             type: object
             required:
               - projects
+              - nextPageToken
             properties:
               projects:
                 type: array
                 items:
                   $ref: '#/components/schemas/Project'
+              nextPageToken:
+                type: string
     ProjectResponse:
       description: Project Response
       content:

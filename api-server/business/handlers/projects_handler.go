@@ -28,8 +28,12 @@ func NewProjectsHandler(projectService businessservices.ProjectService) Projects
 
 func (ph *projectsHandler) GetProjects(ctx context.Context, request businessapi.GetProjectsRequestObject) (businessapi.GetProjectsResponseObject, error) {
 	companyID, _ := businesshelpers.ExtractCompanyID(ctx)
+	var pageToken int
+	if request.Params.PageToken != nil {
+		pageToken, _ = strconv.Atoi(*request.Params.PageToken)
+	}
 
-	projects, err := ph.projectService.FetchLists(ctx, companyID)
+	projects, nextPageToken, err := ph.projectService.FetchLists(ctx, companyID, pageToken)
 	if err != nil {
 		res := businessapi.InternalServerErrorResponseJSONResponse{Code: http.StatusInternalServerError}
 		return businessapi.GetProjects500JSONResponse{InternalServerErrorResponseJSONResponse: res}, err
@@ -63,6 +67,7 @@ func (ph *projectsHandler) GetProjects(ctx context.Context, request businessapi.
 	}
 	return businessapi.GetProjects200JSONResponse{ProjectsListResponseJSONResponse: businessapi.ProjectsListResponseJSONResponse{
 		Projects: resProjects,
+		NextPageToken: strconv.Itoa(nextPageToken),
 	}}, nil
 }
 

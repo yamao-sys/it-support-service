@@ -92,7 +92,8 @@ type ProjectStoreResponse struct {
 
 // ProjectsListResponse defines model for ProjectsListResponse.
 type ProjectsListResponse struct {
-	Projects []Project `json:"projects"`
+	NextPageToken string    `json:"nextPageToken"`
+	Projects      []Project `json:"projects"`
 }
 
 // SupporterSignInBadRequestResponse defines model for SupporterSignInBadRequestResponse.
@@ -130,6 +131,11 @@ type SupporterSignInInput struct {
 type PostCompaniesSignInJSONBody struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
+}
+
+// GetProjectsParams defines parameters for GetProjects.
+type GetProjectsParams struct {
+	PageToken *string `form:"pageToken,omitempty" json:"pageToken,omitempty"`
 }
 
 // PostProjectsJSONBody defines parameters for PostProjects.
@@ -182,7 +188,7 @@ type ServerInterface interface {
 	GetCsrf(ctx echo.Context) error
 	// Project List
 	// (GET /projects)
-	GetProjects(ctx echo.Context) error
+	GetProjects(ctx echo.Context, params GetProjectsParams) error
 	// Project Create
 	// (POST /projects)
 	PostProjects(ctx echo.Context) error
@@ -226,8 +232,17 @@ func (w *ServerInterfaceWrapper) GetProjects(ctx echo.Context) error {
 
 	ctx.Set(BusinessAuthenticationScopes, []string{})
 
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetProjectsParams
+	// ------------- Optional query parameter "pageToken" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "pageToken", ctx.QueryParams(), &params.PageToken)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter pageToken: %s", err))
+	}
+
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.GetProjects(ctx)
+	err = w.Handler.GetProjects(ctx, params)
 	return err
 }
 
@@ -365,7 +380,8 @@ type ProjectStoreResponseJSONResponse struct {
 }
 
 type ProjectsListResponseJSONResponse struct {
-	Projects []Project `json:"projects"`
+	NextPageToken string    `json:"nextPageToken"`
+	Projects      []Project `json:"projects"`
 }
 
 type SupporterSignInBadRequestResponseJSONResponse struct {
@@ -451,6 +467,7 @@ func (response GetCsrf500JSONResponse) VisitGetCsrfResponse(w http.ResponseWrite
 }
 
 type GetProjectsRequestObject struct {
+	Params GetProjectsParams
 }
 
 type GetProjectsResponseObject interface {
@@ -700,8 +717,10 @@ func (sh *strictHandler) GetCsrf(ctx echo.Context) error {
 }
 
 // GetProjects operation middleware
-func (sh *strictHandler) GetProjects(ctx echo.Context) error {
+func (sh *strictHandler) GetProjects(ctx echo.Context, params GetProjectsParams) error {
 	var request GetProjectsRequestObject
+
+	request.Params = params
 
 	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
 		return sh.ssi.GetProjects(ctx.Request().Context(), request.(GetProjectsRequestObject))
@@ -839,26 +858,26 @@ func (sh *strictHandler) PostSupportersSignIn(ctx echo.Context) error {
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/+xY227jNhN+FYH/f6ldZdstsNBd4rYLo+02WLe9CYyAEcc2NxapkqNsjUDvXgwl60jb",
-	"8iFFA/TOFjmj+eb4jZ5ZotNMK1BoWfzMDPyZg8UbLSS4BxOdZlxtZnKppmqqshzpaaIVgnI/eZatZcJR",
-	"ahV9sVrRM5usIOX0KzM6A4OVMki5XNMP3GTAYmbRSLVkRcgybu1XbYTnsAidVdKAYPFdpaMlMQ+3Evrh",
-	"CyTIChIRYBMjMzKLxVsUQQkjCEogRchujSaZGWoD56LrvNKDEZT4niPQ2UKblCOLmaAH4fCutNcJyido",
-	"KXrQeg1c0WnK/7rJxRKwdSwVwhKMO5Zq37FFbnC0JShxDf6wHHR75d3Aubd0uiWdszzLtEEwrzytahz9",
-	"xHLKbaaV9VTRDRefyzL7XN05B7sx2rhfEiG1Xi9UD7gxfDMEXio4oYoaHEENpAi7WH99PAnjsabULwnZ",
-	"CriA0iMzwDcTrR8leLXXmUDqJ9YsLhCOxJrFb/oR1OGMa66O8r01i8C03DxVCEbx9QzME5gfKIqXsF8L",
-	"2NFUwFq+hBG4SEVzfwy4LZagBBM4NJ2k+qTxR50r8bpxftIYOBgehFWvvAC2rNREP/9vYMFi9r+omfJR",
-	"KWaj6oUDXFvx+REN3gPE9fyLNrgRYP7gaymcXudgNwIu443wmEbZnXse59ifpb1gqLv9fxTMA1OhVnwE",
-	"XBsQqg7c3qB/tZNvMOh3zL4e3peafgNzzp1/xArLDKHz26ZkvIFmYb+bGuAI4p7jgFK+QZl6eeUItnwv",
-	"RtNl4dVxkEXfP+yn0XvPHY8eb+M+Il0e1X3jFy1gzQZ5WbePfps7tIqMLZDOjjJeqO3m8VKdJeYIsfZy",
-	"M16ss/SMF6uDdkSP6UWzFyw7jCuZB0luJG5mVIVlDB9yKxVYe53jChRW7cLZQrWYlIUdMsVTUoaOSjbm",
-	"ZPIn2JTNQ6qFHhbzVn9wfTslo2yeptxsWMxYg2F7iYXsCYwtJd+9vSLgOgPFM8li9u1bekTLE66c7W70",
-	"cCXBRtZ1KJei2rqgUaI6LFNBXtIWJ9vbZTtjYes7xGbXSOt8qog83yn6S9g3V1e7dVX3ol3bSxGy90fL",
-	"e+ZdEbLvxujZR+/bCcPiu3k7drUHkS9tSVMr37I5yUW0dtDrqwrqBuMjIC0a7CTPtTeol4b5ETCoLK2B",
-	"0t8SY5sW7cK5JS0nYfXSuBfAvLsL3M2LjkO2o4Msajml4XFEhXcWYMcZR1be8BNacYZLu2vDv8KlE8du",
-	"/E5tZ1v0LEUxJuWmwvVKw1NAR9Xuqp5O/bPp6FKwNmFFk0M4ZHE1ISHjT3Z7t8+9PyznX8jP9vVspb/u",
-	"TN/cl735P+LW/2qiG6ffM7G3Jux2QxlHAOqF5gwG4P2ofJLbd29xY1nA4b33xXlAb0VshaqJDQXL6SDd",
-	"ZcHkZs1itkLM4iha64SvV9pi/OHqwztGqVAp6ZNJGr4BKJFpqbCpNTeTi7B/u7HAI9MybyhZsxnfy2qm",
-	"U8yLvwMAAP//gJRPadkaAAA=",
+	"H4sIAAAAAAAC/+xYW2/bNhT+KwK3R7VKtw4o9JZkW2Fs64J620tgBIx4bLORSJY8SmsE+u8DKVlXypYv",
+	"GRagb7bIc3S+79z1RBKZKSlAoCHxE9HwOQeDV5JxcA+uZaao2Mz5SszETKgc7dNECgThflKlUp5Q5FJE",
+	"n4wU9plJ1pBR+0tpqUBjpQwyylP7AzcKSEwMai5WpAiJosZ8kZp5DovQWcU1MBLfVjpaEotwKyHvP0GC",
+	"pLAiDEyiubJmkXiLIihhBEEJpAjJjZZWZo5Sw6noOq/0YATBfqYI9mwpdUaRxITZB+HwLjeXCfJHaCm6",
+	"lzIFKuxpRr9e5WwF2DrmAmEF2h1zsevYINU42RLkmILfLXtpr9gNHL0l6cbqnOdKSY2gX3hY1Tj6geWU",
+	"GyWF8WTRFWUfyzT7WN05BbvWUrtfHCEzXhaqB1RruhkCLxUckUUNjqAGUoRdrH8+HIXxUFPql4RkDZRB",
+	"ycgc8NW1lA8cvNrrSLDqr41ensEdidHLv+QDiP0R11ydxL3Ry0C3aJ4JBC1oOgf9CPoX68Vz2C8ZjBQV",
+	"MIauYAIuq6K5PwXcFktQggkcmk5QfZD4q8wFe9k4P0gMHAwPwqpWngGbKjXZn99rWJKYfBc1XT4qxUxU",
+	"vXCAayu+OKDAe4C4mn/WAjcBzD805czpdQS7FnAeNsJDCmW373nIMb/zs1R/AV/xhq5grOTU8LsdYhIR",
+	"e/pGrTjsWXEAQSawPHQI6o0GL7ZXDkaDkW7Zw/tc/XJgzqkd086RZcTY85smybyOJmG//mqgCOyO4mAI",
+	"fYU8806iE+brOzZ5wGZeHXvn7rv73YP3znM3eU+3cdfoXR7VleYPySAlg7isC06/MO5bXqYmSGermS7U",
+	"pnm6VGftOUCsvQ5NF+usSdPFaqcdUGN63uw5ywz9as2DJNccN3ObhaUP73PDBRhzmeMaBFblwtliczEp",
+	"EzskgmZWGbpy3Zij+G+wKYsHF0s5TOat/uDyZmaNMnmWUb0hMSENhu0lEpJH0KaUfPP6wgKXCgRVnMTk",
+	"x9f2kV23cO1sd62ICg4mMq5CuRCVxjnNBqrDMmOWJWnwenu7LGckbH252Iy1uM7HjcjzZaO/tv1wcTGu",
+	"q7oXje07RUjeHizv6XdFSH6aomfXQtAOGBLfLtq+qxlEujLlYFtxSxZWLrKLin19lUFdZ7wHtKsJOYq5",
+	"9s713DDfAwaVpTVQ+7fE2B6TxnDeNBOPoppmgK5r3lbp9TkHvWmyS9UDUbijkS6O4c07RD4Df+MV5XZR",
+	"dMjdtiFrUYvgmtWFnURHk7lF7MFZPPyAV5xAaXdp+V9Qeu0mJT+p7ciNnjgrpoTvjI0EsK3FTfxyRtrD",
+	"L+ocPIFcDzcnRXK3Zr7dL+f/HHAy1/O1/DIavrkvevP/hNZvOdH109+K7cwJs912pg0T9XJ0wjTh/aR9",
+	"FO3jG+HUiWL/Dv3sM0Vv3Wy5qvGNdZbTYXWXCZPrlMRkjajiKEplQtO1NBi/u3j3hthQqJT0B1PbyAMQ",
+	"TEkusMk119+LsH+7scAj0zJvKFlPRr6X1VNTsSj+DQAA//+R6w9BVxsAAA==",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file
