@@ -193,6 +193,7 @@ export interface components {
       content: {
         "application/json": {
           projects: components["schemas"]["Project"][];
+          nextPageToken: string;
         };
       };
     };
@@ -317,7 +318,9 @@ export interface operations {
   };
   "get-projects": {
     parameters: {
-      query?: never;
+      query?: {
+        pageToken?: string;
+      };
       header?: never;
       path?: never;
       cookie?: never;

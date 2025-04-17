@@ -1,6 +1,45 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("/projects", () => {
+  test.describe("GET /projects", () => {
+    test("案件一覧ページ", async ({ page }) => {
+      await page.goto("/sign_in");
+
+      await page.getByRole("radio", { name: "企業" }).check();
+
+      // NOTE: ログインフォームを入力
+      await page.getByRole("textbox", { name: "Email" }).fill("test@example.com");
+      await page.getByRole("textbox", { name: "パスワード" }).fill("password");
+      await page.getByRole("button", { name: "ログイン" }).click();
+
+      // NOTE: ログイン成功
+      await page.waitForURL("/");
+
+      // NOTE: 案件一覧ページへ遷移
+      await page.goto("/projects");
+
+      // NOTE: 初期表示が5件であることを確認
+      const initialItemsCount = await page.getByRole("link", { name: "編集" }).count();
+      expect(initialItemsCount).toBe(5);
+      await expect(page.getByText("これ以上データはありません。")).not.toBeVisible();
+
+      // NOTE: スクロールしてロードをトリガー
+      await page.evaluate(() => {
+        window.scrollTo(0, document.body.scrollHeight);
+      });
+      // TODO: 特定要素の出現を待つようにする
+      await page.waitForTimeout(1500);
+
+      expect(await page.getByRole("link", { name: "編集" }).count()).toBe(10);
+
+      // NOTE: スクロールしてロードをトリガー
+      await page.evaluate(() => {
+        window.scrollTo(0, document.body.scrollHeight);
+      });
+      await expect(page.getByText("これ以上データはありません。")).toBeVisible();
+    });
+  });
+
   test.describe("POST /projects", () => {
     test("正常系(必須項目のみ)", async ({ page }) => {
       await page.goto("/sign_in");
