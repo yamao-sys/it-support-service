@@ -44,6 +44,10 @@ func main() {
 	havingBudgetProject2 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID, "IsActive": false}).(*models.Project)
 	var projects models.ProjectSlice
 	projects = append(projects, emptyBudgetProject1, havingBudgetProject1, emptyBudgetProject2, havingBudgetProject2)
+	// NOTE: 無限スクロールのテスト用に11になるように登録する(案件追加のテストでさらに4件追加されるので、最大15個になるように)
+	for range 6{
+        projects = append(projects, factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID, "MinBudget": null.Int{Int: 0, Valid: false}, "MaxBudget": null.Int{Int: 0, Valid: false}}).(*models.Project))
+	}
 	if _, err := projects.InsertAll(context.Background(), dbCon, boil.Infer()); err != nil {
 		fmt.Println("failed to create projects", err)
 	}
