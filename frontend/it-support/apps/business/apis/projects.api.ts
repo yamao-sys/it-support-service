@@ -3,7 +3,7 @@
 import createClient from "openapi-fetch";
 import { ProjectStoreInput } from "../types";
 import { getRequestHeaders } from "./csrf.api";
-import { paths } from "./generated/apiSchema";
+import { operations, paths } from "./generated/apiSchema";
 
 const client = createClient<paths>({
   baseUrl: `${process.env.BUSINESS_API_ENDPOINT_URI}/`,
@@ -39,15 +39,21 @@ export async function postProjectCreate(input: ProjectStoreInput) {
   return data.errors;
 }
 
-export async function getProjects() {
+export async function getProjects(nextPageToken?: string) {
+  const params: operations["get-projects"]["parameters"] = {};
+  if (nextPageToken) {
+    params.query = { pageToken: nextPageToken };
+  }
+
   const { data, response } = await client.GET("/projects", {
     ...(await getRequestHeaders()),
+    params,
   });
   if (data === undefined || response.status === 404) {
     throw Error("Not Found Error");
   }
 
-  return data.projects;
+  return data;
 }
 
 export async function getProject(id: number) {
