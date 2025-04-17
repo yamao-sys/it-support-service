@@ -3,11 +3,11 @@ import { FC } from "react";
 import ProjectLists from "../ProjectLists";
 
 const ProjectListsContainer: FC = async () => {
-  const projects = await getProjects();
+  const { projects, nextPageToken } = await getProjects();
 
   return (
     <>
-      <ProjectLists projects={projects} />
+      <ProjectLists initialProjects={projects} initialNextPageToken={Number(nextPageToken)} />
     </>
   );
 };

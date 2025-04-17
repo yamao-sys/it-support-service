@@ -1,19 +1,66 @@
+"use client";
+
+import { getProjects } from "@/apis/projects.api";
 import { Project } from "@/types";
 import Link from "next/link";
-import { FC } from "react";
+import { FC, useCallback, useEffect, useRef, useState } from "react";
 
 type Props = {
-  projects: Project[];
+  initialProjects: Project[];
+  initialNextPageToken: number;
 };
 
-const ProjectLists: FC<Props> = ({ projects }: Props) => {
+const ProjectLists: FC<Props> = ({ initialProjects, initialNextPageToken }: Props) => {
+  const [displayProjects, setDisplayProjects] = useState<Project[]>(initialProjects);
+  const [nextPageToken, setNextPageToken] = useState(initialNextPageToken);
+  const [loading, setLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const loader = useRef<HTMLDivElement | null>(null);
+
+  // NOTE: 無限スクロールによるデータ取得
+  const fetchItems = useCallback(async () => {
+    setLoading(true);
+
+    const { nextPageToken: npt, projects } = await getProjects(String(nextPageToken));
+    setDisplayProjects((prev) => [...prev, ...projects]);
+
+    // 最後まで取得したか確認
+    if (Number(npt) === 0) {
+      setHasMore(false);
+    }
+
+    setNextPageToken(Number(npt));
+    setLoading(false);
+  }, [nextPageToken]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (entry?.isIntersecting && !loading && hasMore) {
+          fetchItems();
+        }
+      },
+      { threshold: 1.0 },
+    );
+
+    const currentLoader = loader.current;
+    if (currentLoader) {
+      observer.observe(currentLoader);
+    }
+
+    return () => {
+      if (currentLoader) observer.unobserve(currentLoader);
+    };
+  }, [loading, hasMore, fetchItems]);
+
   return (
     <>
       <div className='w-full mt-4 md:mt-16'>
-        {projects.length === 0 ? (
+        {displayProjects.length === 0 ? (
           <p className='text-center'>まだ案件が未登録です</p>
         ) : (
-          projects.map((project) => (
+          displayProjects.map((project) => (
             <div
               key={project.id}
               className='bg-white shadow-md rounded-2xl p-4 mb-4 flex items-center justify-between'
@@ -41,6 +88,19 @@ const ProjectLists: FC<Props> = ({ projects }: Props) => {
             </div>
           ))
         )}
+
+        {/* ローディング表示 */}
+        {loading && <div style={{ textAlign: "center", padding: "10px" }}>Loading...</div>}
+
+        {/* 読み込み終了メッセージ */}
+        {!hasMore && (
+          <div style={{ textAlign: "center", padding: "10px", color: "gray" }}>
+            これ以上データはありません。
+          </div>
+        )}
+
+        {/* 監視対象 */}
+        <div ref={loader} style={{ height: "100px" }} />
       </div>
     </>
   );
