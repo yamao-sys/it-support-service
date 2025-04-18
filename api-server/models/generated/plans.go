@@ -22,171 +22,207 @@ import (
 	"github.com/volatiletech/strmangle"
 )
 
-// Project is an object representing the database table.
-type Project struct {
+// Plan is an object representing the database table.
+type Plan struct {
 	ID          int       `boil:"id" json:"id" toml:"id" yaml:"id"`
-	CompanyID   int       `boil:"company_id" json:"company_id" toml:"company_id" yaml:"company_id"`
+	SupporterID int       `boil:"supporter_id" json:"supporter_id" toml:"supporter_id" yaml:"supporter_id"`
+	ProjectID   int       `boil:"project_id" json:"project_id" toml:"project_id" yaml:"project_id"`
 	Title       string    `boil:"title" json:"title" toml:"title" yaml:"title"`
 	Description string    `boil:"description" json:"description" toml:"description" yaml:"description"`
 	StartDate   time.Time `boil:"start_date" json:"start_date" toml:"start_date" yaml:"start_date"`
 	EndDate     time.Time `boil:"end_date" json:"end_date" toml:"end_date" yaml:"end_date"`
-	MinBudget   null.Int  `boil:"min_budget" json:"min_budget,omitempty" toml:"min_budget" yaml:"min_budget,omitempty"`
-	MaxBudget   null.Int  `boil:"max_budget" json:"max_budget,omitempty" toml:"max_budget" yaml:"max_budget,omitempty"`
-	IsActive    bool      `boil:"is_active" json:"is_active" toml:"is_active" yaml:"is_active"`
+	UnitPrice   null.Int  `boil:"unit_price" json:"unit_price,omitempty" toml:"unit_price" yaml:"unit_price,omitempty"`
+	Status      int       `boil:"status" json:"status" toml:"status" yaml:"status"`
+	AgreedAt    null.Time `boil:"agreed_at" json:"agreed_at,omitempty" toml:"agreed_at" yaml:"agreed_at,omitempty"`
 	CreatedAt   time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
 	UpdatedAt   time.Time `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
 
-	R *projectR `boil:"-" json:"-" toml:"-" yaml:"-"`
-	L projectL  `boil:"-" json:"-" toml:"-" yaml:"-"`
+	R *planR `boil:"-" json:"-" toml:"-" yaml:"-"`
+	L planL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
-var ProjectColumns = struct {
+var PlanColumns = struct {
 	ID          string
-	CompanyID   string
+	SupporterID string
+	ProjectID   string
 	Title       string
 	Description string
 	StartDate   string
 	EndDate     string
-	MinBudget   string
-	MaxBudget   string
-	IsActive    string
+	UnitPrice   string
+	Status      string
+	AgreedAt    string
 	CreatedAt   string
 	UpdatedAt   string
 }{
 	ID:          "id",
-	CompanyID:   "company_id",
+	SupporterID: "supporter_id",
+	ProjectID:   "project_id",
 	Title:       "title",
 	Description: "description",
 	StartDate:   "start_date",
 	EndDate:     "end_date",
-	MinBudget:   "min_budget",
-	MaxBudget:   "max_budget",
-	IsActive:    "is_active",
+	UnitPrice:   "unit_price",
+	Status:      "status",
+	AgreedAt:    "agreed_at",
 	CreatedAt:   "created_at",
 	UpdatedAt:   "updated_at",
 }
 
-var ProjectTableColumns = struct {
+var PlanTableColumns = struct {
 	ID          string
-	CompanyID   string
+	SupporterID string
+	ProjectID   string
 	Title       string
 	Description string
 	StartDate   string
 	EndDate     string
-	MinBudget   string
-	MaxBudget   string
-	IsActive    string
+	UnitPrice   string
+	Status      string
+	AgreedAt    string
 	CreatedAt   string
 	UpdatedAt   string
 }{
-	ID:          "projects.id",
-	CompanyID:   "projects.company_id",
-	Title:       "projects.title",
-	Description: "projects.description",
-	StartDate:   "projects.start_date",
-	EndDate:     "projects.end_date",
-	MinBudget:   "projects.min_budget",
-	MaxBudget:   "projects.max_budget",
-	IsActive:    "projects.is_active",
-	CreatedAt:   "projects.created_at",
-	UpdatedAt:   "projects.updated_at",
+	ID:          "plans.id",
+	SupporterID: "plans.supporter_id",
+	ProjectID:   "plans.project_id",
+	Title:       "plans.title",
+	Description: "plans.description",
+	StartDate:   "plans.start_date",
+	EndDate:     "plans.end_date",
+	UnitPrice:   "plans.unit_price",
+	Status:      "plans.status",
+	AgreedAt:    "plans.agreed_at",
+	CreatedAt:   "plans.created_at",
+	UpdatedAt:   "plans.updated_at",
 }
 
 // Generated where
 
-type whereHelperbool struct{ field string }
+type whereHelpernull_Int struct{ field string }
 
-func (w whereHelperbool) EQ(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
-func (w whereHelperbool) NEQ(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
-func (w whereHelperbool) LT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
-func (w whereHelperbool) LTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
-func (w whereHelperbool) GT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
-func (w whereHelperbool) GTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
+func (w whereHelpernull_Int) EQ(x null.Int) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, false, x)
+}
+func (w whereHelpernull_Int) NEQ(x null.Int) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, true, x)
+}
+func (w whereHelpernull_Int) LT(x null.Int) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelpernull_Int) LTE(x null.Int) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelpernull_Int) GT(x null.Int) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelpernull_Int) GTE(x null.Int) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+func (w whereHelpernull_Int) IN(slice []int) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
+}
+func (w whereHelpernull_Int) NIN(slice []int) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
+}
 
-var ProjectWhere = struct {
+func (w whereHelpernull_Int) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
+func (w whereHelpernull_Int) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
+
+var PlanWhere = struct {
 	ID          whereHelperint
-	CompanyID   whereHelperint
+	SupporterID whereHelperint
+	ProjectID   whereHelperint
 	Title       whereHelperstring
 	Description whereHelperstring
 	StartDate   whereHelpertime_Time
 	EndDate     whereHelpertime_Time
-	MinBudget   whereHelpernull_Int
-	MaxBudget   whereHelpernull_Int
-	IsActive    whereHelperbool
+	UnitPrice   whereHelpernull_Int
+	Status      whereHelperint
+	AgreedAt    whereHelpernull_Time
 	CreatedAt   whereHelpertime_Time
 	UpdatedAt   whereHelpertime_Time
 }{
-	ID:          whereHelperint{field: "`projects`.`id`"},
-	CompanyID:   whereHelperint{field: "`projects`.`company_id`"},
-	Title:       whereHelperstring{field: "`projects`.`title`"},
-	Description: whereHelperstring{field: "`projects`.`description`"},
-	StartDate:   whereHelpertime_Time{field: "`projects`.`start_date`"},
-	EndDate:     whereHelpertime_Time{field: "`projects`.`end_date`"},
-	MinBudget:   whereHelpernull_Int{field: "`projects`.`min_budget`"},
-	MaxBudget:   whereHelpernull_Int{field: "`projects`.`max_budget`"},
-	IsActive:    whereHelperbool{field: "`projects`.`is_active`"},
-	CreatedAt:   whereHelpertime_Time{field: "`projects`.`created_at`"},
-	UpdatedAt:   whereHelpertime_Time{field: "`projects`.`updated_at`"},
+	ID:          whereHelperint{field: "`plans`.`id`"},
+	SupporterID: whereHelperint{field: "`plans`.`supporter_id`"},
+	ProjectID:   whereHelperint{field: "`plans`.`project_id`"},
+	Title:       whereHelperstring{field: "`plans`.`title`"},
+	Description: whereHelperstring{field: "`plans`.`description`"},
+	StartDate:   whereHelpertime_Time{field: "`plans`.`start_date`"},
+	EndDate:     whereHelpertime_Time{field: "`plans`.`end_date`"},
+	UnitPrice:   whereHelpernull_Int{field: "`plans`.`unit_price`"},
+	Status:      whereHelperint{field: "`plans`.`status`"},
+	AgreedAt:    whereHelpernull_Time{field: "`plans`.`agreed_at`"},
+	CreatedAt:   whereHelpertime_Time{field: "`plans`.`created_at`"},
+	UpdatedAt:   whereHelpertime_Time{field: "`plans`.`updated_at`"},
 }
 
-// ProjectRels is where relationship names are stored.
-var ProjectRels = struct {
-	Company string
+// PlanRels is where relationship names are stored.
+var PlanRels = struct {
+	Supporter string
 }{
-	Company: "Company",
+	Supporter: "Supporter",
 }
 
-// projectR is where relationships are stored.
-type projectR struct {
-	Company *Company `boil:"Company" json:"Company" toml:"Company" yaml:"Company"`
+// planR is where relationships are stored.
+type planR struct {
+	Supporter *Supporter `boil:"Supporter" json:"Supporter" toml:"Supporter" yaml:"Supporter"`
 }
 
 // NewStruct creates a new relationship struct
-func (*projectR) NewStruct() *projectR {
-	return &projectR{}
+func (*planR) NewStruct() *planR {
+	return &planR{}
 }
 
-func (r *projectR) GetCompany() *Company {
+func (r *planR) GetSupporter() *Supporter {
 	if r == nil {
 		return nil
 	}
-	return r.Company
+	return r.Supporter
 }
 
-// projectL is where Load methods for each relationship are stored.
-type projectL struct{}
+// planL is where Load methods for each relationship are stored.
+type planL struct{}
 
 var (
-	projectAllColumns            = []string{"id", "company_id", "title", "description", "start_date", "end_date", "min_budget", "max_budget", "is_active", "created_at", "updated_at"}
-	projectColumnsWithoutDefault = []string{"company_id", "title", "description", "start_date", "end_date", "min_budget", "max_budget", "is_active", "created_at", "updated_at"}
-	projectColumnsWithDefault    = []string{"id"}
-	projectPrimaryKeyColumns     = []string{"id"}
-	projectGeneratedColumns      = []string{}
+	planAllColumns            = []string{"id", "supporter_id", "project_id", "title", "description", "start_date", "end_date", "unit_price", "status", "agreed_at", "created_at", "updated_at"}
+	planColumnsWithoutDefault = []string{"supporter_id", "project_id", "title", "description", "start_date", "end_date", "unit_price", "agreed_at", "created_at", "updated_at"}
+	planColumnsWithDefault    = []string{"id", "status"}
+	planPrimaryKeyColumns     = []string{"id"}
+	planGeneratedColumns      = []string{}
 )
 
 type (
-	// ProjectSlice is an alias for a slice of pointers to Project.
-	// This should almost always be used instead of []Project.
-	ProjectSlice []*Project
-	// ProjectHook is the signature for custom Project hook methods
-	ProjectHook func(context.Context, boil.ContextExecutor, *Project) error
+	// PlanSlice is an alias for a slice of pointers to Plan.
+	// This should almost always be used instead of []Plan.
+	PlanSlice []*Plan
+	// PlanHook is the signature for custom Plan hook methods
+	PlanHook func(context.Context, boil.ContextExecutor, *Plan) error
 
-	projectQuery struct {
+	planQuery struct {
 		*queries.Query
 	}
 )
 
 // Cache for insert, update and upsert
 var (
-	projectType                 = reflect.TypeOf(&Project{})
-	projectMapping              = queries.MakeStructMapping(projectType)
-	projectPrimaryKeyMapping, _ = queries.BindMapping(projectType, projectMapping, projectPrimaryKeyColumns)
-	projectInsertCacheMut       sync.RWMutex
-	projectInsertCache          = make(map[string]insertCache)
-	projectUpdateCacheMut       sync.RWMutex
-	projectUpdateCache          = make(map[string]updateCache)
-	projectUpsertCacheMut       sync.RWMutex
-	projectUpsertCache          = make(map[string]insertCache)
+	planType                 = reflect.TypeOf(&Plan{})
+	planMapping              = queries.MakeStructMapping(planType)
+	planPrimaryKeyMapping, _ = queries.BindMapping(planType, planMapping, planPrimaryKeyColumns)
+	planInsertCacheMut       sync.RWMutex
+	planInsertCache          = make(map[string]insertCache)
+	planUpdateCacheMut       sync.RWMutex
+	planUpdateCache          = make(map[string]updateCache)
+	planUpsertCacheMut       sync.RWMutex
+	planUpsertCache          = make(map[string]insertCache)
 )
 
 var (
@@ -197,36 +233,36 @@ var (
 	_ = qmhelper.Where
 )
 
-var projectAfterSelectMu sync.Mutex
-var projectAfterSelectHooks []ProjectHook
+var planAfterSelectMu sync.Mutex
+var planAfterSelectHooks []PlanHook
 
-var projectBeforeInsertMu sync.Mutex
-var projectBeforeInsertHooks []ProjectHook
-var projectAfterInsertMu sync.Mutex
-var projectAfterInsertHooks []ProjectHook
+var planBeforeInsertMu sync.Mutex
+var planBeforeInsertHooks []PlanHook
+var planAfterInsertMu sync.Mutex
+var planAfterInsertHooks []PlanHook
 
-var projectBeforeUpdateMu sync.Mutex
-var projectBeforeUpdateHooks []ProjectHook
-var projectAfterUpdateMu sync.Mutex
-var projectAfterUpdateHooks []ProjectHook
+var planBeforeUpdateMu sync.Mutex
+var planBeforeUpdateHooks []PlanHook
+var planAfterUpdateMu sync.Mutex
+var planAfterUpdateHooks []PlanHook
 
-var projectBeforeDeleteMu sync.Mutex
-var projectBeforeDeleteHooks []ProjectHook
-var projectAfterDeleteMu sync.Mutex
-var projectAfterDeleteHooks []ProjectHook
+var planBeforeDeleteMu sync.Mutex
+var planBeforeDeleteHooks []PlanHook
+var planAfterDeleteMu sync.Mutex
+var planAfterDeleteHooks []PlanHook
 
-var projectBeforeUpsertMu sync.Mutex
-var projectBeforeUpsertHooks []ProjectHook
-var projectAfterUpsertMu sync.Mutex
-var projectAfterUpsertHooks []ProjectHook
+var planBeforeUpsertMu sync.Mutex
+var planBeforeUpsertHooks []PlanHook
+var planAfterUpsertMu sync.Mutex
+var planAfterUpsertHooks []PlanHook
 
 // doAfterSelectHooks executes all "after Select" hooks.
-func (o *Project) doAfterSelectHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *Plan) doAfterSelectHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range projectAfterSelectHooks {
+	for _, hook := range planAfterSelectHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -236,12 +272,12 @@ func (o *Project) doAfterSelectHooks(ctx context.Context, exec boil.ContextExecu
 }
 
 // doBeforeInsertHooks executes all "before insert" hooks.
-func (o *Project) doBeforeInsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *Plan) doBeforeInsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range projectBeforeInsertHooks {
+	for _, hook := range planBeforeInsertHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -251,12 +287,12 @@ func (o *Project) doBeforeInsertHooks(ctx context.Context, exec boil.ContextExec
 }
 
 // doAfterInsertHooks executes all "after Insert" hooks.
-func (o *Project) doAfterInsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *Plan) doAfterInsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range projectAfterInsertHooks {
+	for _, hook := range planAfterInsertHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -266,12 +302,12 @@ func (o *Project) doAfterInsertHooks(ctx context.Context, exec boil.ContextExecu
 }
 
 // doBeforeUpdateHooks executes all "before Update" hooks.
-func (o *Project) doBeforeUpdateHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *Plan) doBeforeUpdateHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range projectBeforeUpdateHooks {
+	for _, hook := range planBeforeUpdateHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -281,12 +317,12 @@ func (o *Project) doBeforeUpdateHooks(ctx context.Context, exec boil.ContextExec
 }
 
 // doAfterUpdateHooks executes all "after Update" hooks.
-func (o *Project) doAfterUpdateHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *Plan) doAfterUpdateHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range projectAfterUpdateHooks {
+	for _, hook := range planAfterUpdateHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -296,12 +332,12 @@ func (o *Project) doAfterUpdateHooks(ctx context.Context, exec boil.ContextExecu
 }
 
 // doBeforeDeleteHooks executes all "before Delete" hooks.
-func (o *Project) doBeforeDeleteHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *Plan) doBeforeDeleteHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range projectBeforeDeleteHooks {
+	for _, hook := range planBeforeDeleteHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -311,12 +347,12 @@ func (o *Project) doBeforeDeleteHooks(ctx context.Context, exec boil.ContextExec
 }
 
 // doAfterDeleteHooks executes all "after Delete" hooks.
-func (o *Project) doAfterDeleteHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *Plan) doAfterDeleteHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range projectAfterDeleteHooks {
+	for _, hook := range planAfterDeleteHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -326,12 +362,12 @@ func (o *Project) doAfterDeleteHooks(ctx context.Context, exec boil.ContextExecu
 }
 
 // doBeforeUpsertHooks executes all "before Upsert" hooks.
-func (o *Project) doBeforeUpsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *Plan) doBeforeUpsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range projectBeforeUpsertHooks {
+	for _, hook := range planBeforeUpsertHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -341,12 +377,12 @@ func (o *Project) doBeforeUpsertHooks(ctx context.Context, exec boil.ContextExec
 }
 
 // doAfterUpsertHooks executes all "after Upsert" hooks.
-func (o *Project) doAfterUpsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *Plan) doAfterUpsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range projectAfterUpsertHooks {
+	for _, hook := range planAfterUpsertHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -355,51 +391,51 @@ func (o *Project) doAfterUpsertHooks(ctx context.Context, exec boil.ContextExecu
 	return nil
 }
 
-// AddProjectHook registers your hook function for all future operations.
-func AddProjectHook(hookPoint boil.HookPoint, projectHook ProjectHook) {
+// AddPlanHook registers your hook function for all future operations.
+func AddPlanHook(hookPoint boil.HookPoint, planHook PlanHook) {
 	switch hookPoint {
 	case boil.AfterSelectHook:
-		projectAfterSelectMu.Lock()
-		projectAfterSelectHooks = append(projectAfterSelectHooks, projectHook)
-		projectAfterSelectMu.Unlock()
+		planAfterSelectMu.Lock()
+		planAfterSelectHooks = append(planAfterSelectHooks, planHook)
+		planAfterSelectMu.Unlock()
 	case boil.BeforeInsertHook:
-		projectBeforeInsertMu.Lock()
-		projectBeforeInsertHooks = append(projectBeforeInsertHooks, projectHook)
-		projectBeforeInsertMu.Unlock()
+		planBeforeInsertMu.Lock()
+		planBeforeInsertHooks = append(planBeforeInsertHooks, planHook)
+		planBeforeInsertMu.Unlock()
 	case boil.AfterInsertHook:
-		projectAfterInsertMu.Lock()
-		projectAfterInsertHooks = append(projectAfterInsertHooks, projectHook)
-		projectAfterInsertMu.Unlock()
+		planAfterInsertMu.Lock()
+		planAfterInsertHooks = append(planAfterInsertHooks, planHook)
+		planAfterInsertMu.Unlock()
 	case boil.BeforeUpdateHook:
-		projectBeforeUpdateMu.Lock()
-		projectBeforeUpdateHooks = append(projectBeforeUpdateHooks, projectHook)
-		projectBeforeUpdateMu.Unlock()
+		planBeforeUpdateMu.Lock()
+		planBeforeUpdateHooks = append(planBeforeUpdateHooks, planHook)
+		planBeforeUpdateMu.Unlock()
 	case boil.AfterUpdateHook:
-		projectAfterUpdateMu.Lock()
-		projectAfterUpdateHooks = append(projectAfterUpdateHooks, projectHook)
-		projectAfterUpdateMu.Unlock()
+		planAfterUpdateMu.Lock()
+		planAfterUpdateHooks = append(planAfterUpdateHooks, planHook)
+		planAfterUpdateMu.Unlock()
 	case boil.BeforeDeleteHook:
-		projectBeforeDeleteMu.Lock()
-		projectBeforeDeleteHooks = append(projectBeforeDeleteHooks, projectHook)
-		projectBeforeDeleteMu.Unlock()
+		planBeforeDeleteMu.Lock()
+		planBeforeDeleteHooks = append(planBeforeDeleteHooks, planHook)
+		planBeforeDeleteMu.Unlock()
 	case boil.AfterDeleteHook:
-		projectAfterDeleteMu.Lock()
-		projectAfterDeleteHooks = append(projectAfterDeleteHooks, projectHook)
-		projectAfterDeleteMu.Unlock()
+		planAfterDeleteMu.Lock()
+		planAfterDeleteHooks = append(planAfterDeleteHooks, planHook)
+		planAfterDeleteMu.Unlock()
 	case boil.BeforeUpsertHook:
-		projectBeforeUpsertMu.Lock()
-		projectBeforeUpsertHooks = append(projectBeforeUpsertHooks, projectHook)
-		projectBeforeUpsertMu.Unlock()
+		planBeforeUpsertMu.Lock()
+		planBeforeUpsertHooks = append(planBeforeUpsertHooks, planHook)
+		planBeforeUpsertMu.Unlock()
 	case boil.AfterUpsertHook:
-		projectAfterUpsertMu.Lock()
-		projectAfterUpsertHooks = append(projectAfterUpsertHooks, projectHook)
-		projectAfterUpsertMu.Unlock()
+		planAfterUpsertMu.Lock()
+		planAfterUpsertHooks = append(planAfterUpsertHooks, planHook)
+		planAfterUpsertMu.Unlock()
 	}
 }
 
-// One returns a single project record from the query.
-func (q projectQuery) One(ctx context.Context, exec boil.ContextExecutor) (*Project, error) {
-	o := &Project{}
+// One returns a single plan record from the query.
+func (q planQuery) One(ctx context.Context, exec boil.ContextExecutor) (*Plan, error) {
+	o := &Plan{}
 
 	queries.SetLimit(q.Query, 1)
 
@@ -408,7 +444,7 @@ func (q projectQuery) One(ctx context.Context, exec boil.ContextExecutor) (*Proj
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, sql.ErrNoRows
 		}
-		return nil, errors.Wrap(err, "models: failed to execute a one query for projects")
+		return nil, errors.Wrap(err, "models: failed to execute a one query for plans")
 	}
 
 	if err := o.doAfterSelectHooks(ctx, exec); err != nil {
@@ -418,16 +454,16 @@ func (q projectQuery) One(ctx context.Context, exec boil.ContextExecutor) (*Proj
 	return o, nil
 }
 
-// All returns all Project records from the query.
-func (q projectQuery) All(ctx context.Context, exec boil.ContextExecutor) (ProjectSlice, error) {
-	var o []*Project
+// All returns all Plan records from the query.
+func (q planQuery) All(ctx context.Context, exec boil.ContextExecutor) (PlanSlice, error) {
+	var o []*Plan
 
 	err := q.Bind(ctx, exec, &o)
 	if err != nil {
-		return nil, errors.Wrap(err, "models: failed to assign all query results to Project slice")
+		return nil, errors.Wrap(err, "models: failed to assign all query results to Plan slice")
 	}
 
-	if len(projectAfterSelectHooks) != 0 {
+	if len(planAfterSelectHooks) != 0 {
 		for _, obj := range o {
 			if err := obj.doAfterSelectHooks(ctx, exec); err != nil {
 				return o, err
@@ -438,8 +474,8 @@ func (q projectQuery) All(ctx context.Context, exec boil.ContextExecutor) (Proje
 	return o, nil
 }
 
-// Count returns the count of all Project records in the query.
-func (q projectQuery) Count(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+// Count returns the count of all Plan records in the query.
+func (q planQuery) Count(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	var count int64
 
 	queries.SetSelect(q.Query, nil)
@@ -447,14 +483,14 @@ func (q projectQuery) Count(ctx context.Context, exec boil.ContextExecutor) (int
 
 	err := q.Query.QueryRowContext(ctx, exec).Scan(&count)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: failed to count projects rows")
+		return 0, errors.Wrap(err, "models: failed to count plans rows")
 	}
 
 	return count, nil
 }
 
 // Exists checks if the row exists in the table.
-func (q projectQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bool, error) {
+func (q planQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bool, error) {
 	var count int64
 
 	queries.SetSelect(q.Query, nil)
@@ -463,47 +499,47 @@ func (q projectQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bo
 
 	err := q.Query.QueryRowContext(ctx, exec).Scan(&count)
 	if err != nil {
-		return false, errors.Wrap(err, "models: failed to check if projects exists")
+		return false, errors.Wrap(err, "models: failed to check if plans exists")
 	}
 
 	return count > 0, nil
 }
 
-// Company pointed to by the foreign key.
-func (o *Project) Company(mods ...qm.QueryMod) companyQuery {
+// Supporter pointed to by the foreign key.
+func (o *Plan) Supporter(mods ...qm.QueryMod) supporterQuery {
 	queryMods := []qm.QueryMod{
-		qm.Where("`id` = ?", o.CompanyID),
+		qm.Where("`id` = ?", o.SupporterID),
 	}
 
 	queryMods = append(queryMods, mods...)
 
-	return Companies(queryMods...)
+	return Supporters(queryMods...)
 }
 
-// LoadCompany allows an eager lookup of values, cached into the
+// LoadSupporter allows an eager lookup of values, cached into the
 // loaded structs of the objects. This is for an N-1 relationship.
-func (projectL) LoadCompany(ctx context.Context, e boil.ContextExecutor, singular bool, maybeProject interface{}, mods queries.Applicator) error {
-	var slice []*Project
-	var object *Project
+func (planL) LoadSupporter(ctx context.Context, e boil.ContextExecutor, singular bool, maybePlan interface{}, mods queries.Applicator) error {
+	var slice []*Plan
+	var object *Plan
 
 	if singular {
 		var ok bool
-		object, ok = maybeProject.(*Project)
+		object, ok = maybePlan.(*Plan)
 		if !ok {
-			object = new(Project)
-			ok = queries.SetFromEmbeddedStruct(&object, &maybeProject)
+			object = new(Plan)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybePlan)
 			if !ok {
-				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeProject))
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybePlan))
 			}
 		}
 	} else {
-		s, ok := maybeProject.(*[]*Project)
+		s, ok := maybePlan.(*[]*Plan)
 		if ok {
 			slice = *s
 		} else {
-			ok = queries.SetFromEmbeddedStruct(&slice, maybeProject)
+			ok = queries.SetFromEmbeddedStruct(&slice, maybePlan)
 			if !ok {
-				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeProject))
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybePlan))
 			}
 		}
 	}
@@ -511,17 +547,17 @@ func (projectL) LoadCompany(ctx context.Context, e boil.ContextExecutor, singula
 	args := make(map[interface{}]struct{})
 	if singular {
 		if object.R == nil {
-			object.R = &projectR{}
+			object.R = &planR{}
 		}
-		args[object.CompanyID] = struct{}{}
+		args[object.SupporterID] = struct{}{}
 
 	} else {
 		for _, obj := range slice {
 			if obj.R == nil {
-				obj.R = &projectR{}
+				obj.R = &planR{}
 			}
 
-			args[obj.CompanyID] = struct{}{}
+			args[obj.SupporterID] = struct{}{}
 
 		}
 	}
@@ -538,8 +574,8 @@ func (projectL) LoadCompany(ctx context.Context, e boil.ContextExecutor, singula
 	}
 
 	query := NewQuery(
-		qm.From(`companies`),
-		qm.WhereIn(`companies.id in ?`, argsSlice...),
+		qm.From(`supporters`),
+		qm.WhereIn(`supporters.id in ?`, argsSlice...),
 	)
 	if mods != nil {
 		mods.Apply(query)
@@ -547,22 +583,22 @@ func (projectL) LoadCompany(ctx context.Context, e boil.ContextExecutor, singula
 
 	results, err := query.QueryContext(ctx, e)
 	if err != nil {
-		return errors.Wrap(err, "failed to eager load Company")
+		return errors.Wrap(err, "failed to eager load Supporter")
 	}
 
-	var resultSlice []*Company
+	var resultSlice []*Supporter
 	if err = queries.Bind(results, &resultSlice); err != nil {
-		return errors.Wrap(err, "failed to bind eager loaded slice Company")
+		return errors.Wrap(err, "failed to bind eager loaded slice Supporter")
 	}
 
 	if err = results.Close(); err != nil {
-		return errors.Wrap(err, "failed to close results of eager load for companies")
+		return errors.Wrap(err, "failed to close results of eager load for supporters")
 	}
 	if err = results.Err(); err != nil {
-		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for companies")
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for supporters")
 	}
 
-	if len(companyAfterSelectHooks) != 0 {
+	if len(supporterAfterSelectHooks) != 0 {
 		for _, obj := range resultSlice {
 			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
 				return err
@@ -576,22 +612,22 @@ func (projectL) LoadCompany(ctx context.Context, e boil.ContextExecutor, singula
 
 	if singular {
 		foreign := resultSlice[0]
-		object.R.Company = foreign
+		object.R.Supporter = foreign
 		if foreign.R == nil {
-			foreign.R = &companyR{}
+			foreign.R = &supporterR{}
 		}
-		foreign.R.Projects = append(foreign.R.Projects, object)
+		foreign.R.Plans = append(foreign.R.Plans, object)
 		return nil
 	}
 
 	for _, local := range slice {
 		for _, foreign := range resultSlice {
-			if local.CompanyID == foreign.ID {
-				local.R.Company = foreign
+			if local.SupporterID == foreign.ID {
+				local.R.Supporter = foreign
 				if foreign.R == nil {
-					foreign.R = &companyR{}
+					foreign.R = &supporterR{}
 				}
-				foreign.R.Projects = append(foreign.R.Projects, local)
+				foreign.R.Plans = append(foreign.R.Plans, local)
 				break
 			}
 		}
@@ -600,10 +636,10 @@ func (projectL) LoadCompany(ctx context.Context, e boil.ContextExecutor, singula
 	return nil
 }
 
-// SetCompany of the project to the related item.
-// Sets o.R.Company to related.
-// Adds o to related.R.Projects.
-func (o *Project) SetCompany(ctx context.Context, exec boil.ContextExecutor, insert bool, related *Company) error {
+// SetSupporter of the plan to the related item.
+// Sets o.R.Supporter to related.
+// Adds o to related.R.Plans.
+func (o *Plan) SetSupporter(ctx context.Context, exec boil.ContextExecutor, insert bool, related *Supporter) error {
 	var err error
 	if insert {
 		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
@@ -612,9 +648,9 @@ func (o *Project) SetCompany(ctx context.Context, exec boil.ContextExecutor, ins
 	}
 
 	updateQuery := fmt.Sprintf(
-		"UPDATE `projects` SET %s WHERE %s",
-		strmangle.SetParamNames("`", "`", 0, []string{"company_id"}),
-		strmangle.WhereClause("`", "`", 0, projectPrimaryKeyColumns),
+		"UPDATE `plans` SET %s WHERE %s",
+		strmangle.SetParamNames("`", "`", 0, []string{"supporter_id"}),
+		strmangle.WhereClause("`", "`", 0, planPrimaryKeyColumns),
 	)
 	values := []interface{}{related.ID, o.ID}
 
@@ -627,72 +663,72 @@ func (o *Project) SetCompany(ctx context.Context, exec boil.ContextExecutor, ins
 		return errors.Wrap(err, "failed to update local table")
 	}
 
-	o.CompanyID = related.ID
+	o.SupporterID = related.ID
 	if o.R == nil {
-		o.R = &projectR{
-			Company: related,
+		o.R = &planR{
+			Supporter: related,
 		}
 	} else {
-		o.R.Company = related
+		o.R.Supporter = related
 	}
 
 	if related.R == nil {
-		related.R = &companyR{
-			Projects: ProjectSlice{o},
+		related.R = &supporterR{
+			Plans: PlanSlice{o},
 		}
 	} else {
-		related.R.Projects = append(related.R.Projects, o)
+		related.R.Plans = append(related.R.Plans, o)
 	}
 
 	return nil
 }
 
-// Projects retrieves all the records using an executor.
-func Projects(mods ...qm.QueryMod) projectQuery {
-	mods = append(mods, qm.From("`projects`"))
+// Plans retrieves all the records using an executor.
+func Plans(mods ...qm.QueryMod) planQuery {
+	mods = append(mods, qm.From("`plans`"))
 	q := NewQuery(mods...)
 	if len(queries.GetSelect(q)) == 0 {
-		queries.SetSelect(q, []string{"`projects`.*"})
+		queries.SetSelect(q, []string{"`plans`.*"})
 	}
 
-	return projectQuery{q}
+	return planQuery{q}
 }
 
-// FindProject retrieves a single record by ID with an executor.
+// FindPlan retrieves a single record by ID with an executor.
 // If selectCols is empty Find will return all columns.
-func FindProject(ctx context.Context, exec boil.ContextExecutor, iD int, selectCols ...string) (*Project, error) {
-	projectObj := &Project{}
+func FindPlan(ctx context.Context, exec boil.ContextExecutor, iD int, selectCols ...string) (*Plan, error) {
+	planObj := &Plan{}
 
 	sel := "*"
 	if len(selectCols) > 0 {
 		sel = strings.Join(strmangle.IdentQuoteSlice(dialect.LQ, dialect.RQ, selectCols), ",")
 	}
 	query := fmt.Sprintf(
-		"select %s from `projects` where `id`=?", sel,
+		"select %s from `plans` where `id`=?", sel,
 	)
 
 	q := queries.Raw(query, iD)
 
-	err := q.Bind(ctx, exec, projectObj)
+	err := q.Bind(ctx, exec, planObj)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, sql.ErrNoRows
 		}
-		return nil, errors.Wrap(err, "models: unable to select from projects")
+		return nil, errors.Wrap(err, "models: unable to select from plans")
 	}
 
-	if err = projectObj.doAfterSelectHooks(ctx, exec); err != nil {
-		return projectObj, err
+	if err = planObj.doAfterSelectHooks(ctx, exec); err != nil {
+		return planObj, err
 	}
 
-	return projectObj, nil
+	return planObj, nil
 }
 
 // Insert a single record using an executor.
 // See boil.Columns.InsertColumnSet documentation to understand column list inference for inserts.
-func (o *Project) Insert(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) error {
+func (o *Plan) Insert(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) error {
 	if o == nil {
-		return errors.New("models: no projects provided for insertion")
+		return errors.New("models: no plans provided for insertion")
 	}
 
 	var err error
@@ -711,39 +747,39 @@ func (o *Project) Insert(ctx context.Context, exec boil.ContextExecutor, columns
 		return err
 	}
 
-	nzDefaults := queries.NonZeroDefaultSet(projectColumnsWithDefault, o)
+	nzDefaults := queries.NonZeroDefaultSet(planColumnsWithDefault, o)
 
 	key := makeCacheKey(columns, nzDefaults)
-	projectInsertCacheMut.RLock()
-	cache, cached := projectInsertCache[key]
-	projectInsertCacheMut.RUnlock()
+	planInsertCacheMut.RLock()
+	cache, cached := planInsertCache[key]
+	planInsertCacheMut.RUnlock()
 
 	if !cached {
 		wl, returnColumns := columns.InsertColumnSet(
-			projectAllColumns,
-			projectColumnsWithDefault,
-			projectColumnsWithoutDefault,
+			planAllColumns,
+			planColumnsWithDefault,
+			planColumnsWithoutDefault,
 			nzDefaults,
 		)
 
-		cache.valueMapping, err = queries.BindMapping(projectType, projectMapping, wl)
+		cache.valueMapping, err = queries.BindMapping(planType, planMapping, wl)
 		if err != nil {
 			return err
 		}
-		cache.retMapping, err = queries.BindMapping(projectType, projectMapping, returnColumns)
+		cache.retMapping, err = queries.BindMapping(planType, planMapping, returnColumns)
 		if err != nil {
 			return err
 		}
 		if len(wl) != 0 {
-			cache.query = fmt.Sprintf("INSERT INTO `projects` (`%s`) %%sVALUES (%s)%%s", strings.Join(wl, "`,`"), strmangle.Placeholders(dialect.UseIndexPlaceholders, len(wl), 1, 1))
+			cache.query = fmt.Sprintf("INSERT INTO `plans` (`%s`) %%sVALUES (%s)%%s", strings.Join(wl, "`,`"), strmangle.Placeholders(dialect.UseIndexPlaceholders, len(wl), 1, 1))
 		} else {
-			cache.query = "INSERT INTO `projects` () VALUES ()%s%s"
+			cache.query = "INSERT INTO `plans` () VALUES ()%s%s"
 		}
 
 		var queryOutput, queryReturning string
 
 		if len(cache.retMapping) != 0 {
-			cache.retQuery = fmt.Sprintf("SELECT `%s` FROM `projects` WHERE %s", strings.Join(returnColumns, "`,`"), strmangle.WhereClause("`", "`", 0, projectPrimaryKeyColumns))
+			cache.retQuery = fmt.Sprintf("SELECT `%s` FROM `plans` WHERE %s", strings.Join(returnColumns, "`,`"), strmangle.WhereClause("`", "`", 0, planPrimaryKeyColumns))
 		}
 
 		cache.query = fmt.Sprintf(cache.query, queryOutput, queryReturning)
@@ -760,7 +796,7 @@ func (o *Project) Insert(ctx context.Context, exec boil.ContextExecutor, columns
 	result, err := exec.ExecContext(ctx, cache.query, vals...)
 
 	if err != nil {
-		return errors.Wrap(err, "models: unable to insert into projects")
+		return errors.Wrap(err, "models: unable to insert into plans")
 	}
 
 	var lastID int64
@@ -776,7 +812,7 @@ func (o *Project) Insert(ctx context.Context, exec boil.ContextExecutor, columns
 	}
 
 	o.ID = int(lastID)
-	if lastID != 0 && len(cache.retMapping) == 1 && cache.retMapping[0] == projectMapping["id"] {
+	if lastID != 0 && len(cache.retMapping) == 1 && cache.retMapping[0] == planMapping["id"] {
 		goto CacheNoHooks
 	}
 
@@ -791,23 +827,23 @@ func (o *Project) Insert(ctx context.Context, exec boil.ContextExecutor, columns
 	}
 	err = exec.QueryRowContext(ctx, cache.retQuery, identifierCols...).Scan(queries.PtrsFromMapping(value, cache.retMapping)...)
 	if err != nil {
-		return errors.Wrap(err, "models: unable to populate default values for projects")
+		return errors.Wrap(err, "models: unable to populate default values for plans")
 	}
 
 CacheNoHooks:
 	if !cached {
-		projectInsertCacheMut.Lock()
-		projectInsertCache[key] = cache
-		projectInsertCacheMut.Unlock()
+		planInsertCacheMut.Lock()
+		planInsertCache[key] = cache
+		planInsertCacheMut.Unlock()
 	}
 
 	return o.doAfterInsertHooks(ctx, exec)
 }
 
-// Update uses an executor to update the Project.
+// Update uses an executor to update the Plan.
 // See boil.Columns.UpdateColumnSet documentation to understand column list inference for updates.
 // Update does not automatically update the record in case of default values. Use .Reload() to refresh the records.
-func (o *Project) Update(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) (int64, error) {
+func (o *Plan) Update(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) (int64, error) {
 	if !boil.TimestampsAreSkipped(ctx) {
 		currTime := time.Now().In(boil.GetLocation())
 
@@ -819,28 +855,28 @@ func (o *Project) Update(ctx context.Context, exec boil.ContextExecutor, columns
 		return 0, err
 	}
 	key := makeCacheKey(columns, nil)
-	projectUpdateCacheMut.RLock()
-	cache, cached := projectUpdateCache[key]
-	projectUpdateCacheMut.RUnlock()
+	planUpdateCacheMut.RLock()
+	cache, cached := planUpdateCache[key]
+	planUpdateCacheMut.RUnlock()
 
 	if !cached {
 		wl := columns.UpdateColumnSet(
-			projectAllColumns,
-			projectPrimaryKeyColumns,
+			planAllColumns,
+			planPrimaryKeyColumns,
 		)
 
 		if !columns.IsWhitelist() {
 			wl = strmangle.SetComplement(wl, []string{"created_at"})
 		}
 		if len(wl) == 0 {
-			return 0, errors.New("models: unable to update projects, could not build whitelist")
+			return 0, errors.New("models: unable to update plans, could not build whitelist")
 		}
 
-		cache.query = fmt.Sprintf("UPDATE `projects` SET %s WHERE %s",
+		cache.query = fmt.Sprintf("UPDATE `plans` SET %s WHERE %s",
 			strmangle.SetParamNames("`", "`", 0, wl),
-			strmangle.WhereClause("`", "`", 0, projectPrimaryKeyColumns),
+			strmangle.WhereClause("`", "`", 0, planPrimaryKeyColumns),
 		)
-		cache.valueMapping, err = queries.BindMapping(projectType, projectMapping, append(wl, projectPrimaryKeyColumns...))
+		cache.valueMapping, err = queries.BindMapping(planType, planMapping, append(wl, planPrimaryKeyColumns...))
 		if err != nil {
 			return 0, err
 		}
@@ -856,42 +892,42 @@ func (o *Project) Update(ctx context.Context, exec boil.ContextExecutor, columns
 	var result sql.Result
 	result, err = exec.ExecContext(ctx, cache.query, values...)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to update projects row")
+		return 0, errors.Wrap(err, "models: unable to update plans row")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: failed to get rows affected by update for projects")
+		return 0, errors.Wrap(err, "models: failed to get rows affected by update for plans")
 	}
 
 	if !cached {
-		projectUpdateCacheMut.Lock()
-		projectUpdateCache[key] = cache
-		projectUpdateCacheMut.Unlock()
+		planUpdateCacheMut.Lock()
+		planUpdateCache[key] = cache
+		planUpdateCacheMut.Unlock()
 	}
 
 	return rowsAff, o.doAfterUpdateHooks(ctx, exec)
 }
 
 // UpdateAll updates all rows with the specified column values.
-func (q projectQuery) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
+func (q planQuery) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
 	queries.SetUpdate(q.Query, cols)
 
 	result, err := q.Query.ExecContext(ctx, exec)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to update all for projects")
+		return 0, errors.Wrap(err, "models: unable to update all for plans")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to retrieve rows affected for projects")
+		return 0, errors.Wrap(err, "models: unable to retrieve rows affected for plans")
 	}
 
 	return rowsAff, nil
 }
 
 // UpdateAll updates all rows with the specified column values, using an executor.
-func (o ProjectSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
+func (o PlanSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
 	ln := int64(len(o))
 	if ln == 0 {
 		return 0, nil
@@ -913,13 +949,13 @@ func (o ProjectSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, 
 
 	// Append all of the primary key values for each column
 	for _, obj := range o {
-		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), projectPrimaryKeyMapping)
+		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), planPrimaryKeyMapping)
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := fmt.Sprintf("UPDATE `projects` SET %s WHERE %s",
+	sql := fmt.Sprintf("UPDATE `plans` SET %s WHERE %s",
 		strmangle.SetParamNames("`", "`", 0, colNames),
-		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 0, projectPrimaryKeyColumns, len(o)))
+		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 0, planPrimaryKeyColumns, len(o)))
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -928,25 +964,25 @@ func (o ProjectSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, 
 	}
 	result, err := exec.ExecContext(ctx, sql, args...)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to update all in project slice")
+		return 0, errors.Wrap(err, "models: unable to update all in plan slice")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to retrieve rows affected all in update all project")
+		return 0, errors.Wrap(err, "models: unable to retrieve rows affected all in update all plan")
 	}
 	return rowsAff, nil
 }
 
-var mySQLProjectUniqueColumns = []string{
+var mySQLPlanUniqueColumns = []string{
 	"id",
 }
 
 // Upsert attempts an insert using an executor, and does an update or ignore on conflict.
 // See boil.Columns documentation for how to properly use updateColumns and insertColumns.
-func (o *Project) Upsert(ctx context.Context, exec boil.ContextExecutor, updateColumns, insertColumns boil.Columns) error {
+func (o *Plan) Upsert(ctx context.Context, exec boil.ContextExecutor, updateColumns, insertColumns boil.Columns) error {
 	if o == nil {
-		return errors.New("models: no projects provided for upsert")
+		return errors.New("models: no plans provided for upsert")
 	}
 	if !boil.TimestampsAreSkipped(ctx) {
 		currTime := time.Now().In(boil.GetLocation())
@@ -961,8 +997,8 @@ func (o *Project) Upsert(ctx context.Context, exec boil.ContextExecutor, updateC
 		return err
 	}
 
-	nzDefaults := queries.NonZeroDefaultSet(projectColumnsWithDefault, o)
-	nzUniques := queries.NonZeroDefaultSet(mySQLProjectUniqueColumns, o)
+	nzDefaults := queries.NonZeroDefaultSet(planColumnsWithDefault, o)
+	nzUniques := queries.NonZeroDefaultSet(mySQLPlanUniqueColumns, o)
 
 	if len(nzUniques) == 0 {
 		return errors.New("cannot upsert with a table that cannot conflict on a unique column")
@@ -990,44 +1026,44 @@ func (o *Project) Upsert(ctx context.Context, exec boil.ContextExecutor, updateC
 	key := buf.String()
 	strmangle.PutBuffer(buf)
 
-	projectUpsertCacheMut.RLock()
-	cache, cached := projectUpsertCache[key]
-	projectUpsertCacheMut.RUnlock()
+	planUpsertCacheMut.RLock()
+	cache, cached := planUpsertCache[key]
+	planUpsertCacheMut.RUnlock()
 
 	var err error
 
 	if !cached {
 		insert, _ := insertColumns.InsertColumnSet(
-			projectAllColumns,
-			projectColumnsWithDefault,
-			projectColumnsWithoutDefault,
+			planAllColumns,
+			planColumnsWithDefault,
+			planColumnsWithoutDefault,
 			nzDefaults,
 		)
 
 		update := updateColumns.UpdateColumnSet(
-			projectAllColumns,
-			projectPrimaryKeyColumns,
+			planAllColumns,
+			planPrimaryKeyColumns,
 		)
 
 		if !updateColumns.IsNone() && len(update) == 0 {
-			return errors.New("models: unable to upsert projects, could not build update column list")
+			return errors.New("models: unable to upsert plans, could not build update column list")
 		}
 
-		ret := strmangle.SetComplement(projectAllColumns, strmangle.SetIntersect(insert, update))
+		ret := strmangle.SetComplement(planAllColumns, strmangle.SetIntersect(insert, update))
 
-		cache.query = buildUpsertQueryMySQL(dialect, "`projects`", update, insert)
+		cache.query = buildUpsertQueryMySQL(dialect, "`plans`", update, insert)
 		cache.retQuery = fmt.Sprintf(
-			"SELECT %s FROM `projects` WHERE %s",
+			"SELECT %s FROM `plans` WHERE %s",
 			strings.Join(strmangle.IdentQuoteSlice(dialect.LQ, dialect.RQ, ret), ","),
 			strmangle.WhereClause("`", "`", 0, nzUniques),
 		)
 
-		cache.valueMapping, err = queries.BindMapping(projectType, projectMapping, insert)
+		cache.valueMapping, err = queries.BindMapping(planType, planMapping, insert)
 		if err != nil {
 			return err
 		}
 		if len(ret) != 0 {
-			cache.retMapping, err = queries.BindMapping(projectType, projectMapping, ret)
+			cache.retMapping, err = queries.BindMapping(planType, planMapping, ret)
 			if err != nil {
 				return err
 			}
@@ -1049,7 +1085,7 @@ func (o *Project) Upsert(ctx context.Context, exec boil.ContextExecutor, updateC
 	result, err := exec.ExecContext(ctx, cache.query, vals...)
 
 	if err != nil {
-		return errors.Wrap(err, "models: unable to upsert for projects")
+		return errors.Wrap(err, "models: unable to upsert for plans")
 	}
 
 	var lastID int64
@@ -1066,13 +1102,13 @@ func (o *Project) Upsert(ctx context.Context, exec boil.ContextExecutor, updateC
 	}
 
 	o.ID = int(lastID)
-	if lastID != 0 && len(cache.retMapping) == 1 && cache.retMapping[0] == projectMapping["id"] {
+	if lastID != 0 && len(cache.retMapping) == 1 && cache.retMapping[0] == planMapping["id"] {
 		goto CacheNoHooks
 	}
 
-	uniqueMap, err = queries.BindMapping(projectType, projectMapping, nzUniques)
+	uniqueMap, err = queries.BindMapping(planType, planMapping, nzUniques)
 	if err != nil {
-		return errors.Wrap(err, "models: unable to retrieve unique values for projects")
+		return errors.Wrap(err, "models: unable to retrieve unique values for plans")
 	}
 	nzUniqueCols = queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), uniqueMap)
 
@@ -1083,32 +1119,32 @@ func (o *Project) Upsert(ctx context.Context, exec boil.ContextExecutor, updateC
 	}
 	err = exec.QueryRowContext(ctx, cache.retQuery, nzUniqueCols...).Scan(returns...)
 	if err != nil {
-		return errors.Wrap(err, "models: unable to populate default values for projects")
+		return errors.Wrap(err, "models: unable to populate default values for plans")
 	}
 
 CacheNoHooks:
 	if !cached {
-		projectUpsertCacheMut.Lock()
-		projectUpsertCache[key] = cache
-		projectUpsertCacheMut.Unlock()
+		planUpsertCacheMut.Lock()
+		planUpsertCache[key] = cache
+		planUpsertCacheMut.Unlock()
 	}
 
 	return o.doAfterUpsertHooks(ctx, exec)
 }
 
-// Delete deletes a single Project record with an executor.
+// Delete deletes a single Plan record with an executor.
 // Delete will match against the primary key column to find the record to delete.
-func (o *Project) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (o *Plan) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	if o == nil {
-		return 0, errors.New("models: no Project provided for delete")
+		return 0, errors.New("models: no Plan provided for delete")
 	}
 
 	if err := o.doBeforeDeleteHooks(ctx, exec); err != nil {
 		return 0, err
 	}
 
-	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), projectPrimaryKeyMapping)
-	sql := "DELETE FROM `projects` WHERE `id`=?"
+	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), planPrimaryKeyMapping)
+	sql := "DELETE FROM `plans` WHERE `id`=?"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -1117,12 +1153,12 @@ func (o *Project) Delete(ctx context.Context, exec boil.ContextExecutor) (int64,
 	}
 	result, err := exec.ExecContext(ctx, sql, args...)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to delete from projects")
+		return 0, errors.Wrap(err, "models: unable to delete from plans")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: failed to get rows affected by delete for projects")
+		return 0, errors.Wrap(err, "models: failed to get rows affected by delete for plans")
 	}
 
 	if err := o.doAfterDeleteHooks(ctx, exec); err != nil {
@@ -1133,33 +1169,33 @@ func (o *Project) Delete(ctx context.Context, exec boil.ContextExecutor) (int64,
 }
 
 // DeleteAll deletes all matching rows.
-func (q projectQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (q planQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	if q.Query == nil {
-		return 0, errors.New("models: no projectQuery provided for delete all")
+		return 0, errors.New("models: no planQuery provided for delete all")
 	}
 
 	queries.SetDelete(q.Query)
 
 	result, err := q.Query.ExecContext(ctx, exec)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to delete all from projects")
+		return 0, errors.Wrap(err, "models: unable to delete all from plans")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: failed to get rows affected by deleteall for projects")
+		return 0, errors.Wrap(err, "models: failed to get rows affected by deleteall for plans")
 	}
 
 	return rowsAff, nil
 }
 
 // DeleteAll deletes all rows in the slice, using an executor.
-func (o ProjectSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (o PlanSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	if len(o) == 0 {
 		return 0, nil
 	}
 
-	if len(projectBeforeDeleteHooks) != 0 {
+	if len(planBeforeDeleteHooks) != 0 {
 		for _, obj := range o {
 			if err := obj.doBeforeDeleteHooks(ctx, exec); err != nil {
 				return 0, err
@@ -1169,12 +1205,12 @@ func (o ProjectSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) 
 
 	var args []interface{}
 	for _, obj := range o {
-		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), projectPrimaryKeyMapping)
+		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), planPrimaryKeyMapping)
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := "DELETE FROM `projects` WHERE " +
-		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 0, projectPrimaryKeyColumns, len(o))
+	sql := "DELETE FROM `plans` WHERE " +
+		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 0, planPrimaryKeyColumns, len(o))
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -1183,15 +1219,15 @@ func (o ProjectSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) 
 	}
 	result, err := exec.ExecContext(ctx, sql, args...)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to delete all from project slice")
+		return 0, errors.Wrap(err, "models: unable to delete all from plan slice")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: failed to get rows affected by deleteall for projects")
+		return 0, errors.Wrap(err, "models: failed to get rows affected by deleteall for plans")
 	}
 
-	if len(projectAfterDeleteHooks) != 0 {
+	if len(planAfterDeleteHooks) != 0 {
 		for _, obj := range o {
 			if err := obj.doAfterDeleteHooks(ctx, exec); err != nil {
 				return 0, err
@@ -1204,8 +1240,8 @@ func (o ProjectSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) 
 
 // Reload refetches the object from the database
 // using the primary keys with an executor.
-func (o *Project) Reload(ctx context.Context, exec boil.ContextExecutor) error {
-	ret, err := FindProject(ctx, exec, o.ID)
+func (o *Plan) Reload(ctx context.Context, exec boil.ContextExecutor) error {
+	ret, err := FindPlan(ctx, exec, o.ID)
 	if err != nil {
 		return err
 	}
@@ -1216,26 +1252,26 @@ func (o *Project) Reload(ctx context.Context, exec boil.ContextExecutor) error {
 
 // ReloadAll refetches every row with matching primary key column values
 // and overwrites the original object slice with the newly updated slice.
-func (o *ProjectSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) error {
+func (o *PlanSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) error {
 	if o == nil || len(*o) == 0 {
 		return nil
 	}
 
-	slice := ProjectSlice{}
+	slice := PlanSlice{}
 	var args []interface{}
 	for _, obj := range *o {
-		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), projectPrimaryKeyMapping)
+		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), planPrimaryKeyMapping)
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := "SELECT `projects`.* FROM `projects` WHERE " +
-		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 0, projectPrimaryKeyColumns, len(*o))
+	sql := "SELECT `plans`.* FROM `plans` WHERE " +
+		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 0, planPrimaryKeyColumns, len(*o))
 
 	q := queries.Raw(sql, args...)
 
 	err := q.Bind(ctx, exec, &slice)
 	if err != nil {
-		return errors.Wrap(err, "models: unable to reload all in ProjectSlice")
+		return errors.Wrap(err, "models: unable to reload all in PlanSlice")
 	}
 
 	*o = slice
@@ -1243,10 +1279,10 @@ func (o *ProjectSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor)
 	return nil
 }
 
-// ProjectExists checks if the Project row exists.
-func ProjectExists(ctx context.Context, exec boil.ContextExecutor, iD int) (bool, error) {
+// PlanExists checks if the Plan row exists.
+func PlanExists(ctx context.Context, exec boil.ContextExecutor, iD int) (bool, error) {
 	var exists bool
-	sql := "select exists(select 1 from `projects` where `id`=? limit 1)"
+	sql := "select exists(select 1 from `plans` where `id`=? limit 1)"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -1257,34 +1293,34 @@ func ProjectExists(ctx context.Context, exec boil.ContextExecutor, iD int) (bool
 
 	err := row.Scan(&exists)
 	if err != nil {
-		return false, errors.Wrap(err, "models: unable to check if projects exists")
+		return false, errors.Wrap(err, "models: unable to check if plans exists")
 	}
 
 	return exists, nil
 }
 
-// Exists checks if the Project row exists.
-func (o *Project) Exists(ctx context.Context, exec boil.ContextExecutor) (bool, error) {
-	return ProjectExists(ctx, exec, o.ID)
+// Exists checks if the Plan row exists.
+func (o *Plan) Exists(ctx context.Context, exec boil.ContextExecutor) (bool, error) {
+	return PlanExists(ctx, exec, o.ID)
 }
 
 // /////////////////////////////// BEGIN EXTENSIONS /////////////////////////////////
 // Expose table columns
 var (
-	ProjectAllColumns            = projectAllColumns
-	ProjectColumnsWithoutDefault = projectColumnsWithoutDefault
-	ProjectColumnsWithDefault    = projectColumnsWithDefault
-	ProjectPrimaryKeyColumns     = projectPrimaryKeyColumns
-	ProjectGeneratedColumns      = projectGeneratedColumns
+	PlanAllColumns            = planAllColumns
+	PlanColumnsWithoutDefault = planColumnsWithoutDefault
+	PlanColumnsWithDefault    = planColumnsWithDefault
+	PlanPrimaryKeyColumns     = planPrimaryKeyColumns
+	PlanGeneratedColumns      = planGeneratedColumns
 )
 
 // GetID get ID from model object
-func (o *Project) GetID() int {
+func (o *Plan) GetID() int {
 	return o.ID
 }
 
 // GetIDs extract IDs from model objects
-func (s ProjectSlice) GetIDs() []int {
+func (s PlanSlice) GetIDs() []int {
 	result := make([]int, len(s))
 	for i := range s {
 		result[i] = s[i].ID
@@ -1293,7 +1329,7 @@ func (s ProjectSlice) GetIDs() []int {
 }
 
 // GetIntfIDs extract IDs from model objects as interface slice
-func (s ProjectSlice) GetIntfIDs() []interface{} {
+func (s PlanSlice) GetIntfIDs() []interface{} {
 	result := make([]interface{}, len(s))
 	for i := range s {
 		result[i] = s[i].ID
@@ -1302,8 +1338,8 @@ func (s ProjectSlice) GetIntfIDs() []interface{} {
 }
 
 // ToIDMap convert a slice of model objects to a map with ID as key
-func (s ProjectSlice) ToIDMap() map[int]*Project {
-	result := make(map[int]*Project, len(s))
+func (s PlanSlice) ToIDMap() map[int]*Plan {
+	result := make(map[int]*Plan, len(s))
 	for _, o := range s {
 		result[o.ID] = o
 	}
@@ -1311,8 +1347,8 @@ func (s ProjectSlice) ToIDMap() map[int]*Project {
 }
 
 // ToUniqueItems construct a slice of unique items from the given slice
-func (s ProjectSlice) ToUniqueItems() ProjectSlice {
-	result := make(ProjectSlice, 0, len(s))
+func (s PlanSlice) ToUniqueItems() PlanSlice {
+	result := make(PlanSlice, 0, len(s))
 	mapChk := make(map[int]struct{}, len(s))
 	for i := len(s) - 1; i >= 0; i-- {
 		o := s[i]
@@ -1325,7 +1361,7 @@ func (s ProjectSlice) ToUniqueItems() ProjectSlice {
 }
 
 // FindItemByID find item by ID in the slice
-func (s ProjectSlice) FindItemByID(id int) *Project {
+func (s PlanSlice) FindItemByID(id int) *Plan {
 	for _, o := range s {
 		if o.ID == id {
 			return o
@@ -1336,7 +1372,7 @@ func (s ProjectSlice) FindItemByID(id int) *Project {
 
 // FindMissingItemIDs find all item IDs that are not in the list
 // NOTE: the input ID slice should contain unique values
-func (s ProjectSlice) FindMissingItemIDs(expectedIDs []int) []int {
+func (s PlanSlice) FindMissingItemIDs(expectedIDs []int) []int {
 	if len(s) == 0 {
 		return expectedIDs
 	}
@@ -1352,7 +1388,7 @@ func (s ProjectSlice) FindMissingItemIDs(expectedIDs []int) []int {
 
 // InsertAll inserts all rows with the specified column values, using an executor.
 // IMPORTANT: this will calculate the widest columns from all items in the slice, be careful if you want to use default column values
-func (o ProjectSlice) InsertAll(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) (int64, error) {
+func (o PlanSlice) InsertAll(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) (int64, error) {
 	if len(o) == 0 {
 		return 0, nil
 	}
@@ -1361,17 +1397,17 @@ func (o ProjectSlice) InsertAll(ctx context.Context, exec boil.ContextExecutor, 
 	wlCols := make(map[string]struct{}, 10)
 	for _, row := range o {
 		wl, _ := columns.InsertColumnSet(
-			projectAllColumns,
-			projectColumnsWithDefault,
-			projectColumnsWithoutDefault,
-			queries.NonZeroDefaultSet(projectColumnsWithDefault, row),
+			planAllColumns,
+			planColumnsWithDefault,
+			planColumnsWithoutDefault,
+			queries.NonZeroDefaultSet(planColumnsWithDefault, row),
 		)
 		for _, col := range wl {
 			wlCols[col] = struct{}{}
 		}
 	}
 	wl := make([]string, 0, len(wlCols))
-	for _, col := range projectAllColumns {
+	for _, col := range planAllColumns {
 		if _, ok := wlCols[col]; ok {
 			wl = append(wl, col)
 		}
@@ -1395,13 +1431,13 @@ func (o ProjectSlice) InsertAll(ctx context.Context, exec boil.ContextExecutor, 
 		}
 
 		if i == 0 {
-			sql = "INSERT INTO `projects` " + "(`" + strings.Join(wl, "`,`") + "`)" + " VALUES "
+			sql = "INSERT INTO `plans` " + "(`" + strings.Join(wl, "`,`") + "`)" + " VALUES "
 		}
 		sql += strmangle.Placeholders(dialect.UseIndexPlaceholders, len(wl), len(vals)+1, len(wl))
 		if i != len(o)-1 {
 			sql += ","
 		}
-		valMapping, err := queries.BindMapping(projectType, projectMapping, wl)
+		valMapping, err := queries.BindMapping(planType, planMapping, wl)
 		if err != nil {
 			return 0, err
 		}
@@ -1418,15 +1454,15 @@ func (o ProjectSlice) InsertAll(ctx context.Context, exec boil.ContextExecutor, 
 
 	result, err := exec.ExecContext(ctx, sql, vals...)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to insert all from project slice")
+		return 0, errors.Wrap(err, "models: unable to insert all from plan slice")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: failed to get rows affected by insertall for projects")
+		return 0, errors.Wrap(err, "models: failed to get rows affected by insertall for plans")
 	}
 
-	if len(projectAfterInsertHooks) != 0 {
+	if len(planAfterInsertHooks) != 0 {
 		for _, obj := range o {
 			if err := obj.doAfterInsertHooks(ctx, exec); err != nil {
 				return 0, err
@@ -1439,14 +1475,14 @@ func (o ProjectSlice) InsertAll(ctx context.Context, exec boil.ContextExecutor, 
 
 // InsertIgnoreAll inserts all rows with ignoring the existing ones having the same primary key values.
 // IMPORTANT: this will calculate the widest columns from all items in the slice, be careful if you want to use default column values
-func (o ProjectSlice) InsertIgnoreAll(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) (int64, error) {
+func (o PlanSlice) InsertIgnoreAll(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) (int64, error) {
 	return o.UpsertAll(ctx, exec, boil.None(), columns)
 }
 
 // UpsertAll inserts or updates all rows
 // Currently it doesn't support "NoContext" and "NoRowsAffected"
 // IMPORTANT: this will calculate the widest columns from all items in the slice, be careful if you want to use default column values
-func (o ProjectSlice) UpsertAll(ctx context.Context, exec boil.ContextExecutor, updateColumns, insertColumns boil.Columns) (int64, error) {
+func (o PlanSlice) UpsertAll(ctx context.Context, exec boil.ContextExecutor, updateColumns, insertColumns boil.Columns) (int64, error) {
 	if len(o) == 0 {
 		return 0, nil
 	}
@@ -1454,33 +1490,33 @@ func (o ProjectSlice) UpsertAll(ctx context.Context, exec boil.ContextExecutor, 
 	// Calculate the widest columns from all rows need to upsert
 	insertCols := make(map[string]struct{}, 10)
 	for _, row := range o {
-		nzUniques := queries.NonZeroDefaultSet(mySQLProjectUniqueColumns, row)
+		nzUniques := queries.NonZeroDefaultSet(mySQLPlanUniqueColumns, row)
 		if len(nzUniques) == 0 {
 			return 0, errors.New("cannot upsert with a table that cannot conflict on a unique column")
 		}
 		insert, _ := insertColumns.InsertColumnSet(
-			projectAllColumns,
-			projectColumnsWithDefault,
-			projectColumnsWithoutDefault,
-			queries.NonZeroDefaultSet(projectColumnsWithDefault, row),
+			planAllColumns,
+			planColumnsWithDefault,
+			planColumnsWithoutDefault,
+			queries.NonZeroDefaultSet(planColumnsWithDefault, row),
 		)
 		for _, col := range insert {
 			insertCols[col] = struct{}{}
 		}
 	}
 	insert := make([]string, 0, len(insertCols))
-	for _, col := range projectAllColumns {
+	for _, col := range planAllColumns {
 		if _, ok := insertCols[col]; ok {
 			insert = append(insert, col)
 		}
 	}
 
 	update := updateColumns.UpdateColumnSet(
-		projectAllColumns,
-		projectPrimaryKeyColumns,
+		planAllColumns,
+		planPrimaryKeyColumns,
 	)
 	if !updateColumns.IsNone() && len(update) == 0 {
-		return 0, errors.New("models: unable to upsert projects, could not build update column list")
+		return 0, errors.New("models: unable to upsert plans, could not build update column list")
 	}
 
 	buf := strmangle.GetBuffer()
@@ -1489,14 +1525,14 @@ func (o ProjectSlice) UpsertAll(ctx context.Context, exec boil.ContextExecutor, 
 	if len(update) == 0 {
 		fmt.Fprintf(
 			buf,
-			"INSERT IGNORE INTO `projects`(%s) VALUES %s",
+			"INSERT IGNORE INTO `plans`(%s) VALUES %s",
 			strings.Join(strmangle.IdentQuoteSlice(dialect.LQ, dialect.RQ, insert), ","),
 			strmangle.Placeholders(false, len(insert)*len(o), 1, len(insert)),
 		)
 	} else {
 		fmt.Fprintf(
 			buf,
-			"INSERT INTO `projects`(%s) VALUES %s ON DUPLICATE KEY UPDATE ",
+			"INSERT INTO `plans`(%s) VALUES %s ON DUPLICATE KEY UPDATE ",
 			strings.Join(strmangle.IdentQuoteSlice(dialect.LQ, dialect.RQ, insert), ","),
 			strmangle.Placeholders(false, len(insert)*len(o), 1, len(insert)),
 		)
@@ -1514,7 +1550,7 @@ func (o ProjectSlice) UpsertAll(ctx context.Context, exec boil.ContextExecutor, 
 	}
 
 	query := buf.String()
-	valueMapping, err := queries.BindMapping(projectType, projectMapping, insert)
+	valueMapping, err := queries.BindMapping(planType, planMapping, insert)
 	if err != nil {
 		return 0, err
 	}
@@ -1546,15 +1582,15 @@ func (o ProjectSlice) UpsertAll(ctx context.Context, exec boil.ContextExecutor, 
 
 	result, err := exec.ExecContext(ctx, query, vals...)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to upsert for projects")
+		return 0, errors.Wrap(err, "models: unable to upsert for plans")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: failed to get rows affected by upsert for projects")
+		return 0, errors.Wrap(err, "models: failed to get rows affected by upsert for plans")
 	}
 
-	if len(projectAfterUpsertHooks) != 0 {
+	if len(planAfterUpsertHooks) != 0 {
 		for _, obj := range o {
 			if err := obj.doAfterUpsertHooks(ctx, exec); err != nil {
 				return 0, err
@@ -1565,10 +1601,10 @@ func (o ProjectSlice) UpsertAll(ctx context.Context, exec boil.ContextExecutor, 
 	return rowsAff, nil
 }
 
-// DeleteAllByPage delete all Project records from the slice.
+// DeleteAllByPage delete all Plan records from the slice.
 // This function deletes data by pages to avoid exceeding Mysql limitation (max placeholders: 65535)
 // Mysql Error 1390: Prepared statement contains too many placeholders.
-func (s ProjectSlice) DeleteAllByPage(ctx context.Context, exec boil.ContextExecutor, limits ...int) (int64, error) {
+func (s PlanSlice) DeleteAllByPage(ctx context.Context, exec boil.ContextExecutor, limits ...int) (int64, error) {
 	length := len(s)
 	if length == 0 {
 		return 0, nil
@@ -1604,10 +1640,10 @@ func (s ProjectSlice) DeleteAllByPage(ctx context.Context, exec boil.ContextExec
 	return rowsAffected, nil
 }
 
-// UpdateAllByPage update all Project records from the slice.
+// UpdateAllByPage update all Plan records from the slice.
 // This function updates data by pages to avoid exceeding Mysql limitation (max placeholders: 65535)
 // Mysql Error 1390: Prepared statement contains too many placeholders.
-func (s ProjectSlice) UpdateAllByPage(ctx context.Context, exec boil.ContextExecutor, cols M, limits ...int) (int64, error) {
+func (s PlanSlice) UpdateAllByPage(ctx context.Context, exec boil.ContextExecutor, cols M, limits ...int) (int64, error) {
 	length := len(s)
 	if length == 0 {
 		return 0, nil
@@ -1644,17 +1680,17 @@ func (s ProjectSlice) UpdateAllByPage(ctx context.Context, exec boil.ContextExec
 	return rowsAffected, nil
 }
 
-// InsertAllByPage insert all Project records from the slice.
+// InsertAllByPage insert all Plan records from the slice.
 // This function inserts data by pages to avoid exceeding Mysql limitation (max placeholders: 65535)
 // Mysql Error 1390: Prepared statement contains too many placeholders.
-func (s ProjectSlice) InsertAllByPage(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns, limits ...int) (int64, error) {
+func (s PlanSlice) InsertAllByPage(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns, limits ...int) (int64, error) {
 	length := len(s)
 	if length == 0 {
 		return 0, nil
 	}
 
 	// MySQL max placeholders = 65535
-	chunkSize := MaxPageSize / reflect.ValueOf(&ProjectColumns).Elem().NumField()
+	chunkSize := MaxPageSize / reflect.ValueOf(&PlanColumns).Elem().NumField()
 	if len(limits) > 0 && limits[0] > 0 && limits[0] < chunkSize {
 		chunkSize = limits[0]
 	}
@@ -1683,16 +1719,16 @@ func (s ProjectSlice) InsertAllByPage(ctx context.Context, exec boil.ContextExec
 	return rowsAffected, nil
 }
 
-// InsertIgnoreAllByPage insert all Project records from the slice.
+// InsertIgnoreAllByPage insert all Plan records from the slice.
 // This function inserts data by pages to avoid exceeding Postgres limitation (max parameters: 65535)
-func (s ProjectSlice) InsertIgnoreAllByPage(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns, limits ...int) (int64, error) {
+func (s PlanSlice) InsertIgnoreAllByPage(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns, limits ...int) (int64, error) {
 	length := len(s)
 	if length == 0 {
 		return 0, nil
 	}
 
 	// max number of parameters = 65535
-	chunkSize := MaxPageSize / reflect.ValueOf(&ProjectColumns).Elem().NumField()
+	chunkSize := MaxPageSize / reflect.ValueOf(&PlanColumns).Elem().NumField()
 	if len(limits) > 0 && limits[0] > 0 && limits[0] < chunkSize {
 		chunkSize = limits[0]
 	}
@@ -1721,17 +1757,17 @@ func (s ProjectSlice) InsertIgnoreAllByPage(ctx context.Context, exec boil.Conte
 	return rowsAffected, nil
 }
 
-// UpsertAllByPage upsert all Project records from the slice.
+// UpsertAllByPage upsert all Plan records from the slice.
 // This function upserts data by pages to avoid exceeding Mysql limitation (max placeholders: 65535)
 // Mysql Error 1390: Prepared statement contains too many placeholders.
-func (s ProjectSlice) UpsertAllByPage(ctx context.Context, exec boil.ContextExecutor, updateColumns, insertColumns boil.Columns, limits ...int) (int64, error) {
+func (s PlanSlice) UpsertAllByPage(ctx context.Context, exec boil.ContextExecutor, updateColumns, insertColumns boil.Columns, limits ...int) (int64, error) {
 	length := len(s)
 	if length == 0 {
 		return 0, nil
 	}
 
 	// MySQL max placeholders = 65535
-	chunkSize := MaxPageSize / reflect.ValueOf(&ProjectColumns).Elem().NumField()
+	chunkSize := MaxPageSize / reflect.ValueOf(&PlanColumns).Elem().NumField()
 	if len(limits) > 0 && limits[0] > 0 && limits[0] < chunkSize {
 		chunkSize = limits[0]
 	}
@@ -1760,34 +1796,34 @@ func (s ProjectSlice) UpsertAllByPage(ctx context.Context, exec boil.ContextExec
 	return rowsAffected, nil
 }
 
-// LoadCompaniesByPage performs eager loading of values by page. This is for a N-1 relationship.
-func (s ProjectSlice) LoadCompaniesByPage(ctx context.Context, e boil.ContextExecutor, mods ...qm.QueryMod) error {
-	return s.LoadCompaniesByPageEx(ctx, e, DefaultPageSize, mods...)
+// LoadSupportersByPage performs eager loading of values by page. This is for a N-1 relationship.
+func (s PlanSlice) LoadSupportersByPage(ctx context.Context, e boil.ContextExecutor, mods ...qm.QueryMod) error {
+	return s.LoadSupportersByPageEx(ctx, e, DefaultPageSize, mods...)
 }
-func (s ProjectSlice) LoadCompaniesByPageEx(ctx context.Context, e boil.ContextExecutor, pageSize int, mods ...qm.QueryMod) error {
+func (s PlanSlice) LoadSupportersByPageEx(ctx context.Context, e boil.ContextExecutor, pageSize int, mods ...qm.QueryMod) error {
 	if len(s) == 0 {
 		return nil
 	}
-	for _, chunk := range chunkSlice[*Project](s, pageSize) {
-		if err := chunk[0].L.LoadCompany(ctx, e, false, &chunk, queryMods(mods)); err != nil {
+	for _, chunk := range chunkSlice[*Plan](s, pageSize) {
+		if err := chunk[0].L.LoadSupporter(ctx, e, false, &chunk, queryMods(mods)); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (s ProjectSlice) GetLoadedCompanies() CompanySlice {
-	result := make(CompanySlice, 0, len(s))
-	mapCheckDup := make(map[*Company]struct{})
+func (s PlanSlice) GetLoadedSupporters() SupporterSlice {
+	result := make(SupporterSlice, 0, len(s))
+	mapCheckDup := make(map[*Supporter]struct{})
 	for _, item := range s {
-		if item.R == nil || item.R.Company == nil {
+		if item.R == nil || item.R.Supporter == nil {
 			continue
 		}
-		if _, ok := mapCheckDup[item.R.Company]; ok {
+		if _, ok := mapCheckDup[item.R.Supporter]; ok {
 			continue
 		}
-		result = append(result, item.R.Company)
-		mapCheckDup[item.R.Company] = struct{}{}
+		result = append(result, item.R.Supporter)
+		mapCheckDup[item.R.Supporter] = struct{}{}
 	}
 	return result
 }
