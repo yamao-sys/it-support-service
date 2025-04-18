@@ -6,3 +6,8 @@ no-tests = true             # テストコードを作成するか
 
 [mysql]
 sslmode = "false"
+dbname = "it_support"
+host   = "db"
+port   = 3306
+user   = "root"
+pass   = "root"
