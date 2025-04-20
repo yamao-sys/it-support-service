@@ -305,6 +305,8 @@ components:
               - projectId
               - title
               - description
+              - startDate
+              - endDate
               - unitPrice
             properties:
               projectId:
