@@ -59,7 +59,7 @@ func (m *MockProjectService) MappingValidationErrorStruct(err error) businessapi
 func (s *TestProjectsHandlerSuite) SetupTest() {
 	s.SetDBCon()
 
-	s.initializeHandlers(businessservices.NewProjectService(DBCon))
+	s.initializeHandlers(businessservices.NewProjectService(DBCon), businessservices.NewPlanService(DBCon))
 
 	// NOTE: CSRFトークンのセット
 	s.SetCsrfHeaderValues()
@@ -238,7 +238,7 @@ func (s *TestProjectsHandlerSuite) TestGetProjectsFetchLists_StatusInternalServe
 	mockProjectService.On("Create", mock.AnythingOfType("*context.valueCtx"), mock.AnythingOfType("*businessapi.ProjectStoreInput"), mock.AnythingOfType("int") ).Return(models.Project{}, nil, nil)
 	mockProjectService.On("Update", mock.AnythingOfType("*context.valueCtx"), mock.AnythingOfType("*businessapi.ProjectStoreInput"), mock.AnythingOfType("int") ).Return(models.Project{}, nil, nil)
 	mockProjectService.On("MappingValidationErrorStruct", mock.AnythingOfType("error")).Return(businessapi.ProjectValidationError{})
-	s.initializeHandlers(mockProjectService)
+	s.initializeHandlers(mockProjectService, businessservices.NewPlanService(DBCon))
 	result := testutil.NewRequest().Get("/projects").WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).GoWithHTTPHandler(s.T(), e)
 
 	assert.Equal(s.T(), http.StatusInternalServerError, result.Code())
@@ -348,7 +348,7 @@ func (s *TestProjectsHandlerSuite) TestPostProjectsCreate_StatusInternalServerEr
 	mockProjectService.On("Create", mock.AnythingOfType("*context.valueCtx"), mock.AnythingOfType("*businessapi.ProjectStoreInput"), mock.AnythingOfType("int") ).Return(models.Project{}, nil, errors.New("internal server error"))
 	mockProjectService.On("Update", mock.AnythingOfType("*context.valueCtx"), mock.AnythingOfType("*businessapi.ProjectStoreInput"), mock.AnythingOfType("int") ).Return(models.Project{}, nil, nil)
 	mockProjectService.On("MappingValidationErrorStruct", mock.AnythingOfType("error")).Return(businessapi.ProjectValidationError{})
-	s.initializeHandlers(mockProjectService)
+	s.initializeHandlers(mockProjectService, businessservices.NewPlanService(DBCon))
 
 	result := testutil.NewRequest().Post("/projects").WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithJsonBody(reqBody).GoWithHTTPHandler(s.T(), e)
 
@@ -577,7 +577,7 @@ func (s *TestProjectsHandlerSuite) TestPutProjectsId_StatusInternalServerError()
 	mockProjectService.On("Create", mock.AnythingOfType("*context.valueCtx"), mock.AnythingOfType("*businessapi.ProjectStoreInput"), mock.AnythingOfType("int") ).Return(models.Project{}, nil, errors.New("internal server error"))
 	mockProjectService.On("Update", mock.AnythingOfType("*context.valueCtx"), mock.AnythingOfType("*businessapi.ProjectStoreInput"), mock.AnythingOfType("int") ).Return(models.Project{}, nil, errors.New("internal server error"))
 	mockProjectService.On("MappingValidationErrorStruct", mock.AnythingOfType("error")).Return(businessapi.ProjectValidationError{})
-	s.initializeHandlers(mockProjectService)
+	s.initializeHandlers(mockProjectService, businessservices.NewPlanService(DBCon))
 
 	result := testutil.NewRequest().Put("/projects/"+strconv.Itoa(project.ID)).WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithJsonBody(reqBody).GoWithHTTPHandler(s.T(), e)
 
