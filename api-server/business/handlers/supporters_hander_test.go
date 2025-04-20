@@ -22,7 +22,7 @@ type TestSupportersHandlerSuite struct {
 func (s *TestSupportersHandlerSuite) SetupTest() {
 	s.SetDBCon()
 
-	s.initializeHandlers(businessservices.NewProjectService(DBCon))
+	s.initializeHandlers(businessservices.NewProjectService(DBCon), businessservices.NewPlanService(DBCon))
 
 	// NOTE: CSRFトークンのセット
 	s.SetCsrfHeaderValues()

@@ -27,6 +27,27 @@ const (
 	BusinessAuthenticationScopes = "businessAuthentication.Scopes"
 )
 
+// Plan defines model for Plan.
+type Plan struct {
+	CreatedAt   *time.Time          `json:"createdAt,omitempty"`
+	Description *string             `json:"description,omitempty"`
+	EndDate     *openapi_types.Date `json:"endDate,omitempty"`
+	Id          *string             `json:"id,omitempty"`
+	ProjectId   *string             `json:"projectId,omitempty"`
+	StartDate   *openapi_types.Date `json:"startDate,omitempty"`
+	Title       *string             `json:"title,omitempty"`
+	UnitPrice   *int                `json:"unitPrice,omitempty"`
+}
+
+// PlanValidationError defines model for PlanValidationError.
+type PlanValidationError struct {
+	Description *[]string `json:"description,omitempty"`
+	EndDate     *[]string `json:"endDate,omitempty"`
+	StartDate   *[]string `json:"startDate,omitempty"`
+	Title       *[]string `json:"title,omitempty"`
+	UnitPrice   *[]string `json:"unitPrice,omitempty"`
+}
+
 // Project Project
 type Project struct {
 	CreatedAt   *time.Time          `json:"created_at,omitempty"`
@@ -76,6 +97,12 @@ type NotFoundErrorResponse struct {
 	Message string `json:"message"`
 }
 
+// PlanStoreResponse defines model for PlanStoreResponse.
+type PlanStoreResponse struct {
+	Errors PlanValidationError `json:"errors"`
+	Plan   Plan                `json:"plan"`
+}
+
 // ProjectResponse defines model for ProjectResponse.
 type ProjectResponse struct {
 	// Project Project
@@ -110,6 +137,16 @@ type CompanySignInInput struct {
 	Password string `json:"password"`
 }
 
+// PlanStoreInput defines model for PlanStoreInput.
+type PlanStoreInput struct {
+	Description string             `json:"description"`
+	EndDate     openapi_types.Date `json:"endDate"`
+	ProjectId   int                `json:"projectId"`
+	StartDate   openapi_types.Date `json:"startDate"`
+	Title       string             `json:"title"`
+	UnitPrice   int                `json:"unitPrice"`
+}
+
 // ProjectStoreInput defines model for ProjectStoreInput.
 type ProjectStoreInput struct {
 	Description *string             `json:"description,omitempty"`
@@ -131,6 +168,16 @@ type SupporterSignInInput struct {
 type PostCompaniesSignInJSONBody struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
+}
+
+// PostPlansJSONBody defines parameters for PostPlans.
+type PostPlansJSONBody struct {
+	Description string             `json:"description"`
+	EndDate     openapi_types.Date `json:"endDate"`
+	ProjectId   int                `json:"projectId"`
+	StartDate   openapi_types.Date `json:"startDate"`
+	Title       string             `json:"title"`
+	UnitPrice   int                `json:"unitPrice"`
 }
 
 // GetProjectsParams defines parameters for GetProjects.
@@ -169,6 +216,9 @@ type PostSupportersSignInJSONBody struct {
 // PostCompaniesSignInJSONRequestBody defines body for PostCompaniesSignIn for application/json ContentType.
 type PostCompaniesSignInJSONRequestBody PostCompaniesSignInJSONBody
 
+// PostPlansJSONRequestBody defines body for PostPlans for application/json ContentType.
+type PostPlansJSONRequestBody PostPlansJSONBody
+
 // PostProjectsJSONRequestBody defines body for PostProjects for application/json ContentType.
 type PostProjectsJSONRequestBody PostProjectsJSONBody
 
@@ -186,6 +236,9 @@ type ServerInterface interface {
 	// Get Csrf
 	// (GET /csrf)
 	GetCsrf(ctx echo.Context) error
+	// Plan Create
+	// (POST /plans)
+	PostPlans(ctx echo.Context) error
 	// Project List
 	// (GET /projects)
 	GetProjects(ctx echo.Context, params GetProjectsParams) error
@@ -223,6 +276,17 @@ func (w *ServerInterfaceWrapper) GetCsrf(ctx echo.Context) error {
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.GetCsrf(ctx)
+	return err
+}
+
+// PostPlans converts echo context to params.
+func (w *ServerInterfaceWrapper) PostPlans(ctx echo.Context) error {
+	var err error
+
+	ctx.Set(BusinessAuthenticationScopes, []string{})
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.PostPlans(ctx)
 	return err
 }
 
@@ -332,6 +396,7 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 
 	router.POST(baseURL+"/companies/signIn", wrapper.PostCompaniesSignIn)
 	router.GET(baseURL+"/csrf", wrapper.GetCsrf)
+	router.POST(baseURL+"/plans", wrapper.PostPlans)
 	router.GET(baseURL+"/projects", wrapper.GetProjects)
 	router.POST(baseURL+"/projects", wrapper.PostProjects)
 	router.GET(baseURL+"/projects/:id", wrapper.GetProjectsId)
@@ -365,6 +430,11 @@ type InternalServerErrorResponseJSONResponse struct {
 type NotFoundErrorResponseJSONResponse struct {
 	Code    int    `json:"code"`
 	Message string `json:"message"`
+}
+
+type PlanStoreResponseJSONResponse struct {
+	Errors PlanValidationError `json:"errors"`
+	Plan   Plan                `json:"plan"`
 }
 
 type ProjectResponseJSONResponse struct {
@@ -460,6 +530,34 @@ type GetCsrf500JSONResponse struct {
 }
 
 func (response GetCsrf500JSONResponse) VisitGetCsrfResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(500)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostPlansRequestObject struct {
+	Body *PostPlansJSONRequestBody
+}
+
+type PostPlansResponseObject interface {
+	VisitPostPlansResponse(w http.ResponseWriter) error
+}
+
+type PostPlans200JSONResponse struct{ PlanStoreResponseJSONResponse }
+
+func (response PostPlans200JSONResponse) VisitPostPlansResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostPlans500JSONResponse struct {
+	InternalServerErrorResponseJSONResponse
+}
+
+func (response PostPlans500JSONResponse) VisitPostPlansResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(500)
 
@@ -635,6 +733,9 @@ type StrictServerInterface interface {
 	// Get Csrf
 	// (GET /csrf)
 	GetCsrf(ctx context.Context, request GetCsrfRequestObject) (GetCsrfResponseObject, error)
+	// Plan Create
+	// (POST /plans)
+	PostPlans(ctx context.Context, request PostPlansRequestObject) (PostPlansResponseObject, error)
 	// Project List
 	// (GET /projects)
 	GetProjects(ctx context.Context, request GetProjectsRequestObject) (GetProjectsResponseObject, error)
@@ -710,6 +811,35 @@ func (sh *strictHandler) GetCsrf(ctx echo.Context) error {
 		return err
 	} else if validResponse, ok := response.(GetCsrfResponseObject); ok {
 		return validResponse.VisitGetCsrfResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("unexpected response type: %T", response)
+	}
+	return nil
+}
+
+// PostPlans operation middleware
+func (sh *strictHandler) PostPlans(ctx echo.Context) error {
+	var request PostPlansRequestObject
+
+	var body PostPlansJSONRequestBody
+	if err := ctx.Bind(&body); err != nil {
+		return err
+	}
+	request.Body = &body
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.PostPlans(ctx.Request().Context(), request.(PostPlansRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PostPlans")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(PostPlansResponseObject); ok {
+		return validResponse.VisitPostPlansResponse(ctx.Response())
 	} else if response != nil {
 		return fmt.Errorf("unexpected response type: %T", response)
 	}
@@ -858,26 +988,29 @@ func (sh *strictHandler) PostSupportersSignIn(ctx echo.Context) error {
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"H4sIAAAAAAAC/+xZ32/bNhD+VwRuj2qdbh1Q6C31tsLY1hn1tpfAKBjpbLOVSJU8pTUC/e8DSVmiJMqW",
+	"fyRLgL05Iu9433dH3kfmnsQiywUHjopE90TClwIUvhUJA/NhKrKc8u2CrfmMz3heoP4aC47AzU+a5ymL",
+	"KTLBJ5+U4PqbijeQUf0rlyIHiZUzyChL9Q/c5kAiolAyviZlSHKq1FchE89gGZqomISERDeVD8diGe4s",
+	"xO0niJGU2iQBFUuW67BItEMRWBhBYIGUIZmnlC9QSDgXWms9D0Dgyc8UQY+thMwokogk+kPoIUMKDWTm",
+	"ssE4whqkHlZIJY52hgxT8IZUcIZzyWLwLdNhvQlp57FNsRtVA9ZdY0yadDYCkw4nQ3blJ5ckpq5jZHcu",
+	"ebdCpEC5Hs3ot7dFsgb0pzBjfN/wZTJcjmHcsuuSrrTPRZHnQiLIZ77xaxzdrW+cq1xw5Tnn3tLkgz0I",
+	"P1RzzsEupZDmF0PIlJeF6gOVkm77wK2DE865BkdQAynDNtY/P5+E8dhQ6kVCsgGagGVkAfhiKsRnBl7v",
+	"dSVo91MlVxdIR6zk6i/xGfjhimumjuJeyVUgHZpnHEFymi5A3oH8RWfxEvGLBAYOFVCKrmEELu2imT8G",
+	"3A5LYMEEBk2rqN4L/FUUPHneON8LDAwMD8JaK1z0UPhewopE5LtJI8Qm1kpN9Ir/0JQlxqmJyJyZKeVj",
+	"TPtdXH8MjzlQnI7cosK2jQsQUQmLg3CqaQO6ZByWqtd5gDxyWu2ivsxeho3jUtySAB5y1O/sIo2Qwzec",
+	"0zUMnb41/HazHEXEgRZaOw47URxBkAo0Dy2COirp2cqGnkoaEA4dvA8lHXrhnCsetKS2FaPH59Xx2ek3",
+	"EihCco09zf0CWeYV3he9TiT7dsTMP/pYN8HK0jLXqyfbGbun2aHL19iqbtE43qhFzXizmqPxJi3yjtir",
+	"Lqld8nwcN63BezyR0F/QH+llK/pjcmZJH7w4f7zdf3PeO27yPj7GfXfnXX6q/viHSCDdk5kntgFcmsdb",
+	"td4tjjBz3zOe3ibtZ7OTLNXPqw4P4kIy3C5077A5vC0U46DUdYEb4Fg1OROL3ouxbUch4TTTztCIjCac",
+	"nP0GW9vyGF+J/mbe+Q+u5zMdlCqyjMotiQhpMOwmkZDcgVTW8tXLKw1c5MBpzkhEfnypP4Ukp7gxsRsB",
+	"RTkDNVGmr5oSFcokTReqwaJbDZkLhdPdbNuESeg8Dm+HhFnr/XjieTzuvrv8cHU17KuaNxl6sChD8vpo",
+	"e49KK0Py0xg/+270bsGQ6Gbp5q5mEOla2ZtpxS1ZartJrORKL1/toHYy3gFO9fhJzLmPJg8N8x1gUEVa",
+	"A9V/Woz68qn2l9zcTDmh0DrP+CcVWf96/wB8DZ8gN8uyRaa5eU9ND3f4tCRWhDq3paHCmTcXn5xKmgEa",
+	"8XxTnVdfCpDb5rjK63tRuEdPL09i13eX/G8Jrvq6jshleMfYUsvv4VJtiD2+Wnv/0ijPoPQp1WxFab9s",
+	"G1Ldyp3cs6QcU77m/06+AtbNralflhD3DoyyAE8hNzebcyq53YReH7bzP5CezfViI74Olm/hq97iUWj9",
+	"f0+08/R3nuzdE2r36DFOndVvJGfIM+8/+U6iffhhaKxEO/yU9uAirfPq5KSqyY1OlvGhfdsNU8iURGSD",
+	"mEeTSSpimm6EwujN1ZtXRJdC5aSr9LUyCoAnuWAcm71mBFMZdmc3EXhsnPD6lrXU9C1Wy9C+nVEaHhur",
+	"QMpl+W8AAAD//6GxPmI7IgAA",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

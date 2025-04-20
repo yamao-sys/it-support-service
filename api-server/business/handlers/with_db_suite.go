@@ -67,7 +67,7 @@ func (s *WithDBSuite) SetCsrfHeaderValues() {
 }
 
 
-func (s *WithDBSuite) initializeHandlers(projectService businessservices.ProjectService) {
+func (s *WithDBSuite) initializeHandlers(projectService businessservices.ProjectService, planService businessservices.PlanService) {
 	csrfServer := NewCsrfHandler()
 
 	supporterService := businessservices.NewSupporterService(DBCon)
@@ -77,8 +77,10 @@ func (s *WithDBSuite) initializeHandlers(projectService businessservices.Project
 	testCompaniesHandler := NewCompaniesHandler(companyService)
 
 	testProjectsHandler := NewProjectsHandler(projectService)
+	
+	testPlansHandler := NewPlansHandler(planService)
 
-	mainHandler := NewMainHandler(csrfServer, testSupportersHandler, testCompaniesHandler, testProjectsHandler)
+	mainHandler := NewMainHandler(csrfServer, testSupportersHandler, testCompaniesHandler, testProjectsHandler, testPlansHandler)
 
 	strictHandler := businessapi.NewStrictHandler(mainHandler, []businessapi.StrictMiddlewareFunc{businessmiddlewares.AuthMiddleware})
 	businessapi.RegisterHandlers(e, strictHandler)
@@ -97,4 +99,19 @@ func (s *WithDBSuite) companySignIn() (company *models.Company, cookieString str
 	cookieString = result.Recorder.Result().Header.Values("Set-Cookie")[0]
 
 	return company, cookieString
+}
+
+func (s *WithDBSuite) supporterSignIn() (supporter *models.Supporter, cookieString string) {
+	// NOTE: テスト用サポータの作成
+	supporter = factories.SupporterFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.Supporter)
+	supporter.Insert(ctx, DBCon, boil.Infer())
+
+	reqBody := businessapi.SupporterSignInInput{
+		Email: "test@example.com",
+		Password: "password",
+	}
+	result := testutil.NewRequest().Post("/supporters/signIn").WithHeader("Cookie", csrfTokenCookie).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithJsonBody(reqBody).GoWithHTTPHandler(s.T(), e)
+	cookieString = result.Recorder.Result().Header.Values("Set-Cookie")[0]
+
+	return supporter, cookieString
 }

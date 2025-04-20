@@ -20,6 +20,9 @@ type MainHandler interface {
 	PostProjects(ctx context.Context, request businessapi.PostProjectsRequestObject) (businessapi.PostProjectsResponseObject, error)
 	GetProjectsId(ctx context.Context, request businessapi.GetProjectsIdRequestObject) (businessapi.GetProjectsIdResponseObject, error)
 	PutProjectsId(ctx context.Context, request businessapi.PutProjectsIdRequestObject) (businessapi.PutProjectsIdResponseObject, error)
+
+	// handlers /plans
+	PostPlans(ctx context.Context, request businessapi.PostPlansRequestObject) (businessapi.PostPlansResponseObject, error)
 }
 
 type mainHandler struct {
@@ -27,6 +30,7 @@ type mainHandler struct {
 	supportersHandler SupportersHandler
 	companiesHandler CompaniesHandler
 	projectsHandler ProjectsHandler
+	plansHandler PlansHandler
 }
 
 func NewMainHandler(
@@ -34,8 +38,9 @@ func NewMainHandler(
 	supportersHandler SupportersHandler,
 	companiesHandler CompaniesHandler,
 	projectsHandler ProjectsHandler,
+	plansHandler PlansHandler,
 ) MainHandler {
-	return &mainHandler{csrfHandler, supportersHandler, companiesHandler, projectsHandler}
+	return &mainHandler{csrfHandler, supportersHandler, companiesHandler, projectsHandler, plansHandler}
 }
 
 func (mh *mainHandler) GetCsrf(ctx context.Context, request businessapi.GetCsrfRequestObject) (businessapi.GetCsrfResponseObject, error) {
@@ -72,5 +77,10 @@ func (mh *mainHandler) GetProjectsId(ctx context.Context, request businessapi.Ge
 //lint:ignore ST1003 oapi-codegenの自動生成メソッド名
 func (mh *mainHandler) PutProjectsId(ctx context.Context, request businessapi.PutProjectsIdRequestObject) (businessapi.PutProjectsIdResponseObject, error) {
 	res, err := mh.projectsHandler.PutProjectsId(ctx, request)
+	return res, err
+}
+
+func (mh *mainHandler) PostPlans(ctx context.Context, request businessapi.PostPlansRequestObject) (businessapi.PostPlansResponseObject, error) {
+	res, err := mh.plansHandler.PostPlans(ctx, request)
 	return res, err
 }

@@ -122,6 +122,21 @@ paths:
         - businessAuthentication: []
       requestBody:
         $ref: '#/components/requestBodies/ProjectStoreInput'
+  /plans:
+    post:
+      summary: Plan Create
+      tags:
+        - plans
+      responses:
+        '200':
+          $ref: '#/components/responses/PlanStoreResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      operationId: post-plans
+      security:
+        - businessAuthentication: []
+      requestBody:
+        $ref: '#/components/requestBodies/PlanStoreInput'
 components:
   schemas:
     Project:
@@ -182,6 +197,53 @@ components:
           type: array
           items:
             type: string
+    PlanValidationError:
+      title: PlanValidationError
+      type: object
+      properties:
+        title:
+          type: array
+          items:
+            type: string
+        description:
+          type: array
+          items:
+            type: string
+        startDate:
+          type: array
+          items:
+            type: string
+        endDate:
+          type: array
+          items:
+            type: string
+        unitPrice:
+          type: array
+          items:
+            type: string
+    Plan:
+      title: Plan
+      type: object
+      properties:
+        id:
+          type: string
+        projectId:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        unitPrice:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
   requestBodies:
     ProjectStoreInput:
       content:
@@ -234,6 +296,34 @@ components:
               password:
                 type: string
       description: Company SignIn  Input
+    PlanStoreInput:
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - projectId
+              - title
+              - description
+              - startDate
+              - endDate
+              - unitPrice
+            properties:
+              projectId:
+                type: integer
+              title:
+                type: string
+              description:
+                type: string
+              startDate:
+                type: string
+                format: date
+              endDate:
+                type: string
+                format: date
+              unitPrice:
+                type: integer
+      description: Plan Store Input
   responses:
     CsrfResponse:
       description: Csrf response
@@ -333,6 +423,20 @@ components:
             properties:
               project:
                 $ref: '#/components/schemas/Project'
+    PlanStoreResponse:
+      description: Plan Store Response
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - plan
+              - errors
+            properties:
+              plan:
+                $ref: '#/components/schemas/Plan'
+              errors:
+                $ref: '#/components/schemas/PlanValidationError'
     NotFoundErrorResponse:
       description: Not Found Error Response
       content:
@@ -373,3 +477,5 @@ tags:
     description: supporters endpoint
   - name: companies
     description: companies endpoint
+  - name: plans
+    description: plans endpoint
