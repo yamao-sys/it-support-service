@@ -10,7 +10,7 @@ type Props<T extends FieldValues> = {
   validationErrors: string[];
 };
 
-const BaseFormDatePicker = memo(function BaseFormDatePicker<T extends FieldValues>({
+function BaseFormDatePickerInner<T extends FieldValues>({
   id,
   label,
   control,
@@ -49,6 +49,8 @@ const BaseFormDatePicker = memo(function BaseFormDatePicker<T extends FieldValue
       )}
     </>
   );
-});
+}
+
+const BaseFormDatePicker = memo(BaseFormDatePickerInner) as typeof BaseFormDatePickerInner;
 
 export default BaseFormDatePicker;

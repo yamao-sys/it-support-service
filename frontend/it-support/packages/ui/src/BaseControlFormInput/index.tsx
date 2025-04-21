@@ -11,7 +11,7 @@ type Props<T extends FieldValues> = {
   validationErrors: string[];
 };
 
-const BaseControlFormInput = memo(function BaseControlFormInput<T extends FieldValues>({
+function BaseControlFormInputInner<T extends FieldValues>({
   id,
   type = "text",
   label,
@@ -20,23 +20,23 @@ const BaseControlFormInput = memo(function BaseControlFormInput<T extends FieldV
   validationErrors,
 }: Props<T>) {
   return (
-    <>
-      <Controller
-        control={control}
-        name={name}
-        render={({ field }) => (
-          <BaseFormInput
-            id={id}
-            label={label}
-            type={type}
-            {...field}
-            value={field.value ?? ""}
-            validationErrorMessages={validationErrors}
-          />
-        )}
-      />
-    </>
+    <Controller
+      control={control}
+      name={name}
+      render={({ field }) => (
+        <BaseFormInput
+          id={id}
+          label={label}
+          type={type}
+          {...field}
+          value={field.value ?? ""}
+          validationErrorMessages={validationErrors}
+        />
+      )}
+    />
   );
-});
+}
+
+const BaseControlFormInput = memo(BaseControlFormInputInner) as typeof BaseControlFormInputInner;
 
 export default BaseControlFormInput;
