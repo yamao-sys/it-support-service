@@ -10,7 +10,7 @@ type Props<T extends FieldValues> = {
   validationErrors: string[];
 };
 
-const BaseControlFormTextarea = memo(function BaseControlFormTextarea<T extends FieldValues>({
+function BaseControlFormTextareaInner<T extends FieldValues>({
   id,
   label,
   control,
@@ -34,6 +34,10 @@ const BaseControlFormTextarea = memo(function BaseControlFormTextarea<T extends 
       />
     </>
   );
-});
+}
+
+const BaseControlFormTextarea = memo(
+  BaseControlFormTextareaInner,
+) as typeof BaseControlFormTextareaInner;
 
 export default BaseControlFormTextarea;
