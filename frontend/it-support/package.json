@@ -22,9 +22,15 @@
     "@playwright/test": "^1.50.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^22.13.4",
+    "@typespec/compiler": "latest",
+    "@typespec/http": "latest",
+    "@typespec/openapi": "latest",
+    "@typespec/openapi3": "latest",
+    "@typespec/rest": "latest",
     "autoprefixer": "^10.4.20",
     "eslint": "^9.20.0",
     "husky": "^9.1.7",
+    "js-yaml": "^4.1.0",
     "lint-staged": "^15.4.3",
     "openapi-typescript": "^7.6.1",
     "postcss": "^8.5.3",
@@ -33,19 +39,14 @@
     "tailwindcss": "^4",
     "tsx": "^4.19.3",
     "turbo": "^2.4.2",
-    "typescript": "5.7.3",
-    "@typespec/compiler": "latest",
-    "@typespec/http": "latest",
-    "@typespec/rest": "latest",
-    "@typespec/openapi": "latest",
-    "@typespec/openapi3": "latest"
+    "typescript": "5.7.3"
   },
   "peerDependencies": {
     "@typespec/compiler": "latest",
     "@typespec/http": "latest",
-    "@typespec/rest": "latest",
     "@typespec/openapi": "latest",
-    "@typespec/openapi3": "latest"
+    "@typespec/openapi3": "latest",
+    "@typespec/rest": "latest"
   },
   "packageManager": "pnpm@9.0.0",
   "engines": {

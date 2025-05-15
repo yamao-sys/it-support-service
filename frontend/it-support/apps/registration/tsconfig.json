@@ -16,7 +16,8 @@
     "next-env.d.ts",
     "next.config.js",
     ".next/types/**/*.ts",
-    "playwright.config.mjs"
+    "playwright.config.mjs",
+    "api-spec/patch. mjs"
   ],
   "exclude": ["node_modules"]
 }
