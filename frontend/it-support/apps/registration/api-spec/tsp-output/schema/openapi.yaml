@@ -1,11 +1,11 @@
 openapi: 3.1.0
 info:
-  title: (title)
+  title: Registration Service
   version: '1.0'
-  description: A sample service
+  description: registration APIs
 tags: []
 paths: {}
 components: {}
 servers:
-  - url: https://localhost:8081
+  - url: https://localhost:8080
     variables: {}
