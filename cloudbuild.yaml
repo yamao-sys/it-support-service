@@ -151,7 +151,7 @@ steps:
 
   # Business Frontコンテナのビルド・プッシュ
   - name: 'gcr.io/cloud-builders/docker'
-    id: 'build_business_front'
+    id: 'build-business-front'
     waitFor: ['-']
     args:
       [
@@ -163,8 +163,8 @@ steps:
         './frontend/it-support',
       ]
   - name: 'gcr.io/cloud-builders/docker'
-    id: 'push_business_front_image'
-    waitFor: ['build_business_front']
+    id: 'push-business-front-image'
+    waitFor: ['build-business-front']
     args:
       [
         'push',
@@ -174,8 +174,8 @@ steps:
   # Business Front Cloud Run へデプロイ
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
-    id: 'deploy_business_front'
-    waitFor: ['push_business_front_image']
+    id: 'deploy-business-front'
+    waitFor: ['push-business-front-image']
     args:
       - -c
       - |
