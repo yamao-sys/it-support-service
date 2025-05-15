@@ -13,8 +13,8 @@ steps:
         '-t',
         '$_REGION-docker.pkg.dev/${PROJECT_ID}/${_REGISTRATION_API_SERVIVE}/latest',
         '-f',
-        '.api-server/Dockerfile.registration.deploy',
-        '.api-server',
+        './api-server/Dockerfile.registration.deploy',
+        './api-server',
       ]
     id: build-registration-api
     waitFor: ['-']
