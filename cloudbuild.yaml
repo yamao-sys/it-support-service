@@ -1,0 +1,223 @@
+substitutions:
+  _REGION: 'asia-northeast1'
+  _REGISTRATION_API_SERVIVE: 'registration-api'
+  _BUSINESS_API_SERVIVE: 'business-api'
+  _REGISTRATION_SERVIVE: 'registration-front'
+  _BUSINESS_SERVIVE: 'business-front'
+steps:
+  # Registration APIコンテナのビルド・プッシュ
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      [
+        'build',
+        '-t',
+        '$_REGION-docker.pkg.dev/${PROJECT_ID}/${_REGISTRATION_API_SERVIVE}/latest',
+        '-f',
+        '.api-server/Dockerfile.registration.deploy',
+        '.api-server',
+      ]
+    id: build-registration-api
+    waitFor: ['-']
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      [
+        'push',
+        '$_REGION-docker.pkg.dev/${PROJECT_ID}/${_REGISTRATION_API_SERVIVE}/latest',
+      ]
+    id: push-registration-api-image
+    waitFor: ['build-registration-api']
+
+  # Registration API Cloud Run へデプロイ
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'bash'
+    args:
+      - -c
+      - |
+        gcloud run deploy ${_REGISTRATION_API_SERVIVE} \
+          --image ${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REGISTRATION_API_SERVIVE}/latest \
+          --project ${PROJECT_ID} \
+          --platform managed \
+          --region ${_REGION} \
+          --update-env-vars="SERVICE_ACCOUNT_EMAIL=$$SERVICE_ACCOUNT_EMAIL,MYSQL_DBNAME=$$MYSQL_DBNAME,MYSQL_USER=$$MYSQL_USER,MYSQL_PASS=$$MYSQL_PASS,MYSQL_HOST=$$MYSQL_HOST,MYSQL_PORT=$$MYSQL_PORT,SERVER_PORT=$$SERVER_PORT,STORAGE_BUCKET_NAME=$$STORAGE_BUCKET_NAME,JWT_TOKEN_KEY=$$JWT_TOKEN_KEY,REGISTRATION_CLIENT_ORIGIN=$$REGISTRATION_CLIENT_ORIGIN,APP_ENV=$$APP_ENV" \
+          --service-account="$$SERVICE_ACCOUNT_EMAIL"
+    id: deploy-registration-api
+    waitFor: ['push-registration-api-image']
+    secretEnv:
+      [
+        'SERVICE_ACCOUNT_EMAIL',
+        'MYSQL_DBNAME',
+        'MYSQL_USER',
+        'MYSQL_PASS',
+        'MYSQL_HOST',
+        'MYSQL_PORT',
+        'SERVER_PORT',
+        'STORAGE_BUCKET_NAME',
+        'JWT_TOKEN_KEY',
+        'REGISTRATION_CLIENT_ORIGIN',
+        'APP_ENV',
+      ]
+
+  # Business APIコンテナのビルド・プッシュ
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      [
+        'build',
+        '-t',
+        '$_REGION-docker.pkg.dev/${PROJECT_ID}/${_BUSINESS_API_SERVIVE}/latest',
+        '-f',
+        './api-server/Dockerfile.business.deploy',
+        './api-server',
+      ]
+    id: build-business-api
+    waitFor: ['-']
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      [
+        'push',
+        '$_REGION-docker.pkg.dev/${PROJECT_ID}/${_BUSINESS_API_SERVIVE}/latest',
+      ]
+    id: push-business-api-image
+    waitFor: ['build-business-api']
+
+  # Business API Cloud Run へデプロイ
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'bash'
+    args:
+      - -c
+      - |
+        gcloud run deploy ${_BUSINESS_API_SERVIVE} \
+          --image ${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_BUSINESS_API_SERVIVE}/latest \
+          --project ${PROJECT_ID} \
+          --platform managed \
+          --region ${_REGION} \
+          --update-env-vars="SERVICE_ACCOUNT_EMAIL=$$SERVICE_ACCOUNT_EMAIL,MYSQL_DBNAME=$$MYSQL_DBNAME,MYSQL_USER=$$MYSQL_USER,MYSQL_PASS=$$MYSQL_PASS,MYSQL_HOST=$$MYSQL_HOST,MYSQL_PORT=$$MYSQL_PORT,BUSINESS_SERVER_PORT=$$BUSINESS_SERVER_PORT,STORAGE_BUCKET_NAME=$$STORAGE_BUCKET_NAME,JWT_TOKEN_KEY=$$JWT_TOKEN_KEY,BUSINESS_CLIENT_ORIGIN=$$BUSINESS_CLIENT_ORIGIN,APP_ENV=$$APP_ENV" \
+          --service-account="$$SERVICE_ACCOUNT_EMAIL"
+    id: deploy-business-api
+    waitFor: ['push-business-api-image']
+    secretEnv:
+      [
+        'SERVICE_ACCOUNT_EMAIL',
+        'MYSQL_DBNAME',
+        'MYSQL_USER',
+        'MYSQL_PASS',
+        'MYSQL_HOST',
+        'MYSQL_PORT',
+        'BUSINESS_SERVER_PORT',
+        'STORAGE_BUCKET_NAME',
+        'JWT_TOKEN_KEY',
+        'BUSINESS_CLIENT_ORIGIN',
+        'APP_ENV',
+      ]
+
+  # Registration Frontコンテナのビルド・プッシュ
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'build-registration-front'
+    waitFor: ['-']
+    args:
+      [
+        'build',
+        '-t',
+        '$_REGION-docker.pkg.dev/${PROJECT_ID}/${_REGISTRATION_SERVIVE}/latest',
+        '-f',
+        './frontend/it-support/apps/registration/Dockerfile.deploy',
+        './frontend/it-support',
+      ]
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'push-registration-front-image'
+    waitFor: ['build-registration-front']
+    args:
+      [
+        'push',
+        '$_REGION-docker.pkg.dev/${PROJECT_ID}/${_REGISTRATION_SERVIVE}/latest',
+      ]
+
+  # Registration Front Cloud Run へデプロイ
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'bash'
+    id: 'deploy-registration-front'
+    waitFor: ['push-registration-front-image']
+    args:
+      - -c
+      - |
+        gcloud run deploy ${_REGISTRATION_SERVIVE} \
+          --image ${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REGISTRATION_SERVIVE}/latest \
+          --project ${PROJECT_ID} \
+          --platform managed \
+          --region ${_REGION} \
+          --update-env-vars="SERVICE_ACCOUNT_EMAIL=$$SERVICE_ACCOUNT_EMAIL,REGISTRATION_API_ENDPOINT_URI=$$REGISTRATION_API_ENDPOINT_URI,TZ=$$TZ" \
+          --service-account="$$SERVICE_ACCOUNT_EMAIL"
+    secretEnv: ['SERVICE_ACCOUNT_EMAIL', 'REGISTRATION_API_ENDPOINT_URI', 'TZ']
+
+  # Business Frontコンテナのビルド・プッシュ
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'build_business_front'
+    waitFor: ['-']
+    args:
+      [
+        'build',
+        '-t',
+        '$_REGION-docker.pkg.dev/${PROJECT_ID}/${_BUSINESS_SERVIVE}/latest',
+        '-f',
+        './frontend/it-support/apps/business/Dockerfile.deploy',
+        './frontend/it-support',
+      ]
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'push_business_front_image'
+    waitFor: ['build_business_front']
+    args:
+      [
+        'push',
+        '$_REGION-docker.pkg.dev/${PROJECT_ID}/${_BUSINESS_SERVIVE}/latest',
+      ]
+
+  # Business Front Cloud Run へデプロイ
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'bash'
+    id: 'deploy_business_front'
+    waitFor: ['push_business_front_image']
+    args:
+      - -c
+      - |
+        gcloud run deploy ${_BUSINESS_SERVIVE} \
+          --image ${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_BUSINESS_SERVIVE}/latest \
+          --project ${PROJECT_ID} \
+          --platform managed \
+          --region ${_REGION} \
+          --update-env-vars="SERVICE_ACCOUNT_EMAIL=$$SERVICE_ACCOUNT_EMAIL,BUSINESS_API_ENDPOINT_URI=$$BUSINESS_API_ENDPOINT_URI,TZ=$$TZ" \
+          --service-account="$$SERVICE_ACCOUNT_EMAIL"
+    secretEnv: ['SERVICE_ACCOUNT_EMAIL', 'BUSINESS_API_ENDPOINT_URI', 'TZ']
+availableSecrets:
+  secretManager:
+    - versionName: 'projects/${PROJECT_ID}/secrets/SERVICE_ACCOUNT_EMAIL/versions/1'
+      env: SERVICE_ACCOUNT_EMAIL
+    - versionName: 'projects/${PROJECT_ID}/secrets/MYSQL_DBNAME/versions/1'
+      env: MYSQL_DBNAME
+    - versionName: 'projects/${PROJECT_ID}/secrets/MYSQL_USER/versions/1'
+      env: MYSQL_USER
+    - versionName: 'projects/${PROJECT_ID}/secrets/MYSQL_PASS/versions/1'
+      env: MYSQL_PASS
+    - versionName: 'projects/${PROJECT_ID}/secrets/MYSQL_HOST/versions/1'
+      env: MYSQL_HOST
+    - versionName: 'projects/${PROJECT_ID}/secrets/MYSQL_PORT/versions/1'
+      env: MYSQL_PORT
+    - versionName: 'projects/${PROJECT_ID}/secrets/SERVER_PORT/versions/1'
+      env: SERVER_PORT
+    - versionName: 'projects/${PROJECT_ID}/secrets/STORAGE_BUCKET_NAME/versions/1'
+      env: STORAGE_BUCKET_NAME
+    - versionName: 'projects/${PROJECT_ID}/secrets/JWT_TOKEN_KEY/versions/1'
+      env: JWT_TOKEN_KEY
+    - versionName: 'projects/${PROJECT_ID}/secrets/REGISTRATION_CLIENT_ORIGIN/versions/1'
+      env: REGISTRATION_CLIENT_ORIGIN
+    - versionName: 'projects/${PROJECT_ID}/secrets/APP_ENV/versions/1'
+      env: APP_ENV
+    - versionName: 'projects/${PROJECT_ID}/secrets/BUSINESS_SERVER_PORT/versions/1'
+      env: BUSINESS_SERVER_PORT
+    - versionName: 'projects/${PROJECT_ID}/secrets/BUSINESS_CLIENT_ORIGIN/versions/1'
+      env: BUSINESS_CLIENT_ORIGIN
+    - versionName: 'projects/${PROJECT_ID}/secrets/REGISTRATION_API_ENDPOINT_URI/versions/1'
+      env: REGISTRATION_API_ENDPOINT_URI
+    - versionName: 'projects/${PROJECT_ID}/secrets/BUSINESS_API_ENDPOINT_URI/versions/1'
+      env: BUSINESS_API_ENDPOINT_URI
+    - versionName: 'projects/${PROJECT_ID}/secrets/TZ/versions/1'
+      env: TZ
