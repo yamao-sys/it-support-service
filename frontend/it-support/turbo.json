@@ -26,6 +26,12 @@
     },
     "gen:schema": {
       "dependsOn": ["^gen:schema"]
+    },
+    "gen:api-spec": {
+      "dependsOn": ["^gen:api-spec"]
+    },
+    "gen:api-spec:watch": {
+      "dependsOn": ["^gen:api-spec:watch"]
     }
   }
 }
