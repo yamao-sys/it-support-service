@@ -11,6 +11,7 @@ COPY api /app/api
 COPY database /app/database
 COPY models /app/models
 COPY registration /app/registration
+COPY test /app/test
 
 RUN go mod tidy && \
 	go install github.com/volatiletech/sqlboiler/v4@latest && \
