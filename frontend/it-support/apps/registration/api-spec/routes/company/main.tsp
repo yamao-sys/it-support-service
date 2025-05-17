@@ -12,7 +12,6 @@ using OpenAPI;
 
 @tag("companies")
 @route("/companies")
-@useAuth([SecuritySchema])
 namespace RegistrationService.Company {
   interface ValidateSignUp {
     @route("/validateSignUp")
