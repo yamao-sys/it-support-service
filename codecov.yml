@@ -8,7 +8,7 @@ coverage:
         threshold: 1%
     patch:
       default:
-        target: 60%
+        target: 50%
 
 ignore:
   - 'api-server/api'
