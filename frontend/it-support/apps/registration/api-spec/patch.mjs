@@ -3,6 +3,22 @@ import process from "process";
 import * as fs from "fs";
 import yaml from "js-yaml";
 
+function replaceBinaryRef(obj) {
+  if (Array.isArray(obj)) {
+    obj.forEach(replaceBinaryRef);
+  } else if (typeof obj === "object" && obj !== null) {
+    for (const key in obj) {
+      if (key === "$ref" && obj[key] === "#/components/schemas/Binary") {
+        delete obj["$ref"];
+        obj["type"] = "string";
+        obj["format"] = "binary";
+      } else {
+        replaceBinaryRef(obj[key]);
+      }
+    }
+  }
+}
+
 // OpenAPI YAML ファイルを読み込み
 const openapiYamlPath = path.resolve(process.cwd(), "tsp-output", "schema", "openapi.yaml");
 const input = fs.readFileSync(openapiYamlPath, "utf8");
@@ -36,7 +52,15 @@ for (const pathKey in doc.paths) {
   }
 }
 
+// 全体に対してBinary部の置換を実行
+replaceBinaryRef(doc);
+
+// Binaryスキーマの削除
+if (doc.components && doc.components.schemas && doc.components.schemas.Binary) {
+  delete doc.components.schemas.Binary;
+}
+
 const output = yaml.dump(doc, { lineWidth: -1 });
 fs.writeFileSync(openapiYamlPath, output, "utf8");
 
-console.log("✅ contentType: text/plain を削除しました。");
+console.log("✅ OpenAPI YAML file has been patched successfully.");

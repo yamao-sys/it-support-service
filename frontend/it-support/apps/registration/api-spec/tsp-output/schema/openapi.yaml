@@ -5,6 +5,7 @@ info:
   description: registration APIs
 tags:
   - name: companies
+  - name: supporters
 paths:
   /companies/signUp:
     post:
@@ -46,8 +47,6 @@ paths:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/CompanySignUpInput'
-      security:
-        - ApiKeyAuth: []
   /companies/validateSignUp:
     post:
       operationId: post-company-validate_sign_up
@@ -88,13 +87,88 @@ paths:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/CompanySignUpInput'
-      security:
-        - ApiKeyAuth: []
+  /supporters/sign-up:
+    post:
+      operationId: post-supporterr-sign-up
+      summary: Supporter Sign Up
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupporterSignUpResponse'
+        '400':
+          description: The server could not understand the request due to invalid syntax.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupporterSignUpResponse'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  message:
+                    type: string
+                required:
+                  - code
+                  - message
+      tags:
+        - supporters
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SupporterSignUpInput'
+  /supporters/validate-sign-up:
+    post:
+      operationId: post-supporter-validate-sign-up
+      summary: Supporter Validate Sign Up
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupporterSignUpResponse'
+        '400':
+          description: The server could not understand the request due to invalid syntax.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupporterSignUpResponse'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  message:
+                    type: string
+                required:
+                  - code
+                  - message
+      tags:
+        - supporters
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SupporterSignUpInput'
 components:
   schemas:
-    Binary:
-      type: string
-      format: binary
     CompanySignUpInput:
       type: object
       properties:
@@ -105,7 +179,8 @@ components:
         password:
           type: string
         finalTaxReturn:
-          $ref: '#/components/schemas/Binary'
+          type: string
+          format: binary
       required:
         - name
         - email
@@ -141,11 +216,74 @@ components:
           items:
             type: string
       title: Company SignUp Validation Error
-  securitySchemes:
-    ApiKeyAuth:
-      type: apiKey
-      in: cookie
-      name: token
+    SupporterSignUpInput:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        birthday:
+          type: string
+          format: date
+        frontIdentification:
+          type: string
+          format: binary
+        backIdentification:
+          type: string
+          format: binary
+      required:
+        - firstName
+        - lastName
+        - email
+        - password
+    SupporterSignUpResponse:
+      type: object
+      required:
+        - code
+        - errors
+      properties:
+        code:
+          type: integer
+        errors:
+          $ref: '#/components/schemas/SupporterSignUpValidationError'
+      title: Supporter SignUp Response
+    SupporterSignUpValidationError:
+      type: object
+      properties:
+        firstName:
+          type: array
+          items:
+            type: string
+        lastName:
+          type: array
+          items:
+            type: string
+        email:
+          type: array
+          items:
+            type: string
+        password:
+          type: array
+          items:
+            type: string
+        birthday:
+          type: array
+          items:
+            type: string
+        frontIdentification:
+          type: array
+          items:
+            type: string
+        backIdentification:
+          type: array
+          items:
+            type: string
+      title: Supporter SignUp Validation Error
 servers:
   - url: https://localhost:8080
     variables: {}
