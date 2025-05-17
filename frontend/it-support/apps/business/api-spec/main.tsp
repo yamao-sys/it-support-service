@@ -5,9 +5,10 @@ import "@typespec/openapi3";
 using Http;
 
 @service
-@doc("A sample service")
+@doc("business APIs")
 @OpenAPI.info(#{
   version: "1.0",
+  title: "Business Service",
 })
 @server("https://localhost:8080")
 namespace SampleService {};
