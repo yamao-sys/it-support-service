@@ -5,6 +5,7 @@ info:
   description: business APIs
 tags:
   - name: companies
+  - name: csrf
   - name: supporters
 paths:
   /companies/sign-in:
@@ -52,6 +53,34 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/CompanySignInInput'
+  /csrf:
+    get:
+      operationId: get-csrf
+      summary: Get Csrf
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CsrfResponse'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  message:
+                    type: string
+                required:
+                  - code
+                  - message
+      tags:
+        - csrf
   /supporters/sign-in:
     post:
       operationId: post-supporter-sign-in
@@ -131,6 +160,14 @@ components:
         Set-Cookie:
           type: string
       title: Company SignIn Error Response
+    CsrfResponse:
+      type: object
+      required:
+        - csrfToken
+      properties:
+        csrfToken:
+          type: string
+      title: CsrfResponse
     SupporterSignInBadRequestResponse:
       type: object
       required:
