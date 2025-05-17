@@ -6,6 +6,7 @@ services:
       context: ./api-server
     volumes:
       - ./api-server:/app
+      - ./frontend/it-support/apps/registration/api-spec/tsp-output/schema:/app/api/registration/schema
     ports:
       - 8080:8080
       - 8083:8083 # テスト用のポート
@@ -22,6 +23,7 @@ services:
       context: ./api-server
     volumes:
       - ./api-server:/app
+      - ./frontend/it-support/apps/business/api-spec/tsp-output/schema:/app/api/business/schema
     ports:
       - 8081:8081
       - 8084:8084 # テスト用のポート

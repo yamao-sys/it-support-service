@@ -11,7 +11,7 @@ const client = createClient<paths>({
 });
 
 export async function postCompanyValidateSignUp(input: CompanySignUpInput) {
-  const { data, error } = await client.POST("/companies/validateSignUp", {
+  const { data, error } = await client.POST("/companies/validate-sign-up", {
     ...(await getRequestHeaders()),
     body: input,
     bodySerializer(body) {
@@ -37,7 +37,7 @@ export async function postCompanyValidateSignUp(input: CompanySignUpInput) {
 }
 
 export async function postCompanySignUp(input: CompanySignUpInput) {
-  const { data, error } = await client.POST("/companies/signUp", {
+  const { data, error } = await client.POST("/companies/sign-up", {
     ...(await getRequestHeaders()),
     body: input,
     bodySerializer(body) {

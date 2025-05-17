@@ -4,14 +4,11 @@ export type FormType = "supporter" | "company";
 
 export type PhaseType = "input" | "confirm" | "thanks";
 
-export type SupporterSignUpInput =
-  components["requestBodies"]["SupporterSignUpInput"]["content"]["multipart/form-data"];
+export type SupporterSignUpInput = components["schemas"]["SupporterSignUpInput"];
 
 export type SupporterSignUpValidationError =
-  components["responses"]["SupporterSignUpResponse"]["content"]["application/json"]["errors"];
+  components["schemas"]["SupporterSignUpResponse"]["errors"];
 
-export type CompanySignUpInput =
-  components["requestBodies"]["CompanySignUpInput"]["content"]["multipart/form-data"];
+export type CompanySignUpInput = components["schemas"]["CompanySignUpInput"];
 
-export type CompanySignUpValidationError =
-  components["responses"]["CompanySignUpResponse"]["content"]["application/json"]["errors"];
+export type CompanySignUpValidationError = components["schemas"]["CompanySignUpResponse"]["errors"];

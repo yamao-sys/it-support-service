@@ -53,10 +53,10 @@ func (s *TestSupportersHandlerSuite) TestPostAuthValidateSignUp_SuccessRequiredF
 	// NOTE: 終了メッセージを書く
 	mw.Close()
 
-	result := testutil.NewRequest().Post("/supporters/validateSignUp").WithHeader("Cookie", csrfTokenCookie).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithBody(body.Bytes()).WithContentType(mw.FormDataContentType()).GoWithHTTPHandler(s.T(), e)
+	result := testutil.NewRequest().Post("/supporters/validate-sign-up").WithHeader("Cookie", csrfTokenCookie).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithBody(body.Bytes()).WithContentType(mw.FormDataContentType()).GoWithHTTPHandler(s.T(), e)
 	assert.Equal(s.T(), http.StatusOK, result.Code())
 
-	var res registrationapi.SupporterSignUpResponseJSONResponse
+	var res registrationapi.SupporterSignUpResponse
 	err := result.UnmarshalBodyToObject(&res)
 	assert.NoError(s.T(), err, "error unmarshaling response")
 	
@@ -82,10 +82,10 @@ func (s *TestSupportersHandlerSuite) TestPostAuthValidateSignUp_ValidationErrorR
 	// NOTE: 終了メッセージを書く
 	mw.Close()
 
-	result := testutil.NewRequest().Post("/supporters/validateSignUp").WithHeader("Cookie", csrfTokenCookie).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithBody(body.Bytes()).WithContentType(mw.FormDataContentType()).GoWithHTTPHandler(s.T(), e)
+	result := testutil.NewRequest().Post("/supporters/validate-sign-up").WithHeader("Cookie", csrfTokenCookie).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithBody(body.Bytes()).WithContentType(mw.FormDataContentType()).GoWithHTTPHandler(s.T(), e)
 	assert.Equal(s.T(), http.StatusOK, result.Code())
 
-	var res registrationapi.SupporterSignUpResponseJSONResponse
+	var res registrationapi.SupporterSignUpResponse
 	err := result.UnmarshalBodyToObject(&res)
 	assert.NoError(s.T(), err, "error unmarshaling response")
 	
@@ -126,10 +126,10 @@ func (s *TestSupportersHandlerSuite) TestPostAuthValidateSignUp_SuccessWithOptio
 	// NOTE: 終了メッセージを書く
 	mw.Close()
 
-	result := testutil.NewRequest().Post("/supporters/validateSignUp").WithHeader("Cookie", csrfTokenCookie).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithBody(body.Bytes()).WithContentType(mw.FormDataContentType()).GoWithHTTPHandler(s.T(), e)
+	result := testutil.NewRequest().Post("/supporters/validate-sign-up").WithHeader("Cookie", csrfTokenCookie).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithBody(body.Bytes()).WithContentType(mw.FormDataContentType()).GoWithHTTPHandler(s.T(), e)
 	assert.Equal(s.T(), http.StatusOK, result.Code())
 
-	var res registrationapi.SupporterSignUpResponseJSONResponse
+	var res registrationapi.SupporterSignUpResponse
 	err := result.UnmarshalBodyToObject(&res)
 	assert.NoError(s.T(), err, "error unmarshaling response")
 	
@@ -166,10 +166,10 @@ func (s *TestSupportersHandlerSuite) TestPostAuthValidateSignUp_ValidationErrorW
 	// NOTE: 終了メッセージを書く
 	mw.Close()
 
-	result := testutil.NewRequest().Post("/supporters/validateSignUp").WithHeader("Cookie", csrfTokenCookie).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithBody(body.Bytes()).WithContentType(mw.FormDataContentType()).GoWithHTTPHandler(s.T(), e)
+	result := testutil.NewRequest().Post("/supporters/validate-sign-up").WithHeader("Cookie", csrfTokenCookie).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithBody(body.Bytes()).WithContentType(mw.FormDataContentType()).GoWithHTTPHandler(s.T(), e)
 	assert.Equal(s.T(), http.StatusOK, result.Code())
 
-	var res registrationapi.SupporterSignUpResponseJSONResponse
+	var res registrationapi.SupporterSignUpResponse
 	err := result.UnmarshalBodyToObject(&res)
 	assert.NoError(s.T(), err, "error unmarshaling response")
 	
@@ -195,10 +195,10 @@ func (s *TestSupportersHandlerSuite) TestPostAuthSignUp_SuccessRequiredFields() 
 	// NOTE: 終了メッセージを書く
 	mw.Close()
 
-	result := testutil.NewRequest().Post("/supporters/signUp").WithHeader("Cookie", csrfTokenCookie).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithBody(body.Bytes()).WithContentType(mw.FormDataContentType()).GoWithHTTPHandler(s.T(), e)
+	result := testutil.NewRequest().Post("/supporters/sign-up").WithHeader("Cookie", csrfTokenCookie).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithBody(body.Bytes()).WithContentType(mw.FormDataContentType()).GoWithHTTPHandler(s.T(), e)
 	assert.Equal(s.T(), http.StatusOK, result.Code())
 
-	var res registrationapi.SupporterSignUpResponseJSONResponse
+	var res registrationapi.SupporterSignUpResponse
 	err := result.UnmarshalBodyToObject(&res)
 	assert.NoError(s.T(), err, "error unmarshaling response")
 	
@@ -249,10 +249,10 @@ func (s *TestSupportersHandlerSuite) TestPostAuthSignUp_SuccessWithOptionalField
 	// NOTE: 終了メッセージを書く
 	mw.Close()
 
-	result := testutil.NewRequest().Post("/supporters/signUp").WithHeader("Cookie", csrfTokenCookie).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithBody(body.Bytes()).WithContentType(mw.FormDataContentType()).GoWithHTTPHandler(s.T(), e)
+	result := testutil.NewRequest().Post("/supporters/sign-up").WithHeader("Cookie", csrfTokenCookie).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithBody(body.Bytes()).WithContentType(mw.FormDataContentType()).GoWithHTTPHandler(s.T(), e)
 	assert.Equal(s.T(), http.StatusOK, result.Code())
 
-	var res registrationapi.SupporterSignUpResponseJSONResponse
+	var res registrationapi.SupporterSignUpResponse
 	err := result.UnmarshalBodyToObject(&res)
 	assert.NoError(s.T(), err, "error unmarshaling response")
 	
@@ -303,10 +303,10 @@ func (s *TestSupportersHandlerSuite) TestPostAuthSignUp_SuccessWithEmptyBirthday
 	// NOTE: 終了メッセージを書く
 	mw.Close()
 
-	result := testutil.NewRequest().Post("/supporters/signUp").WithHeader("Cookie", csrfTokenCookie).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithBody(body.Bytes()).WithContentType(mw.FormDataContentType()).GoWithHTTPHandler(s.T(), e)
+	result := testutil.NewRequest().Post("/supporters/sign-up").WithHeader("Cookie", csrfTokenCookie).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithBody(body.Bytes()).WithContentType(mw.FormDataContentType()).GoWithHTTPHandler(s.T(), e)
 	assert.Equal(s.T(), http.StatusOK, result.Code())
 
-	var res registrationapi.SupporterSignUpResponseJSONResponse
+	var res registrationapi.SupporterSignUpResponse
 	err := result.UnmarshalBodyToObject(&res)
 	assert.NoError(s.T(), err, "error unmarshaling response")
 	
