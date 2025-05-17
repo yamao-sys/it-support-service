@@ -32,6 +32,9 @@
     },
     "gen:api-spec:watch": {
       "dependsOn": ["^gen:api-spec:watch"]
+    },
+    "diff:api-spec:check": {
+      "dependsOn": ["^diff:api-spec:check"]
     }
   }
 }
