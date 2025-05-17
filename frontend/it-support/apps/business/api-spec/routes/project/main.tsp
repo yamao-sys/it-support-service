@@ -15,7 +15,15 @@ using OpenAPI;
 @useAuth([SecuritySchema])
 namespace BusinessService.Project {
   interface Root {
-    @operationId("post-project")
+    @operationId("get-projects")
+    @summary("Create Project")
+    @get
+    get(
+      @query pageToken: string,
+    ): SuccessResponse<ProjectsListResponse>
+      | InternalServerErrorResponse;
+
+    @operationId("post-projects")
     @summary("Create Project")
     @post
     post(
