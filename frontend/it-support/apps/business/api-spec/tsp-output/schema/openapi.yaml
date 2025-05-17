@@ -3,9 +3,88 @@ info:
   title: Business Service
   version: '1.0'
   description: business APIs
-tags: []
-paths: {}
-components: {}
+tags:
+  - name: companies
+paths:
+  /companies/sign-in:
+    post:
+      operationId: post-company-sign-in
+      summary: Company Sign In
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          headers:
+            headers:
+              required: true
+              schema:
+                $ref: '#/components/schemas/CompanySignInOkResponseHeader'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompanySignInOkResponse'
+        '400':
+          description: The server could not understand the request due to invalid syntax.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompanySignInBadRequestResponse'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  message:
+                    type: string
+                required:
+                  - code
+                  - message
+      tags:
+        - companies
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompanySignInInput'
+components:
+  schemas:
+    CompanySignInBadRequestResponse:
+      type: object
+      required:
+        - errors
+      properties:
+        errors:
+          type: array
+          items:
+            type: string
+      title: Company SignIn BadRequestError Response
+    CompanySignInInput:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+      title: Company SignIn Input
+    CompanySignInOkResponse:
+      type: object
+      title: Company SignIn Ok Response
+    CompanySignInOkResponseHeader:
+      type: object
+      required:
+        - Set-Cookie
+      properties:
+        Set-Cookie:
+          type: string
+      title: Company SignIn Error Response
 servers:
-  - url: https://localhost:8080
+  - url: https://localhost:8081
     variables: {}
