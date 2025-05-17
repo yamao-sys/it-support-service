@@ -5,6 +5,7 @@ info:
   description: business APIs
 tags:
   - name: companies
+  - name: supporters
 paths:
   /companies/sign-in:
     post:
@@ -51,6 +52,51 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/CompanySignInInput'
+  /supporters/sign-in:
+    post:
+      operationId: post-supporter-sign-in
+      summary: Supporter Sign In
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          headers:
+            headers:
+              required: true
+              schema:
+                $ref: '#/components/schemas/SupporterSignInOkResponseHeader'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupporterSignInOkResponse'
+        '400':
+          description: The server could not understand the request due to invalid syntax.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupporterSignInBadRequestResponse'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  message:
+                    type: string
+                required:
+                  - code
+                  - message
+      tags:
+        - supporters
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SupporterSignInInput'
 components:
   schemas:
     CompanySignInBadRequestResponse:
@@ -85,6 +131,38 @@ components:
         Set-Cookie:
           type: string
       title: Company SignIn Error Response
+    SupporterSignInBadRequestResponse:
+      type: object
+      required:
+        - errors
+      properties:
+        errors:
+          type: array
+          items:
+            type: string
+      title: Supporter SignIn BadRequestError Response
+    SupporterSignInInput:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+      title: Supporter SignIn Input
+    SupporterSignInOkResponse:
+      type: object
+      title: Supporter SignIn Ok Response
+    SupporterSignInOkResponseHeader:
+      type: object
+      required:
+        - Set-Cookie
+      properties:
+        Set-Cookie:
+          type: string
+      title: Supporter SignIn Error Response
 servers:
   - url: https://localhost:8081
     variables: {}
