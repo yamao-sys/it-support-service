@@ -11,8 +11,8 @@
     "dev:test": "NODE_ENV=test next dev --turbopack --port 3102",
     "test:e2e": "playwright test",
     "gen:schema": "pnpx tsx /app/it-support/generate_api_types.ts /app/it-support/openapi/business/reference.yaml /app/it-support/apps/business/apis/generated/",
-    "gen:api-spec": "cd api-spec && npx tsp compile . && cd ..",
-    "gen:api-spec:watch": "cd api-spec && npx tsp compile . --watch && cd .."
+    "gen:api-spec": "cd api-spec && npx tsp compile . && node patch.mjs && cd ..",
+    "gen:api-spec:watch": "SHELL=/usr/bin/sh chokidar 'api-spec/**/*.tsp' -c 'pnpm gen:api-spec'"
   },
   "dependencies": {
     "react": "^19.0.0",
