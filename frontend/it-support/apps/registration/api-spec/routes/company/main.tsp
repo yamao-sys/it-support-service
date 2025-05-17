@@ -14,8 +14,8 @@ using OpenAPI;
 @route("/companies")
 namespace RegistrationService.Company {
   interface ValidateSignUp {
-    @route("/validateSignUp")
-    @operationId("post-company-validate_sign_up")
+    @route("/validate-sign-up")
+    @operationId("post-company-validate-sign-up")
     @summary("Company Validate Sign Up")
     @post
     post(
@@ -27,8 +27,8 @@ namespace RegistrationService.Company {
   }
 
   interface SignUp {
-    @route("/signUp")
-    @operationId("post-company-sign_up")
+    @route("/sign-up")
+    @operationId("post-company-sign-up")
     @summary("Company Sign Up")
     @post
     post(
