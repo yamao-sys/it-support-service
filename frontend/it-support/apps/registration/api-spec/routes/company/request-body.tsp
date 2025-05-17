@@ -2,10 +2,9 @@ import "@typespec/http";
 import "@typespec/openapi";
 import "@typespec/openapi3";
 
-using Http;
+import "../common/request.tsp";
 
-@format("binary")
-scalar Binary extends string;
+using Http;
 
 @summary("Company SignUp Input")
 model CompanySignUpInput {
