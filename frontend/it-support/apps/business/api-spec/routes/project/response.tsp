@@ -11,3 +11,8 @@ model ProjectsListResponse{
   projects: Project[];
   nextPageToken: string;
 }
+
+@summary("Project Response")
+model ProjectResponse {
+  project: Project;
+}
