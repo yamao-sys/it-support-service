@@ -7,9 +7,9 @@ tags:
   - name: companies
   - name: supporters
 paths:
-  /companies/signUp:
+  /companies/sign-up:
     post:
-      operationId: post-company-sign_up
+      operationId: post-company-sign-up
       summary: Company Sign Up
       parameters: []
       responses:
@@ -47,9 +47,9 @@ paths:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/CompanySignUpInput'
-  /companies/validateSignUp:
+  /companies/validate-sign-up:
     post:
-      operationId: post-company-validate_sign_up
+      operationId: post-company-validate-sign-up
       summary: Company Validate Sign Up
       parameters: []
       responses:
