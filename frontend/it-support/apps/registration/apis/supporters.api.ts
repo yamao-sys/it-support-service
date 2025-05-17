@@ -11,7 +11,7 @@ const client = createClient<paths>({
 });
 
 export async function postSupporterValidateSignUp(input: SupporterSignUpInput) {
-  const { data, error } = await client.POST("/supporters/validateSignUp", {
+  const { data, error } = await client.POST("/supporters/validate-sign-up", {
     ...(await getRequestHeaders()),
     body: input,
     bodySerializer(body) {
@@ -39,7 +39,7 @@ export async function postSupporterValidateSignUp(input: SupporterSignUpInput) {
 }
 
 export async function postSupporterSignUp(input: SupporterSignUpInput) {
-  const { data, error } = await client.POST("/supporters/signUp", {
+  const { data, error } = await client.POST("/supporters/sign-up", {
     ...(await getRequestHeaders()),
     body: input,
     bodySerializer(body) {
