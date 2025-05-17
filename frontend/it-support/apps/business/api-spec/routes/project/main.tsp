@@ -31,4 +31,26 @@ namespace BusinessService.Project {
     ): SuccessResponse<ProjectStoreResponse>
       | InternalServerErrorResponse;
   }
+
+  @route("/{id}")
+  interface Id {
+    @operationId("get-project")
+    @summary("Get Project")
+    @get
+    get(
+      @path id: integer,
+    ): SuccessResponse<ProjectResponse>
+      | NotFoundErrorResponse
+      | InternalServerErrorResponse;
+
+    @operationId("put-project")
+    @summary("Update Project")
+    @put
+    put(
+      @path id: integer,
+      @body body: ProjectStoreInput,
+    ): SuccessResponse<ProjectStoreResponse>
+      | NotFoundErrorResponse
+      | InternalServerErrorResponse;
+  }
 }
