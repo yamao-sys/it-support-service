@@ -8,7 +8,7 @@ using Http;
 @doc("registration APIs")
 @OpenAPI.info(#{
   version: "1.0",
-	title: "Registration Service",
+  title: "Registration Service",
 })
 @server("https://localhost:8080")
 namespace RegistrationService {};
