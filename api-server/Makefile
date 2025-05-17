@@ -31,4 +31,4 @@ gen-business-schema:
 	make gen-schema SERVICE=business
 
 gen-schema:
-	@oapi-codegen -config oapi_codegen_config.yaml -package ${SERVICE}api api/${SERVICE}/reference.yaml > api/${SERVICE}/reference.go
+	@oapi-codegen -config oapi_codegen_config.yaml -package ${SERVICE}api api/${SERVICE}/schema/openapi.yaml > api/${SERVICE}/openapi.go
