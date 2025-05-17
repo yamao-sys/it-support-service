@@ -1,1 +1,1 @@
-extends: "../../../packages/api-spec-config/tspconfig.yaml"
+extends: "../../../packages/api-spec/tspconfig.yaml"

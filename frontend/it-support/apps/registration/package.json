@@ -25,7 +25,7 @@
     "@repo/eslint-config": "workspace:*",
     "@repo/playwright-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
-    "@repo/api-spec-config": "workspace:*",
+    "@repo/api-spec": "workspace:*",
     "@types/node": "^22",
     "@types/react": "19.0.8",
     "@types/react-dom": "19.0.3",
