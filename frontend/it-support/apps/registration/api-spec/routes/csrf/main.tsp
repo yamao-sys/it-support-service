@@ -12,7 +12,6 @@ using OpenAPI;
 @tag("csrf")
 @route("/csrf")
 namespace RegistrationService.Csrf {
-  @route("/")
   interface Root {
     @operationId("get-csrf")
     @summary("Get Csrf")

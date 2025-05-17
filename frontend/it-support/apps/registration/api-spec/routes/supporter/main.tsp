@@ -28,7 +28,7 @@ namespace RegistrationService.Supporter {
 
   interface SignUp {
     @route("/sign-up")
-    @operationId("post-supporterr-sign-up")
+    @operationId("post-supporter-sign-up")
     @summary("Supporter Sign Up")
     @post
     post(
