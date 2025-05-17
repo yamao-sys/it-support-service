@@ -4,16 +4,37 @@
 package registrationapi
 
 import (
+	"bytes"
+	"compress/gzip"
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"mime/multipart"
 	"net/http"
+	"net/url"
+	"path"
+	"strings"
 
+	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/labstack/echo/v4"
 	strictecho "github.com/oapi-codegen/runtime/strictmiddleware/echo"
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
+
+// CompanySignUpInput defines model for CompanySignUpInput.
+type CompanySignUpInput struct {
+	Email          string              `json:"email"`
+	FinalTaxReturn *openapi_types.File `json:"finalTaxReturn,omitempty"`
+	Name           string              `json:"name"`
+	Password       string              `json:"password"`
+}
+
+// CompanySignUpResponse defines model for CompanySignUpResponse.
+type CompanySignUpResponse struct {
+	Code   int                          `json:"code"`
+	Errors CompanySignUpValidationError `json:"errors"`
+}
 
 // CompanySignUpValidationError defines model for CompanySignUpValidationError.
 type CompanySignUpValidationError struct {
@@ -23,8 +44,30 @@ type CompanySignUpValidationError struct {
 	Password       *[]string `json:"password,omitempty"`
 }
 
-// SuppoterSignUpValidationError defines model for SuppoterSignUpValidationError.
-type SuppoterSignUpValidationError struct {
+// CsrfResponse defines model for CsrfResponse.
+type CsrfResponse struct {
+	CsrfToken string `json:"csrfToken"`
+}
+
+// SupporterSignUpInput defines model for SupporterSignUpInput.
+type SupporterSignUpInput struct {
+	BackIdentification  *openapi_types.File `json:"backIdentification,omitempty"`
+	Birthday            *openapi_types.Date `json:"birthday,omitempty"`
+	Email               string              `json:"email"`
+	FirstName           string              `json:"firstName"`
+	FrontIdentification *openapi_types.File `json:"frontIdentification,omitempty"`
+	LastName            string              `json:"lastName"`
+	Password            string              `json:"password"`
+}
+
+// SupporterSignUpResponse defines model for SupporterSignUpResponse.
+type SupporterSignUpResponse struct {
+	Code   int                            `json:"code"`
+	Errors SupporterSignUpValidationError `json:"errors"`
+}
+
+// SupporterSignUpValidationError defines model for SupporterSignUpValidationError.
+type SupporterSignUpValidationError struct {
 	BackIdentification  *[]string `json:"backIdentification,omitempty"`
 	Birthday            *[]string `json:"birthday,omitempty"`
 	Email               *[]string `json:"email,omitempty"`
@@ -34,95 +77,34 @@ type SuppoterSignUpValidationError struct {
 	Password            *[]string `json:"password,omitempty"`
 }
 
-// CompanySignUpResponse defines model for CompanySignUpResponse.
-type CompanySignUpResponse struct {
-	Code   int                          `json:"code"`
-	Errors CompanySignUpValidationError `json:"errors"`
-}
-
-// CsrfResponse defines model for CsrfResponse.
-type CsrfResponse struct {
-	CsrfToken string `json:"csrfToken"`
-}
-
-// InternalServerErrorResponse defines model for InternalServerErrorResponse.
-type InternalServerErrorResponse struct {
-	Code    int64  `json:"code"`
-	Message string `json:"message"`
-}
-
-// SupporterSignUpResponse defines model for SupporterSignUpResponse.
-type SupporterSignUpResponse struct {
-	Code   int                           `json:"code"`
-	Errors SuppoterSignUpValidationError `json:"errors"`
-}
-
-// PostCompanySignUpMultipartBody defines parameters for PostCompanySignUp.
-type PostCompanySignUpMultipartBody struct {
-	Email          string              `json:"email"`
-	FinalTaxReturn *openapi_types.File `json:"finalTaxReturn,omitempty"`
-	Name           string              `json:"name"`
-	Password       string              `json:"password"`
-}
-
-// PostCompanyValidateSignUpMultipartBody defines parameters for PostCompanyValidateSignUp.
-type PostCompanyValidateSignUpMultipartBody struct {
-	Email          string              `json:"email"`
-	FinalTaxReturn *openapi_types.File `json:"finalTaxReturn,omitempty"`
-	Name           string              `json:"name"`
-	Password       string              `json:"password"`
-}
-
-// PostSupporterSignUpMultipartBody defines parameters for PostSupporterSignUp.
-type PostSupporterSignUpMultipartBody struct {
-	BackIdentification  *openapi_types.File `json:"backIdentification,omitempty"`
-	Birthday            *openapi_types.Date `json:"birthday,omitempty"`
-	Email               string              `json:"email"`
-	FirstName           string              `json:"firstName"`
-	FrontIdentification *openapi_types.File `json:"frontIdentification,omitempty"`
-	LastName            string              `json:"lastName"`
-	Password            string              `json:"password"`
-}
-
-// PostSupporterValidateSignUpMultipartBody defines parameters for PostSupporterValidateSignUp.
-type PostSupporterValidateSignUpMultipartBody struct {
-	BackIdentification  *openapi_types.File `json:"backIdentification,omitempty"`
-	Birthday            *openapi_types.Date `json:"birthday,omitempty"`
-	Email               string              `json:"email"`
-	FirstName           string              `json:"firstName"`
-	FrontIdentification *openapi_types.File `json:"frontIdentification,omitempty"`
-	LastName            string              `json:"lastName"`
-	Password            string              `json:"password"`
-}
-
 // PostCompanySignUpMultipartRequestBody defines body for PostCompanySignUp for multipart/form-data ContentType.
-type PostCompanySignUpMultipartRequestBody PostCompanySignUpMultipartBody
+type PostCompanySignUpMultipartRequestBody = CompanySignUpInput
 
 // PostCompanyValidateSignUpMultipartRequestBody defines body for PostCompanyValidateSignUp for multipart/form-data ContentType.
-type PostCompanyValidateSignUpMultipartRequestBody PostCompanyValidateSignUpMultipartBody
+type PostCompanyValidateSignUpMultipartRequestBody = CompanySignUpInput
 
 // PostSupporterSignUpMultipartRequestBody defines body for PostSupporterSignUp for multipart/form-data ContentType.
-type PostSupporterSignUpMultipartRequestBody PostSupporterSignUpMultipartBody
+type PostSupporterSignUpMultipartRequestBody = SupporterSignUpInput
 
 // PostSupporterValidateSignUpMultipartRequestBody defines body for PostSupporterValidateSignUp for multipart/form-data ContentType.
-type PostSupporterValidateSignUpMultipartRequestBody PostSupporterValidateSignUpMultipartBody
+type PostSupporterValidateSignUpMultipartRequestBody = SupporterSignUpInput
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
-	// SignUp
-	// (POST /companies/signUp)
+	// Company Sign Up
+	// (POST /companies/sign-up)
 	PostCompanySignUp(ctx echo.Context) error
-	// Validate SignUp
-	// (POST /companies/validateSignUp)
+	// Company Validate Sign Up
+	// (POST /companies/validate-sign-up)
 	PostCompanyValidateSignUp(ctx echo.Context) error
 	// Get Csrf
 	// (GET /csrf)
 	GetCsrf(ctx echo.Context) error
-	// SignUp
-	// (POST /supporters/signUp)
+	// Supporter Sign Up
+	// (POST /supporters/sign-up)
 	PostSupporterSignUp(ctx echo.Context) error
-	// Validate SignUp
-	// (POST /supporters/validateSignUp)
+	// Supporter Validate Sign Up
+	// (POST /supporters/validate-sign-up)
 	PostSupporterValidateSignUp(ctx echo.Context) error
 }
 
@@ -204,31 +186,12 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 		Handler: si,
 	}
 
-	router.POST(baseURL+"/companies/signUp", wrapper.PostCompanySignUp)
-	router.POST(baseURL+"/companies/validateSignUp", wrapper.PostCompanyValidateSignUp)
+	router.POST(baseURL+"/companies/sign-up", wrapper.PostCompanySignUp)
+	router.POST(baseURL+"/companies/validate-sign-up", wrapper.PostCompanyValidateSignUp)
 	router.GET(baseURL+"/csrf", wrapper.GetCsrf)
-	router.POST(baseURL+"/supporters/signUp", wrapper.PostSupporterSignUp)
-	router.POST(baseURL+"/supporters/validateSignUp", wrapper.PostSupporterValidateSignUp)
+	router.POST(baseURL+"/supporters/sign-up", wrapper.PostSupporterSignUp)
+	router.POST(baseURL+"/supporters/validate-sign-up", wrapper.PostSupporterValidateSignUp)
 
-}
-
-type CompanySignUpResponseJSONResponse struct {
-	Code   int                          `json:"code"`
-	Errors CompanySignUpValidationError `json:"errors"`
-}
-
-type CsrfResponseJSONResponse struct {
-	CsrfToken string `json:"csrfToken"`
-}
-
-type InternalServerErrorResponseJSONResponse struct {
-	Code    int64  `json:"code"`
-	Message string `json:"message"`
-}
-
-type SupporterSignUpResponseJSONResponse struct {
-	Code   int                           `json:"code"`
-	Errors SuppoterSignUpValidationError `json:"errors"`
 }
 
 type PostCompanySignUpRequestObject struct {
@@ -239,9 +202,7 @@ type PostCompanySignUpResponseObject interface {
 	VisitPostCompanySignUpResponse(w http.ResponseWriter) error
 }
 
-type PostCompanySignUp200JSONResponse struct {
-	CompanySignUpResponseJSONResponse
-}
+type PostCompanySignUp200JSONResponse CompanySignUpResponse
 
 func (response PostCompanySignUp200JSONResponse) VisitPostCompanySignUpResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -250,10 +211,7 @@ func (response PostCompanySignUp200JSONResponse) VisitPostCompanySignUpResponse(
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PostCompanySignUp400JSONResponse struct {
-	Code   int                          `json:"code"`
-	Errors CompanySignUpValidationError `json:"errors"`
-}
+type PostCompanySignUp400JSONResponse CompanySignUpResponse
 
 func (response PostCompanySignUp400JSONResponse) VisitPostCompanySignUpResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -263,7 +221,8 @@ func (response PostCompanySignUp400JSONResponse) VisitPostCompanySignUpResponse(
 }
 
 type PostCompanySignUp500JSONResponse struct {
-	InternalServerErrorResponseJSONResponse
+	Code    int    `json:"code"`
+	Message string `json:"message"`
 }
 
 func (response PostCompanySignUp500JSONResponse) VisitPostCompanySignUpResponse(w http.ResponseWriter) error {
@@ -281,9 +240,7 @@ type PostCompanyValidateSignUpResponseObject interface {
 	VisitPostCompanyValidateSignUpResponse(w http.ResponseWriter) error
 }
 
-type PostCompanyValidateSignUp200JSONResponse struct {
-	CompanySignUpResponseJSONResponse
-}
+type PostCompanyValidateSignUp200JSONResponse CompanySignUpResponse
 
 func (response PostCompanyValidateSignUp200JSONResponse) VisitPostCompanyValidateSignUpResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -292,10 +249,7 @@ func (response PostCompanyValidateSignUp200JSONResponse) VisitPostCompanyValidat
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PostCompanyValidateSignUp400JSONResponse struct {
-	Code   int                          `json:"code"`
-	Errors CompanySignUpValidationError `json:"errors"`
-}
+type PostCompanyValidateSignUp400JSONResponse CompanySignUpResponse
 
 func (response PostCompanyValidateSignUp400JSONResponse) VisitPostCompanyValidateSignUpResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -305,7 +259,8 @@ func (response PostCompanyValidateSignUp400JSONResponse) VisitPostCompanyValidat
 }
 
 type PostCompanyValidateSignUp500JSONResponse struct {
-	InternalServerErrorResponseJSONResponse
+	Code    int    `json:"code"`
+	Message string `json:"message"`
 }
 
 func (response PostCompanyValidateSignUp500JSONResponse) VisitPostCompanyValidateSignUpResponse(w http.ResponseWriter) error {
@@ -322,7 +277,7 @@ type GetCsrfResponseObject interface {
 	VisitGetCsrfResponse(w http.ResponseWriter) error
 }
 
-type GetCsrf200JSONResponse struct{ CsrfResponseJSONResponse }
+type GetCsrf200JSONResponse CsrfResponse
 
 func (response GetCsrf200JSONResponse) VisitGetCsrfResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -332,7 +287,8 @@ func (response GetCsrf200JSONResponse) VisitGetCsrfResponse(w http.ResponseWrite
 }
 
 type GetCsrf500JSONResponse struct {
-	InternalServerErrorResponseJSONResponse
+	Code    int    `json:"code"`
+	Message string `json:"message"`
 }
 
 func (response GetCsrf500JSONResponse) VisitGetCsrfResponse(w http.ResponseWriter) error {
@@ -350,9 +306,7 @@ type PostSupporterSignUpResponseObject interface {
 	VisitPostSupporterSignUpResponse(w http.ResponseWriter) error
 }
 
-type PostSupporterSignUp200JSONResponse struct {
-	SupporterSignUpResponseJSONResponse
-}
+type PostSupporterSignUp200JSONResponse SupporterSignUpResponse
 
 func (response PostSupporterSignUp200JSONResponse) VisitPostSupporterSignUpResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -361,10 +315,7 @@ func (response PostSupporterSignUp200JSONResponse) VisitPostSupporterSignUpRespo
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PostSupporterSignUp400JSONResponse struct {
-	Code   int                           `json:"code"`
-	Errors SuppoterSignUpValidationError `json:"errors"`
-}
+type PostSupporterSignUp400JSONResponse SupporterSignUpResponse
 
 func (response PostSupporterSignUp400JSONResponse) VisitPostSupporterSignUpResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -374,7 +325,8 @@ func (response PostSupporterSignUp400JSONResponse) VisitPostSupporterSignUpRespo
 }
 
 type PostSupporterSignUp500JSONResponse struct {
-	InternalServerErrorResponseJSONResponse
+	Code    int    `json:"code"`
+	Message string `json:"message"`
 }
 
 func (response PostSupporterSignUp500JSONResponse) VisitPostSupporterSignUpResponse(w http.ResponseWriter) error {
@@ -392,9 +344,7 @@ type PostSupporterValidateSignUpResponseObject interface {
 	VisitPostSupporterValidateSignUpResponse(w http.ResponseWriter) error
 }
 
-type PostSupporterValidateSignUp200JSONResponse struct {
-	SupporterSignUpResponseJSONResponse
-}
+type PostSupporterValidateSignUp200JSONResponse SupporterSignUpResponse
 
 func (response PostSupporterValidateSignUp200JSONResponse) VisitPostSupporterValidateSignUpResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -403,10 +353,7 @@ func (response PostSupporterValidateSignUp200JSONResponse) VisitPostSupporterVal
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PostSupporterValidateSignUp400JSONResponse struct {
-	Code   int                           `json:"code"`
-	Errors SuppoterSignUpValidationError `json:"errors"`
-}
+type PostSupporterValidateSignUp400JSONResponse SupporterSignUpResponse
 
 func (response PostSupporterValidateSignUp400JSONResponse) VisitPostSupporterValidateSignUpResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -416,7 +363,8 @@ func (response PostSupporterValidateSignUp400JSONResponse) VisitPostSupporterVal
 }
 
 type PostSupporterValidateSignUp500JSONResponse struct {
-	InternalServerErrorResponseJSONResponse
+	Code    int    `json:"code"`
+	Message string `json:"message"`
 }
 
 func (response PostSupporterValidateSignUp500JSONResponse) VisitPostSupporterValidateSignUpResponse(w http.ResponseWriter) error {
@@ -428,20 +376,20 @@ func (response PostSupporterValidateSignUp500JSONResponse) VisitPostSupporterVal
 
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
-	// SignUp
-	// (POST /companies/signUp)
+	// Company Sign Up
+	// (POST /companies/sign-up)
 	PostCompanySignUp(ctx context.Context, request PostCompanySignUpRequestObject) (PostCompanySignUpResponseObject, error)
-	// Validate SignUp
-	// (POST /companies/validateSignUp)
+	// Company Validate Sign Up
+	// (POST /companies/validate-sign-up)
 	PostCompanyValidateSignUp(ctx context.Context, request PostCompanyValidateSignUpRequestObject) (PostCompanyValidateSignUpResponseObject, error)
 	// Get Csrf
 	// (GET /csrf)
 	GetCsrf(ctx context.Context, request GetCsrfRequestObject) (GetCsrfResponseObject, error)
-	// SignUp
-	// (POST /supporters/signUp)
+	// Supporter Sign Up
+	// (POST /supporters/sign-up)
 	PostSupporterSignUp(ctx context.Context, request PostSupporterSignUpRequestObject) (PostSupporterSignUpResponseObject, error)
-	// Validate SignUp
-	// (POST /supporters/validateSignUp)
+	// Supporter Validate Sign Up
+	// (POST /supporters/validate-sign-up)
 	PostSupporterValidateSignUp(ctx context.Context, request PostSupporterValidateSignUpRequestObject) (PostSupporterValidateSignUpResponseObject, error)
 }
 
@@ -594,4 +542,96 @@ func (sh *strictHandler) PostSupporterValidateSignUp(ctx echo.Context) error {
 		return fmt.Errorf("unexpected response type: %T", response)
 	}
 	return nil
+}
+
+// Base64 encoded, gzipped, json marshaled Swagger object
+var swaggerSpec = []string{
+
+	"H4sIAAAAAAAC/+xYTW/jNhD9KwLboxO7X8BCt7YoFrkUiyTtpfCBEUc2dyWSnRm5awT+7wVJRaJsxZED",
+	"OEEL32yJ8/3e49iPorC1swYMk8gfBRVrqGX4+KutnTTbO70yf7gb4xr2Tx1aB8gawhmopa78B946ELkg",
+	"Rm1WYjcTpTayupdfb4EbNP5IabGWLHLxoI3ErZgdGhlZw6g3J4n+sahGXu5mAuHvRiMokf8VXczaxBLD",
+	"ZRfOPnyGgr3XQYW3QM4agsMiC6vSrLRhWAF6B4BoMZz5FqEUufhm3rdz3vZyPgjzp6y0kqyt+c0bH+Qf",
+	"gnWefdaaKx+29ZJFN1mX7kt17Qd8foaaoabR9rcPJKLcjg93uu3TjKdbpMOfarV7tnF9P7LYkLEGEpZH",
+	"8EBY3tsvYF5GY380nWTqfST6XeOcRQY8Sr0HWXy5UWBYl7oI9Uwk2YNGXiu5HRxXkmHs8DGCI/HvzxG2",
+	"RGv4VelV8ojb6TrQp5e4nKgLewM4nzLsBXq1NnR+pqjDC0EnAm06fVO8Tbd6lSoliDzBbByq0x2kiH0z",
+	"VTsY+cu65s21Ka0PpIAK1C4WKxBWmhij9c+fbkj0gW7Td3eAG114WG0AKRp/d73wmVoHRjotcvHDtX/k",
+	"K+R1qCpAXxoNNCe9MleNCyizFGTNYy14v1EiF58s8eD+EpEDQPyLVdvIOsNggm3dVKydRJ57ZblSkmW/",
+	"xZx0L0eV3Q0px9hAeBDZFIr5frHYS0I6V7XAmX+miJ5XZNBxNiQxHND9GrK2C9laUkZNUQAoUNe+9T++",
+	"V0oEuAHMCttUKjOWs8YoQGJpVMZJyqqBjG2mzcaDNKOtYfk1pP7TialP1d8aiOQKJtzQUVOfzi9HWTOs",
+	"/C5WDZ1GU1PX/jYb7hpZwC7LFcU4LQXE0psklNhE4sLVKdxo2Q4Xjlw48h/lyBOEp5CFsPRprmCEFR+B",
+	"/UYtzonBdGM/GXr/s/l9BM7ahnfz8l/jqOhpL5l41+9to+dTstFfVW+sZc/9sHhXNTsxqYue7fFhuIkP",
+	"haxnwyE9Trv3uyhvdfNf+HLhy5n5cmQDGBLH2weH/t2jaLASuVgzO8rn88oWslpb4vzD4sNC7Jadl8f2",
+	"z8Zkn9jN+of+0kq+JyF3y92/AQAA//+RlC7vGRcAAA==",
+}
+
+// GetSwagger returns the content of the embedded swagger specification file
+// or error if failed to decode
+func decodeSpec() ([]byte, error) {
+	zipped, err := base64.StdEncoding.DecodeString(strings.Join(swaggerSpec, ""))
+	if err != nil {
+		return nil, fmt.Errorf("error base64 decoding spec: %w", err)
+	}
+	zr, err := gzip.NewReader(bytes.NewReader(zipped))
+	if err != nil {
+		return nil, fmt.Errorf("error decompressing spec: %w", err)
+	}
+	var buf bytes.Buffer
+	_, err = buf.ReadFrom(zr)
+	if err != nil {
+		return nil, fmt.Errorf("error decompressing spec: %w", err)
+	}
+
+	return buf.Bytes(), nil
+}
+
+var rawSpec = decodeSpecCached()
+
+// a naive cached of a decoded swagger spec
+func decodeSpecCached() func() ([]byte, error) {
+	data, err := decodeSpec()
+	return func() ([]byte, error) {
+		return data, err
+	}
+}
+
+// Constructs a synthetic filesystem for resolving external references when loading openapi specifications.
+func PathToRawSpec(pathToFile string) map[string]func() ([]byte, error) {
+	res := make(map[string]func() ([]byte, error))
+	if len(pathToFile) > 0 {
+		res[pathToFile] = rawSpec
+	}
+
+	return res
+}
+
+// GetSwagger returns the Swagger specification corresponding to the generated code
+// in this file. The external references of Swagger specification are resolved.
+// The logic of resolving external references is tightly connected to "import-mapping" feature.
+// Externally referenced files must be embedded in the corresponding golang packages.
+// Urls can be supported but this task was out of the scope.
+func GetSwagger() (swagger *openapi3.T, err error) {
+	resolvePath := PathToRawSpec("")
+
+	loader := openapi3.NewLoader()
+	loader.IsExternalRefsAllowed = true
+	loader.ReadFromURIFunc = func(loader *openapi3.Loader, url *url.URL) ([]byte, error) {
+		pathToFile := url.String()
+		pathToFile = path.Clean(pathToFile)
+		getSpec, ok := resolvePath[pathToFile]
+		if !ok {
+			err1 := fmt.Errorf("path not found: %s", pathToFile)
+			return nil, err1
+		}
+		return getSpec()
+	}
+	var specData []byte
+	specData, err = rawSpec()
+	if err != nil {
+		return
+	}
+	swagger, err = loader.LoadFromData(specData)
+	if err != nil {
+		return
+	}
+	return
 }
