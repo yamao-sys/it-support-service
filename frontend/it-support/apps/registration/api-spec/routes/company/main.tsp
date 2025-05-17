@@ -14,29 +14,29 @@ using OpenAPI;
 @route("/companies")
 @useAuth([SecuritySchema])
 namespace RegistrationService.Todo {
-	interface ValidateSignUp {
-		@route("/validateSignUp")
-		@operationId("post-company-validate_sign_up")
-		@summary("Company Validate Sign Up")
-		@post
-		post(
-			@header contentType: "multipart/form-data",
-			@multipartBody body: CompanySignUpInput,
-		): SuccessResponse<CompanySignUpResponse>
-			| BadRequestErrorResponse<CompanySignUpResponse>
-			| InternalServerErrorResponse;
-	}
+  interface ValidateSignUp {
+    @route("/validateSignUp")
+    @operationId("post-company-validate_sign_up")
+    @summary("Company Validate Sign Up")
+    @post
+    post(
+      @header contentType: "multipart/form-data",
+      @multipartBody body: CompanySignUpInput,
+    ): SuccessResponse<CompanySignUpResponse>
+      | BadRequestErrorResponse<CompanySignUpResponse>
+      | InternalServerErrorResponse;
+  }
 
-	interface SignUp {
-		@route("/signUp")
-		@operationId("post-company-sign_up")
-		@summary("Company Sign Up")
-		@post
-		post(
-			@header contentType: "multipart/form-data",
-			@multipartBody body: CompanySignUpInput,
-		): SuccessResponse<CompanySignUpResponse>
-			| BadRequestErrorResponse<CompanySignUpResponse>
-			| InternalServerErrorResponse;
-	}
+  interface SignUp {
+    @route("/signUp")
+    @operationId("post-company-sign_up")
+    @summary("Company Sign Up")
+    @post
+    post(
+      @header contentType: "multipart/form-data",
+      @multipartBody body: CompanySignUpInput,
+    ): SuccessResponse<CompanySignUpResponse>
+      | BadRequestErrorResponse<CompanySignUpResponse>
+      | InternalServerErrorResponse;
+  }
 }

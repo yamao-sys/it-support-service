@@ -9,8 +9,8 @@ scalar Binary extends string;
 
 @summary("Company SignUp Input")
 model CompanySignUpInput {
-	name: HttpPart<string>;
-	email: HttpPart<string>;
-	password: HttpPart<string>;
-	finalTaxReturn?: HttpPart<Binary>;
+  name: HttpPart<string>;
+  email: HttpPart<string>;
+  password: HttpPart<string>;
+  finalTaxReturn?: HttpPart<Binary>;
 }
