@@ -7,6 +7,7 @@ tags:
   - name: companies
   - name: csrf
   - name: supporters
+  - name: projects
 paths:
   /companies/sign-in:
     post:
@@ -81,6 +82,180 @@ paths:
                   - message
       tags:
         - csrf
+  /projects:
+    get:
+      operationId: get-projects
+      summary: Create Project
+      parameters:
+        - name: pageToken
+          in: query
+          required: true
+          schema:
+            type: string
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectsListResponse'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  message:
+                    type: string
+                required:
+                  - code
+                  - message
+      tags:
+        - projects
+      security:
+        - ApiKeyAuth: []
+    post:
+      operationId: post-projects
+      summary: Create Project
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectStoreResponse'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  message:
+                    type: string
+                required:
+                  - code
+                  - message
+      tags:
+        - projects
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectStoreInput'
+      security:
+        - ApiKeyAuth: []
+  /projects/{id}:
+    get:
+      operationId: get-project
+      summary: Get Project
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectResponse'
+        '404':
+          description: The server cannot find the requested resource.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  message:
+                    type: string
+                required:
+                  - code
+                  - message
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  message:
+                    type: string
+                required:
+                  - code
+                  - message
+      tags:
+        - projects
+      security:
+        - ApiKeyAuth: []
+    put:
+      operationId: put-project
+      summary: Update Project
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectStoreResponse'
+        '404':
+          description: The server cannot find the requested resource.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  message:
+                    type: string
+                required:
+                  - code
+                  - message
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  message:
+                    type: string
+                required:
+                  - code
+                  - message
+      tags:
+        - projects
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectStoreInput'
+      security:
+        - ApiKeyAuth: []
   /supporters/sign-in:
     post:
       operationId: post-supporter-sign-in
@@ -168,6 +343,128 @@ components:
         csrfToken:
           type: string
       title: CsrfResponse
+    Project:
+      type: object
+      required:
+        - id
+        - name
+        - description
+        - startDate
+        - endDate
+        - isActive
+        - createdAt
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        minBudget:
+          type: integer
+        maxBudget:
+          type: integer
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+      title: Project
+    ProjectResponse:
+      type: object
+      required:
+        - project
+      properties:
+        project:
+          $ref: '#/components/schemas/Project'
+      title: Project Response
+    ProjectStoreInput:
+      type: object
+      required:
+        - title
+        - description
+        - startDate
+        - endDate
+        - isActive
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        minBudget:
+          type: integer
+        maxBudget:
+          type: integer
+        isActive:
+          type: boolean
+      title: Project Store Input
+    ProjectStoreResponse:
+      type: object
+      required:
+        - project
+        - errors
+      properties:
+        project:
+          $ref: '#/components/schemas/Project'
+        errors:
+          $ref: '#/components/schemas/ProjectValidationError'
+      title: Project Store Response
+    ProjectValidationError:
+      type: object
+      properties:
+        title:
+          type: array
+          items:
+            type: string
+        description:
+          type: array
+          items:
+            type: string
+        startDate:
+          type: array
+          items:
+            type: string
+        endDate:
+          type: array
+          items:
+            type: string
+        minBudget:
+          type: array
+          items:
+            type: string
+        maxBudget:
+          type: array
+          items:
+            type: string
+        isActive:
+          type: array
+          items:
+            type: string
+      title: Project Validation Error
+    ProjectsListResponse:
+      type: object
+      required:
+        - projects
+        - nextPageToken
+      properties:
+        projects:
+          type: array
+          items:
+            $ref: '#/components/schemas/Project'
+        nextPageToken:
+          type: string
+      title: Projects List Response
     SupporterSignInBadRequestResponse:
       type: object
       required:
@@ -200,6 +497,11 @@ components:
         Set-Cookie:
           type: string
       title: Supporter SignIn Error Response
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: cookie
+      name: token
 servers:
   - url: https://localhost:8081
     variables: {}
