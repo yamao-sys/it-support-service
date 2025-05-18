@@ -8,7 +8,6 @@ import (
 	"context"
 	"errors"
 	"net/http"
-	"strconv"
 	"testing"
 	"time"
 
@@ -75,12 +74,12 @@ func (s *TestPlansHandlerSuite) TestPostPlansCreate_StatusOk() {
 
 	var res businessapi.PostPlans200JSONResponse
 	result.UnmarshalBodyToObject(&res)
-	assert.Equal(s.T(), strconv.Itoa(projectID), *res.Plan.ProjectId)
-	assert.Equal(s.T(), title, *res.Plan.Title)
-	assert.Equal(s.T(), description, *res.Plan.Description)
-	assert.Equal(s.T(), startDate, *res.Plan.StartDate)
-	assert.Equal(s.T(), endDate, *res.Plan.EndDate)
-	assert.Equal(s.T(), unitPrice, *res.Plan.UnitPrice)
+	assert.Equal(s.T(), projectID, res.Plan.ProjectId)
+	assert.Equal(s.T(), title, res.Plan.Title)
+	assert.Equal(s.T(), description, res.Plan.Description)
+	assert.Equal(s.T(), startDate, res.Plan.StartDate)
+	assert.Equal(s.T(), endDate, res.Plan.EndDate)
+	assert.Equal(s.T(), unitPrice, res.Plan.UnitPrice)
 
 	expectedValidationErrors := businessapi.PlanValidationError{}
 	assert.Equal(s.T(), expectedValidationErrors, res.Errors)
