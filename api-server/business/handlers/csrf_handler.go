@@ -21,11 +21,8 @@ func NewCsrfHandler() CsrfHandler {
 func (ch *csrfHandler) GetCsrf(ctx context.Context, request businessapi.GetCsrfRequestObject) (businessapi.GetCsrfResponseObject, error) {
 	csrfToken, ok := ctx.Value(middleware.DefaultCSRFConfig.ContextKey).(string)
 	if !ok {
-		return businessapi.GetCsrf500JSONResponse{InternalServerErrorResponseJSONResponse: businessapi.InternalServerErrorResponseJSONResponse{
-			Code: http.StatusInternalServerError,
-			Message: "failed to retrieval token",
-		}}, nil
+		return businessapi.GetCsrf500JSONResponse{Code: http.StatusInternalServerError, Message: "failed to retrieval token",}, nil
 	}
 	
-	return businessapi.GetCsrf200JSONResponse{CsrfResponseJSONResponse: businessapi.CsrfResponseJSONResponse{ CsrfToken: csrfToken }}, nil
+	return businessapi.GetCsrf200JSONResponse(businessapi.CsrfResponse{ CsrfToken: csrfToken }), nil
 }
