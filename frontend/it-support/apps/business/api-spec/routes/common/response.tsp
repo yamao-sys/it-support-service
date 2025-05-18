@@ -8,10 +8,10 @@ model SuccessResponse<T> {
   @body body: T
 }
 
-model SuccessResponseWithHeader<T, H> {
+model SuccessResponseWithHeader<T> {
   @statusCode status: 200;
   @body body: T;
-  @header headers: H;
+  @header("Set-Cookie") token: string;
 }
 
 model BadRequestErrorResponse<T> {

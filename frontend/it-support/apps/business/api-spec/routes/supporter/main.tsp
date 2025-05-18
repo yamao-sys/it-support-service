@@ -15,12 +15,12 @@ using OpenAPI;
 namespace BusinessService.Supporter {
   interface SignIn {
     @route("/sign-in")
-    @operationId("post-supporter-sign-in")
+    @operationId("post-supporters-sign-in")
     @summary("Supporter Sign In")
     @post
     post(
       @body body: SupporterSignInInput,
-    ): SuccessResponseWithHeader<SupporterSignInOkResponse, SupporterSignInOkResponseHeader>
+    ): SuccessResponseWithHeader<SupporterSignInOkResponse>
       | BadRequestErrorResponse<SupporterSignInBadRequestResponse>
       | InternalServerErrorResponse;
   }

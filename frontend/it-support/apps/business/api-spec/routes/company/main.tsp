@@ -15,12 +15,12 @@ using OpenAPI;
 namespace BusinessService.Company {
   interface SignIn {
     @route("/sign-in")
-    @operationId("post-company-sign-in")
+    @operationId("post-companies-sign-in")
     @summary("Company Sign In")
     @post
     post(
       @body body: CompanySignInInput,
-    ): SuccessResponseWithHeader<CompanySignInOkResponse, CompanySignInOkResponseHeader>
+    ): SuccessResponseWithHeader<CompanySignInOkResponse>
       | BadRequestErrorResponse<CompanySignInBadRequestResponse>
       | InternalServerErrorResponse;
   }
