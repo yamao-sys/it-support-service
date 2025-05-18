@@ -15,7 +15,7 @@ using OpenAPI;
 namespace BusinessService.Supporter {
   interface SignIn {
     @route("/sign-in")
-    @operationId("post-supporters-sign-in")
+    @operationId("post-supporter-sign-in")
     @summary("Supporter Sign In")
     @post
     post(
