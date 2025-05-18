@@ -12,7 +12,7 @@ tags:
 paths:
   /companies/sign-in:
     post:
-      operationId: post-companies-sign-in
+      operationId: post-company-sign-in
       summary: Company Sign In
       parameters: []
       responses:
@@ -85,7 +85,7 @@ paths:
         - csrf
   /plans:
     post:
-      operationId: post-plans
+      operationId: post-plan
       summary: Create Plan
       parameters: []
       responses:
@@ -156,7 +156,7 @@ paths:
       security:
         - ApiKeyAuth: []
     post:
-      operationId: post-projects
+      operationId: post-project
       summary: Create Project
       parameters: []
       responses:
@@ -295,7 +295,7 @@ paths:
         - ApiKeyAuth: []
   /supporters/sign-in:
     post:
-      operationId: post-supporters-sign-in
+      operationId: post-supporter-sign-in
       summary: Supporter Sign In
       parameters: []
       responses:
