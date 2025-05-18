@@ -194,7 +194,7 @@ func (s *TestProjectServiceSuite) TestProjectCreate_WithOnlyRequired_StatusOK() 
 	parsedEndDate := time.Date(2025, 4, 10, 0, 0, 0, 0, time.Local)
 	endDate := openapi_types.Date{Time: parsedEndDate}
 	isActive := true
-	requestParams := businessapi.ProjectStoreInput{Title: title, Description: description, StartDate: &startDate, EndDate: &endDate, IsActive: &isActive}
+	requestParams := businessapi.ProjectStoreInput{Title: title, Description: description, StartDate: &startDate, EndDate: &endDate, IsActive: isActive}
 
 	createdProject, validatorErrors, err := testProjectService.Create(ctx, &requestParams, company.ID)
 	mappedValidationErrors := testProjectService.MappingValidationErrorStruct(validatorErrors)
@@ -227,7 +227,7 @@ func (s *TestProjectServiceSuite) TestProjectCreate_WithOptional_StatusOK() {
 	minBudget := 10000
 	maxBudget := 20000
 	isActive := true
-	requestParams := businessapi.ProjectStoreInput{Title: title, Description: description, StartDate: &startDate, EndDate: &endDate, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: &isActive}
+	requestParams := businessapi.ProjectStoreInput{Title: title, Description: description, StartDate: &startDate, EndDate: &endDate, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: isActive}
 
 	createdProject, validatorErrors, err := testProjectService.Create(ctx, &requestParams, company.ID)
 	mappedValidationErrors := testProjectService.MappingValidationErrorStruct(validatorErrors)
@@ -255,7 +255,7 @@ func (s *TestProjectServiceSuite) TestProjectCreate_BadRequest_Required() {
 	description := ""
 	minBudget := 10000
 	maxBudget := 20000
-	requestParams := businessapi.ProjectStoreInput{Title: title, Description: description, StartDate: nil, EndDate: nil, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: nil}
+	requestParams := businessapi.ProjectStoreInput{Title: title, Description: description, StartDate: nil, EndDate: nil, MinBudget: &minBudget, MaxBudget: &maxBudget}
 
 	createdProject, validatorErrors, err := testProjectService.Create(ctx, &requestParams, company.ID)
 	mappedValidationErrors := testProjectService.MappingValidationErrorStruct(validatorErrors)
@@ -267,12 +267,10 @@ func (s *TestProjectServiceSuite) TestProjectCreate_BadRequest_Required() {
 	descriptionErrorMessages := []string{"案件概要は必須入力です。"}
 	startDateErrorMessages := []string{"案件開始日は必須入力です。"}
 	endDateErrorMessages := []string{"案件終了日は必須入力です。"}
-	isActiveErrorMessages := []string{"公開フラグは必須入力です。"}
 	assert.ElementsMatch(s.T(), titleErrorMessages, *mappedValidationErrors.Title)
 	assert.ElementsMatch(s.T(), descriptionErrorMessages, *mappedValidationErrors.Description)
 	assert.ElementsMatch(s.T(), startDateErrorMessages, *mappedValidationErrors.StartDate)
 	assert.ElementsMatch(s.T(), endDateErrorMessages, *mappedValidationErrors.EndDate)
-	assert.ElementsMatch(s.T(), isActiveErrorMessages, *mappedValidationErrors.IsActive)
 
 	assert.Nil(s.T(), err)
 }
@@ -291,7 +289,7 @@ func (s *TestProjectServiceSuite) TestProjectCreate_BadRequest_Greater() {
 	minBudget := 10001
 	maxBudget := 10000
 	isActive := false
-	requestParams := businessapi.ProjectStoreInput{Title: title, Description: description, StartDate: &startDate, EndDate: &endDate, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: &isActive}
+	requestParams := businessapi.ProjectStoreInput{Title: title, Description: description, StartDate: &startDate, EndDate: &endDate, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: isActive}
 
 	createdProject, validatorErrors, err := testProjectService.Create(ctx, &requestParams, company.ID)
 	mappedValidationErrors := testProjectService.MappingValidationErrorStruct(validatorErrors)
@@ -321,7 +319,7 @@ func (s *TestProjectServiceSuite) TestProjectCreate_BadRequest_Threshold() {
 	minBudget := -1
 	maxBudget := 0
 	isActive := false
-	requestParams := businessapi.ProjectStoreInput{Title: title, Description: description, StartDate: &startDate, EndDate: &endDate, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: &isActive}
+	requestParams := businessapi.ProjectStoreInput{Title: title, Description: description, StartDate: &startDate, EndDate: &endDate, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: isActive}
 
 	createdProject, validatorErrors, err := testProjectService.Create(ctx, &requestParams, company.ID)
 	mappedValidationErrors := testProjectService.MappingValidationErrorStruct(validatorErrors)
@@ -390,7 +388,7 @@ func (s *TestProjectServiceSuite) TestProjectUpdate_WithOnlyRequired_StatusOK() 
 	parsedEndDate := time.Date(2025, 4, 10, 0, 0, 0, 0, time.Local)
 	endDate := openapi_types.Date{Time: parsedEndDate}
 	isActive := true
-	requestParams := businessapi.ProjectStoreInput{Title: title, Description: description, StartDate: &startDate, EndDate: &endDate, IsActive: &isActive}
+	requestParams := businessapi.ProjectStoreInput{Title: title, Description: description, StartDate: &startDate, EndDate: &endDate, IsActive: isActive}
 
 	updatedProject, validatorErrors, err := testProjectService.Update(ctx, &requestParams, project.ID)
 	mappedValidationErrors := testProjectService.MappingValidationErrorStruct(validatorErrors)
@@ -439,7 +437,7 @@ func (s *TestProjectServiceSuite) TestProjectUpdate_WithOptional_StatusOK() {
 	minBudget := 10000
 	maxBudget := 20000
 	isActive := true
-	requestParams := businessapi.ProjectStoreInput{Title: title, Description: description, StartDate: &startDate, EndDate: &endDate, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: &isActive}
+	requestParams := businessapi.ProjectStoreInput{Title: title, Description: description, StartDate: &startDate, EndDate: &endDate, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: isActive}
 
 	updatedProject, validatorErrors, err := testProjectService.Update(ctx, &requestParams, project.ID)
 	mappedValidationErrors := testProjectService.MappingValidationErrorStruct(validatorErrors)
@@ -483,7 +481,7 @@ func (s *TestProjectServiceSuite) TestProjectUpdate_BadRequest_Required() {
 	description := ""
 	minBudget := 10000
 	maxBudget := 20000
-	requestParams := businessapi.ProjectStoreInput{Title: title, Description: description, StartDate: nil, EndDate: nil, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: nil}
+	requestParams := businessapi.ProjectStoreInput{Title: title, Description: description, StartDate: nil, EndDate: nil, MinBudget: &minBudget, MaxBudget: &maxBudget}
 
 	updatedProject, validatorErrors, err := testProjectService.Update(ctx, &requestParams, project.ID)
 	mappedValidationErrors := testProjectService.MappingValidationErrorStruct(validatorErrors)
@@ -499,12 +497,10 @@ func (s *TestProjectServiceSuite) TestProjectUpdate_BadRequest_Required() {
 	descriptionErrorMessages := []string{"案件概要は必須入力です。"}
 	startDateErrorMessages := []string{"案件開始日は必須入力です。"}
 	endDateErrorMessages := []string{"案件終了日は必須入力です。"}
-	isActiveErrorMessages := []string{"公開フラグは必須入力です。"}
 	assert.ElementsMatch(s.T(), titleErrorMessages, *mappedValidationErrors.Title)
 	assert.ElementsMatch(s.T(), descriptionErrorMessages, *mappedValidationErrors.Description)
 	assert.ElementsMatch(s.T(), startDateErrorMessages, *mappedValidationErrors.StartDate)
 	assert.ElementsMatch(s.T(), endDateErrorMessages, *mappedValidationErrors.EndDate)
-	assert.ElementsMatch(s.T(), isActiveErrorMessages, *mappedValidationErrors.IsActive)
 
 	assert.Nil(s.T(), err)
 }
@@ -526,7 +522,7 @@ func (s *TestProjectServiceSuite) TestProjectUpdate_BadRequest_Greater() {
 	minBudget := 10001
 	maxBudget := 10000
 	isActive := false
-	requestParams := businessapi.ProjectStoreInput{Title: title, Description: description, StartDate: &startDate, EndDate: &endDate, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: &isActive}
+	requestParams := businessapi.ProjectStoreInput{Title: title, Description: description, StartDate: &startDate, EndDate: &endDate, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: isActive}
 
 	updatedProject, validatorErrors, err := testProjectService.Create(ctx, &requestParams, company.ID)
 	mappedValidationErrors := testProjectService.MappingValidationErrorStruct(validatorErrors)
@@ -563,7 +559,7 @@ func (s *TestProjectServiceSuite) TestProjectUpdate_BadRequest_Threshold() {
 	minBudget := -1
 	maxBudget := 0
 	isActive := false
-	requestParams := businessapi.ProjectStoreInput{Title: title, Description: description, StartDate: &startDate, EndDate: &endDate, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: &isActive}
+	requestParams := businessapi.ProjectStoreInput{Title: title, Description: description, StartDate: &startDate, EndDate: &endDate, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: isActive}
 
 	updatedProject, validatorErrors, err := testProjectService.Create(ctx, &requestParams, company.ID)
 
@@ -602,7 +598,7 @@ func (s *TestProjectServiceSuite) TestProjectUpdate_StatusNotFound() {
 	minBudget := 10000
 	maxBudget := 20000
 	isActive := true
-	requestParams := businessapi.ProjectStoreInput{Title: title, Description: description, StartDate: &startDate, EndDate: &endDate, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: &isActive}
+	requestParams := businessapi.ProjectStoreInput{Title: title, Description: description, StartDate: &startDate, EndDate: &endDate, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: isActive}
 
 	updatedProject, validatorErrors, err := testProjectService.Update(ctx, &requestParams, project.ID+1)
 

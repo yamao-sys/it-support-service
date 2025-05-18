@@ -74,7 +74,7 @@ func (ps *projectService) Create(ctx context.Context, requestParams *businessapi
 	if requestParams.MaxBudget != nil {
 		project.MaxBudget = null.Int{Int: *requestParams.MaxBudget, Valid: true}
 	}
-	project.IsActive = *requestParams.IsActive
+	project.IsActive = requestParams.IsActive
 
 	createErr := project.Insert(ctx, ps.db, boil.Infer())
 	if createErr != nil {
@@ -114,7 +114,7 @@ func (ps *projectService) Update(ctx context.Context, requestParams *businessapi
 	if requestParams.MaxBudget != nil {
 		doUpdateProject.MaxBudget = null.Int{Int: *requestParams.MaxBudget, Valid: true}
 	}
-	doUpdateProject.IsActive = *requestParams.IsActive
+	doUpdateProject.IsActive = requestParams.IsActive
 
 	_, updateErr := doUpdateProject.Update(ctx, ps.db, boil.Infer())
 	if updateErr != nil {

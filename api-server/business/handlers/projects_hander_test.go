@@ -253,7 +253,7 @@ func (s *TestProjectsHandlerSuite) TestPostProjectCreate_StatusOk() {
 	minBudget := 10000
 	maxBudget := 20000
 	isActive := true
-	reqBody := businessapi.PostProjectJSONRequestBody{Title: title, Description: description, StartDate: &startDate, EndDate: &endDate, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: &isActive}
+	reqBody := businessapi.PostProjectJSONRequestBody{Title: title, Description: description, StartDate: &startDate, EndDate: &endDate, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: isActive}
 	result := testutil.NewRequest().Post("/projects").WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithJsonBody(reqBody).GoWithHTTPHandler(s.T(), e)
 
 	assert.Equal(s.T(), http.StatusOK, result.Code())
@@ -291,7 +291,7 @@ func (s *TestProjectsHandlerSuite) TestPostProjectCreate_StatusForbidden() {
 	minBudget := 10000
 	maxBudget := 20000
 	isActive := true
-	reqBody := businessapi.PostProjectJSONRequestBody{Title: title, Description: description, StartDate: &startDate, EndDate: &endDate, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: &isActive}
+	reqBody := businessapi.PostProjectJSONRequestBody{Title: title, Description: description, StartDate: &startDate, EndDate: &endDate, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: isActive}
 	result := testutil.NewRequest().Post("/projects").WithHeader("Cookie", cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithJsonBody(reqBody).GoWithHTTPHandler(s.T(), e)
 
 	assert.Equal(s.T(), http.StatusForbidden, result.Code())
@@ -314,7 +314,7 @@ func (s *TestProjectsHandlerSuite) TestPostProjectCreate_StatusUnauthorized() {
 	minBudget := 10000
 	maxBudget := 20000
 	isActive := true
-	reqBody := businessapi.PostProjectJSONRequestBody{Title: title, Description: description, StartDate: &startDate, EndDate: &endDate, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: &isActive}
+	reqBody := businessapi.PostProjectJSONRequestBody{Title: title, Description: description, StartDate: &startDate, EndDate: &endDate, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: isActive}
 	result := testutil.NewRequest().Post("/projects").WithHeader("Cookie", csrfTokenCookie).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithJsonBody(reqBody).GoWithHTTPHandler(s.T(), e)
 
 	assert.Equal(s.T(), http.StatusUnauthorized, result.Code())
@@ -338,7 +338,7 @@ func (s *TestProjectsHandlerSuite) TestPostProjectCreate_StatusInternalServerErr
 	minBudget := 10000
 	maxBudget := 20000
 	isActive := true
-	reqBody := businessapi.PostProjectJSONRequestBody{Title: title, Description: description, StartDate: &startDate, EndDate: &endDate, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: &isActive}
+	reqBody := businessapi.PostProjectJSONRequestBody{Title: title, Description: description, StartDate: &startDate, EndDate: &endDate, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: isActive}
 
 	mockProjectService := new(MockProjectService)
 	mockProjectService.On("FetchLists", mock.AnythingOfType("*context.valueCtx"), mock.AnythingOfType("int")).Return(models.ProjectSlice{}, 0, nil)
@@ -366,7 +366,7 @@ func (s *TestProjectsHandlerSuite) TestPostProjectCreate_BadRequest_Required() {
 	description := ""
 	minBudget := 10000
 	maxBudget := 20000
-	reqBody := businessapi.PostProjectJSONRequestBody{Title: title, Description: description, StartDate: nil, EndDate: nil, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: nil}
+	reqBody := businessapi.PostProjectJSONRequestBody{Title: title, Description: description, StartDate: nil, EndDate: nil, MinBudget: &minBudget, MaxBudget: &maxBudget}
 	result := testutil.NewRequest().Post("/projects").WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithJsonBody(reqBody).GoWithHTTPHandler(s.T(), e)
 
 	assert.Equal(s.T(), http.StatusOK, result.Code())
@@ -378,12 +378,10 @@ func (s *TestProjectsHandlerSuite) TestPostProjectCreate_BadRequest_Required() {
 	descriptionErrorMessages := []string{"案件概要は必須入力です。"}
 	startDateErrorMessages := []string{"案件開始日は必須入力です。"}
 	endDateErrorMessages := []string{"案件終了日は必須入力です。"}
-	isActiveErrorMessages := []string{"公開フラグは必須入力です。"}
 	assert.Equal(s.T(), titleErrorMessages, *res.Errors.Title)
 	assert.Equal(s.T(), descriptionErrorMessages, *res.Errors.Description)
 	assert.Equal(s.T(), startDateErrorMessages, *res.Errors.StartDate)
 	assert.Equal(s.T(), endDateErrorMessages, *res.Errors.EndDate)
-	assert.Equal(s.T(), isActiveErrorMessages, *res.Errors.IsActive)
 
 	// NOTE: DBの値を確認
 	exists, _ := models.Projects(
@@ -474,7 +472,7 @@ func (s *TestProjectsHandlerSuite) TestPutProject_StatusOk() {
 	minBudget := 10000
 	maxBudget := 20000
 	isActive := true
-	reqBody := businessapi.PutProjectJSONRequestBody{Title: title, Description: description, StartDate: &startDate, EndDate: &endDate, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: &isActive}
+	reqBody := businessapi.PutProjectJSONRequestBody{Title: title, Description: description, StartDate: &startDate, EndDate: &endDate, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: isActive}
 	result := testutil.NewRequest().Put("/projects/"+strconv.Itoa(project.ID)).WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithJsonBody(reqBody).GoWithHTTPHandler(s.T(), e)
 
 	assert.Equal(s.T(), http.StatusOK, result.Code())
@@ -518,7 +516,7 @@ func (s *TestProjectsHandlerSuite) TestPutProject_StatusForbidden() {
 	minBudget := 10000
 	maxBudget := 20000
 	isActive := true
-	reqBody := businessapi.PutProjectJSONRequestBody{Title: title, Description: description, StartDate: &startDate, EndDate: &endDate, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: &isActive}
+	reqBody := businessapi.PutProjectJSONRequestBody{Title: title, Description: description, StartDate: &startDate, EndDate: &endDate, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: isActive}
 	result := testutil.NewRequest().Put("/projects/"+strconv.Itoa(project.ID)).WithHeader("Cookie", cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithJsonBody(reqBody).GoWithHTTPHandler(s.T(), e)
 
 	assert.Equal(s.T(), http.StatusForbidden, result.Code())
@@ -543,7 +541,7 @@ func (s *TestProjectsHandlerSuite) TestPutProject_StatusUnauthorized() {
 	minBudget := 10000
 	maxBudget := 20000
 	isActive := true
-	reqBody := businessapi.PutProjectJSONRequestBody{Title: title, Description: description, StartDate: &startDate, EndDate: &endDate, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: &isActive}
+	reqBody := businessapi.PutProjectJSONRequestBody{Title: title, Description: description, StartDate: &startDate, EndDate: &endDate, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: isActive}
 	result := testutil.NewRequest().Put("/projects/"+strconv.Itoa(project.ID)).WithHeader("Cookie", csrfTokenCookie).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithJsonBody(reqBody).GoWithHTTPHandler(s.T(), e)
 
 	assert.Equal(s.T(), http.StatusUnauthorized, result.Code())
@@ -567,7 +565,7 @@ func (s *TestProjectsHandlerSuite) TestPutProject_StatusInternalServerError() {
 	minBudget := 10000
 	maxBudget := 20000
 	isActive := true
-	reqBody := businessapi.PutProjectJSONRequestBody{Title: title, Description: description, StartDate: &startDate, EndDate: &endDate, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: &isActive}
+	reqBody := businessapi.PutProjectJSONRequestBody{Title: title, Description: description, StartDate: &startDate, EndDate: &endDate, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: isActive}
 
 	mockProjectService := new(MockProjectService)
 	mockProjectService.On("FetchLists", mock.AnythingOfType("*context.valueCtx"), mock.AnythingOfType("int")).Return(models.ProjectSlice{}, 0, nil)
@@ -594,7 +592,7 @@ func (s *TestProjectsHandlerSuite) TestPutProject_BadRequest_Required() {
 	description := ""
 	minBudget := 10000
 	maxBudget := 20000
-	reqBody := businessapi.PutProjectJSONRequestBody{Title: title, Description: description, StartDate: nil, EndDate: nil, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: nil}
+	reqBody := businessapi.PutProjectJSONRequestBody{Title: title, Description: description, StartDate: nil, EndDate: nil, MinBudget: &minBudget, MaxBudget: &maxBudget}
 	result := testutil.NewRequest().Put("/projects/"+strconv.Itoa(project.ID)).WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithJsonBody(reqBody).GoWithHTTPHandler(s.T(), e)
 
 	assert.Equal(s.T(), http.StatusOK, result.Code())
@@ -606,12 +604,10 @@ func (s *TestProjectsHandlerSuite) TestPutProject_BadRequest_Required() {
 	descriptionErrorMessages := []string{"案件概要は必須入力です。"}
 	startDateErrorMessages := []string{"案件開始日は必須入力です。"}
 	endDateErrorMessages := []string{"案件終了日は必須入力です。"}
-	isActiveErrorMessages := []string{"公開フラグは必須入力です。"}
 	assert.Equal(s.T(), titleErrorMessages, *res.Errors.Title)
 	assert.Equal(s.T(), descriptionErrorMessages, *res.Errors.Description)
 	assert.Equal(s.T(), startDateErrorMessages, *res.Errors.StartDate)
 	assert.Equal(s.T(), endDateErrorMessages, *res.Errors.EndDate)
-	assert.Equal(s.T(), isActiveErrorMessages, *res.Errors.IsActive)
 
 	// NOTE: DBの値を確認
 	project.Reload(ctx, DBCon)
