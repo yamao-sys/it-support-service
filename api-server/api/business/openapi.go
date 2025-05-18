@@ -154,38 +154,38 @@ type GetProjectsParams struct {
 	PageToken *string `form:"pageToken,omitempty" json:"pageToken,omitempty"`
 }
 
-// PostCompaniesSignInJSONRequestBody defines body for PostCompaniesSignIn for application/json ContentType.
-type PostCompaniesSignInJSONRequestBody = CompanySignInInput
+// PostCompanySignInJSONRequestBody defines body for PostCompanySignIn for application/json ContentType.
+type PostCompanySignInJSONRequestBody = CompanySignInInput
 
-// PostPlansJSONRequestBody defines body for PostPlans for application/json ContentType.
-type PostPlansJSONRequestBody = PlanStoreInput
+// PostPlanJSONRequestBody defines body for PostPlan for application/json ContentType.
+type PostPlanJSONRequestBody = PlanStoreInput
 
-// PostProjectsJSONRequestBody defines body for PostProjects for application/json ContentType.
-type PostProjectsJSONRequestBody = ProjectStoreInput
+// PostProjectJSONRequestBody defines body for PostProject for application/json ContentType.
+type PostProjectJSONRequestBody = ProjectStoreInput
 
 // PutProjectJSONRequestBody defines body for PutProject for application/json ContentType.
 type PutProjectJSONRequestBody = ProjectStoreInput
 
-// PostSupportersSignInJSONRequestBody defines body for PostSupportersSignIn for application/json ContentType.
-type PostSupportersSignInJSONRequestBody = SupporterSignInInput
+// PostSupporterSignInJSONRequestBody defines body for PostSupporterSignIn for application/json ContentType.
+type PostSupporterSignInJSONRequestBody = SupporterSignInInput
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
 	// Company Sign In
 	// (POST /companies/sign-in)
-	PostCompaniesSignIn(ctx echo.Context) error
+	PostCompanySignIn(ctx echo.Context) error
 	// Get Csrf
 	// (GET /csrf)
 	GetCsrf(ctx echo.Context) error
 	// Create Plan
 	// (POST /plans)
-	PostPlans(ctx echo.Context) error
+	PostPlan(ctx echo.Context) error
 	// Create Project
 	// (GET /projects)
 	GetProjects(ctx echo.Context, params GetProjectsParams) error
 	// Create Project
 	// (POST /projects)
-	PostProjects(ctx echo.Context) error
+	PostProject(ctx echo.Context) error
 	// Get Project
 	// (GET /projects/{id})
 	GetProject(ctx echo.Context, id int) error
@@ -194,7 +194,7 @@ type ServerInterface interface {
 	PutProject(ctx echo.Context, id int) error
 	// Supporter Sign In
 	// (POST /supporters/sign-in)
-	PostSupportersSignIn(ctx echo.Context) error
+	PostSupporterSignIn(ctx echo.Context) error
 }
 
 // ServerInterfaceWrapper converts echo contexts to parameters.
@@ -202,12 +202,12 @@ type ServerInterfaceWrapper struct {
 	Handler ServerInterface
 }
 
-// PostCompaniesSignIn converts echo context to params.
-func (w *ServerInterfaceWrapper) PostCompaniesSignIn(ctx echo.Context) error {
+// PostCompanySignIn converts echo context to params.
+func (w *ServerInterfaceWrapper) PostCompanySignIn(ctx echo.Context) error {
 	var err error
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.PostCompaniesSignIn(ctx)
+	err = w.Handler.PostCompanySignIn(ctx)
 	return err
 }
 
@@ -220,14 +220,14 @@ func (w *ServerInterfaceWrapper) GetCsrf(ctx echo.Context) error {
 	return err
 }
 
-// PostPlans converts echo context to params.
-func (w *ServerInterfaceWrapper) PostPlans(ctx echo.Context) error {
+// PostPlan converts echo context to params.
+func (w *ServerInterfaceWrapper) PostPlan(ctx echo.Context) error {
 	var err error
 
 	ctx.Set(ApiKeyAuthScopes, []string{})
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.PostPlans(ctx)
+	err = w.Handler.PostPlan(ctx)
 	return err
 }
 
@@ -251,14 +251,14 @@ func (w *ServerInterfaceWrapper) GetProjects(ctx echo.Context) error {
 	return err
 }
 
-// PostProjects converts echo context to params.
-func (w *ServerInterfaceWrapper) PostProjects(ctx echo.Context) error {
+// PostProject converts echo context to params.
+func (w *ServerInterfaceWrapper) PostProject(ctx echo.Context) error {
 	var err error
 
 	ctx.Set(ApiKeyAuthScopes, []string{})
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.PostProjects(ctx)
+	err = w.Handler.PostProject(ctx)
 	return err
 }
 
@@ -298,12 +298,12 @@ func (w *ServerInterfaceWrapper) PutProject(ctx echo.Context) error {
 	return err
 }
 
-// PostSupportersSignIn converts echo context to params.
-func (w *ServerInterfaceWrapper) PostSupportersSignIn(ctx echo.Context) error {
+// PostSupporterSignIn converts echo context to params.
+func (w *ServerInterfaceWrapper) PostSupporterSignIn(ctx echo.Context) error {
 	var err error
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.PostSupportersSignIn(ctx)
+	err = w.Handler.PostSupporterSignIn(ctx)
 	return err
 }
 
@@ -335,35 +335,35 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 		Handler: si,
 	}
 
-	router.POST(baseURL+"/companies/sign-in", wrapper.PostCompaniesSignIn)
+	router.POST(baseURL+"/companies/sign-in", wrapper.PostCompanySignIn)
 	router.GET(baseURL+"/csrf", wrapper.GetCsrf)
-	router.POST(baseURL+"/plans", wrapper.PostPlans)
+	router.POST(baseURL+"/plans", wrapper.PostPlan)
 	router.GET(baseURL+"/projects", wrapper.GetProjects)
-	router.POST(baseURL+"/projects", wrapper.PostProjects)
+	router.POST(baseURL+"/projects", wrapper.PostProject)
 	router.GET(baseURL+"/projects/:id", wrapper.GetProject)
 	router.PUT(baseURL+"/projects/:id", wrapper.PutProject)
-	router.POST(baseURL+"/supporters/sign-in", wrapper.PostSupportersSignIn)
+	router.POST(baseURL+"/supporters/sign-in", wrapper.PostSupporterSignIn)
 
 }
 
-type PostCompaniesSignInRequestObject struct {
-	Body *PostCompaniesSignInJSONRequestBody
+type PostCompanySignInRequestObject struct {
+	Body *PostCompanySignInJSONRequestBody
 }
 
-type PostCompaniesSignInResponseObject interface {
-	VisitPostCompaniesSignInResponse(w http.ResponseWriter) error
+type PostCompanySignInResponseObject interface {
+	VisitPostCompanySignInResponse(w http.ResponseWriter) error
 }
 
-type PostCompaniesSignIn200ResponseHeaders struct {
+type PostCompanySignIn200ResponseHeaders struct {
 	SetCookie string
 }
 
-type PostCompaniesSignIn200JSONResponse struct {
+type PostCompanySignIn200JSONResponse struct {
 	Body    CompanySignInOkResponse
-	Headers PostCompaniesSignIn200ResponseHeaders
+	Headers PostCompanySignIn200ResponseHeaders
 }
 
-func (response PostCompaniesSignIn200JSONResponse) VisitPostCompaniesSignInResponse(w http.ResponseWriter) error {
+func (response PostCompanySignIn200JSONResponse) VisitPostCompanySignInResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Set-Cookie", fmt.Sprint(response.Headers.SetCookie))
 	w.WriteHeader(200)
@@ -371,21 +371,21 @@ func (response PostCompaniesSignIn200JSONResponse) VisitPostCompaniesSignInRespo
 	return json.NewEncoder(w).Encode(response.Body)
 }
 
-type PostCompaniesSignIn400JSONResponse CompanySignInBadRequestResponse
+type PostCompanySignIn400JSONResponse CompanySignInBadRequestResponse
 
-func (response PostCompaniesSignIn400JSONResponse) VisitPostCompaniesSignInResponse(w http.ResponseWriter) error {
+func (response PostCompanySignIn400JSONResponse) VisitPostCompanySignInResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(400)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PostCompaniesSignIn500JSONResponse struct {
+type PostCompanySignIn500JSONResponse struct {
 	Code    int    `json:"code"`
 	Message string `json:"message"`
 }
 
-func (response PostCompaniesSignIn500JSONResponse) VisitPostCompaniesSignInResponse(w http.ResponseWriter) error {
+func (response PostCompanySignIn500JSONResponse) VisitPostCompanySignInResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(500)
 
@@ -420,29 +420,29 @@ func (response GetCsrf500JSONResponse) VisitGetCsrfResponse(w http.ResponseWrite
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PostPlansRequestObject struct {
-	Body *PostPlansJSONRequestBody
+type PostPlanRequestObject struct {
+	Body *PostPlanJSONRequestBody
 }
 
-type PostPlansResponseObject interface {
-	VisitPostPlansResponse(w http.ResponseWriter) error
+type PostPlanResponseObject interface {
+	VisitPostPlanResponse(w http.ResponseWriter) error
 }
 
-type PostPlans200JSONResponse PlanStoreResponse
+type PostPlan200JSONResponse PlanStoreResponse
 
-func (response PostPlans200JSONResponse) VisitPostPlansResponse(w http.ResponseWriter) error {
+func (response PostPlan200JSONResponse) VisitPostPlanResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PostPlans500JSONResponse struct {
+type PostPlan500JSONResponse struct {
 	Code    int    `json:"code"`
 	Message string `json:"message"`
 }
 
-func (response PostPlans500JSONResponse) VisitPostPlansResponse(w http.ResponseWriter) error {
+func (response PostPlan500JSONResponse) VisitPostPlanResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(500)
 
@@ -478,29 +478,29 @@ func (response GetProjects500JSONResponse) VisitGetProjectsResponse(w http.Respo
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PostProjectsRequestObject struct {
-	Body *PostProjectsJSONRequestBody
+type PostProjectRequestObject struct {
+	Body *PostProjectJSONRequestBody
 }
 
-type PostProjectsResponseObject interface {
-	VisitPostProjectsResponse(w http.ResponseWriter) error
+type PostProjectResponseObject interface {
+	VisitPostProjectResponse(w http.ResponseWriter) error
 }
 
-type PostProjects200JSONResponse ProjectStoreResponse
+type PostProject200JSONResponse ProjectStoreResponse
 
-func (response PostProjects200JSONResponse) VisitPostProjectsResponse(w http.ResponseWriter) error {
+func (response PostProject200JSONResponse) VisitPostProjectResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PostProjects500JSONResponse struct {
+type PostProject500JSONResponse struct {
 	Code    int    `json:"code"`
 	Message string `json:"message"`
 }
 
-func (response PostProjects500JSONResponse) VisitPostProjectsResponse(w http.ResponseWriter) error {
+func (response PostProject500JSONResponse) VisitPostProjectResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(500)
 
@@ -590,24 +590,24 @@ func (response PutProject500JSONResponse) VisitPutProjectResponse(w http.Respons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PostSupportersSignInRequestObject struct {
-	Body *PostSupportersSignInJSONRequestBody
+type PostSupporterSignInRequestObject struct {
+	Body *PostSupporterSignInJSONRequestBody
 }
 
-type PostSupportersSignInResponseObject interface {
-	VisitPostSupportersSignInResponse(w http.ResponseWriter) error
+type PostSupporterSignInResponseObject interface {
+	VisitPostSupporterSignInResponse(w http.ResponseWriter) error
 }
 
-type PostSupportersSignIn200ResponseHeaders struct {
+type PostSupporterSignIn200ResponseHeaders struct {
 	SetCookie string
 }
 
-type PostSupportersSignIn200JSONResponse struct {
+type PostSupporterSignIn200JSONResponse struct {
 	Body    SupporterSignInOkResponse
-	Headers PostSupportersSignIn200ResponseHeaders
+	Headers PostSupporterSignIn200ResponseHeaders
 }
 
-func (response PostSupportersSignIn200JSONResponse) VisitPostSupportersSignInResponse(w http.ResponseWriter) error {
+func (response PostSupporterSignIn200JSONResponse) VisitPostSupporterSignInResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Set-Cookie", fmt.Sprint(response.Headers.SetCookie))
 	w.WriteHeader(200)
@@ -615,21 +615,21 @@ func (response PostSupportersSignIn200JSONResponse) VisitPostSupportersSignInRes
 	return json.NewEncoder(w).Encode(response.Body)
 }
 
-type PostSupportersSignIn400JSONResponse SupporterSignInBadRequestResponse
+type PostSupporterSignIn400JSONResponse SupporterSignInBadRequestResponse
 
-func (response PostSupportersSignIn400JSONResponse) VisitPostSupportersSignInResponse(w http.ResponseWriter) error {
+func (response PostSupporterSignIn400JSONResponse) VisitPostSupporterSignInResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(400)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PostSupportersSignIn500JSONResponse struct {
+type PostSupporterSignIn500JSONResponse struct {
 	Code    int    `json:"code"`
 	Message string `json:"message"`
 }
 
-func (response PostSupportersSignIn500JSONResponse) VisitPostSupportersSignInResponse(w http.ResponseWriter) error {
+func (response PostSupporterSignIn500JSONResponse) VisitPostSupporterSignInResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(500)
 
@@ -640,19 +640,19 @@ func (response PostSupportersSignIn500JSONResponse) VisitPostSupportersSignInRes
 type StrictServerInterface interface {
 	// Company Sign In
 	// (POST /companies/sign-in)
-	PostCompaniesSignIn(ctx context.Context, request PostCompaniesSignInRequestObject) (PostCompaniesSignInResponseObject, error)
+	PostCompanySignIn(ctx context.Context, request PostCompanySignInRequestObject) (PostCompanySignInResponseObject, error)
 	// Get Csrf
 	// (GET /csrf)
 	GetCsrf(ctx context.Context, request GetCsrfRequestObject) (GetCsrfResponseObject, error)
 	// Create Plan
 	// (POST /plans)
-	PostPlans(ctx context.Context, request PostPlansRequestObject) (PostPlansResponseObject, error)
+	PostPlan(ctx context.Context, request PostPlanRequestObject) (PostPlanResponseObject, error)
 	// Create Project
 	// (GET /projects)
 	GetProjects(ctx context.Context, request GetProjectsRequestObject) (GetProjectsResponseObject, error)
 	// Create Project
 	// (POST /projects)
-	PostProjects(ctx context.Context, request PostProjectsRequestObject) (PostProjectsResponseObject, error)
+	PostProject(ctx context.Context, request PostProjectRequestObject) (PostProjectResponseObject, error)
 	// Get Project
 	// (GET /projects/{id})
 	GetProject(ctx context.Context, request GetProjectRequestObject) (GetProjectResponseObject, error)
@@ -661,7 +661,7 @@ type StrictServerInterface interface {
 	PutProject(ctx context.Context, request PutProjectRequestObject) (PutProjectResponseObject, error)
 	// Supporter Sign In
 	// (POST /supporters/sign-in)
-	PostSupportersSignIn(ctx context.Context, request PostSupportersSignInRequestObject) (PostSupportersSignInResponseObject, error)
+	PostSupporterSignIn(ctx context.Context, request PostSupporterSignInRequestObject) (PostSupporterSignInResponseObject, error)
 }
 
 type StrictHandlerFunc = strictecho.StrictEchoHandlerFunc
@@ -676,29 +676,29 @@ type strictHandler struct {
 	middlewares []StrictMiddlewareFunc
 }
 
-// PostCompaniesSignIn operation middleware
-func (sh *strictHandler) PostCompaniesSignIn(ctx echo.Context) error {
-	var request PostCompaniesSignInRequestObject
+// PostCompanySignIn operation middleware
+func (sh *strictHandler) PostCompanySignIn(ctx echo.Context) error {
+	var request PostCompanySignInRequestObject
 
-	var body PostCompaniesSignInJSONRequestBody
+	var body PostCompanySignInJSONRequestBody
 	if err := ctx.Bind(&body); err != nil {
 		return err
 	}
 	request.Body = &body
 
 	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
-		return sh.ssi.PostCompaniesSignIn(ctx.Request().Context(), request.(PostCompaniesSignInRequestObject))
+		return sh.ssi.PostCompanySignIn(ctx.Request().Context(), request.(PostCompanySignInRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "PostCompaniesSignIn")
+		handler = middleware(handler, "PostCompanySignIn")
 	}
 
 	response, err := handler(ctx, request)
 
 	if err != nil {
 		return err
-	} else if validResponse, ok := response.(PostCompaniesSignInResponseObject); ok {
-		return validResponse.VisitPostCompaniesSignInResponse(ctx.Response())
+	} else if validResponse, ok := response.(PostCompanySignInResponseObject); ok {
+		return validResponse.VisitPostCompanySignInResponse(ctx.Response())
 	} else if response != nil {
 		return fmt.Errorf("unexpected response type: %T", response)
 	}
@@ -728,29 +728,29 @@ func (sh *strictHandler) GetCsrf(ctx echo.Context) error {
 	return nil
 }
 
-// PostPlans operation middleware
-func (sh *strictHandler) PostPlans(ctx echo.Context) error {
-	var request PostPlansRequestObject
+// PostPlan operation middleware
+func (sh *strictHandler) PostPlan(ctx echo.Context) error {
+	var request PostPlanRequestObject
 
-	var body PostPlansJSONRequestBody
+	var body PostPlanJSONRequestBody
 	if err := ctx.Bind(&body); err != nil {
 		return err
 	}
 	request.Body = &body
 
 	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
-		return sh.ssi.PostPlans(ctx.Request().Context(), request.(PostPlansRequestObject))
+		return sh.ssi.PostPlan(ctx.Request().Context(), request.(PostPlanRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "PostPlans")
+		handler = middleware(handler, "PostPlan")
 	}
 
 	response, err := handler(ctx, request)
 
 	if err != nil {
 		return err
-	} else if validResponse, ok := response.(PostPlansResponseObject); ok {
-		return validResponse.VisitPostPlansResponse(ctx.Response())
+	} else if validResponse, ok := response.(PostPlanResponseObject); ok {
+		return validResponse.VisitPostPlanResponse(ctx.Response())
 	} else if response != nil {
 		return fmt.Errorf("unexpected response type: %T", response)
 	}
@@ -782,29 +782,29 @@ func (sh *strictHandler) GetProjects(ctx echo.Context, params GetProjectsParams)
 	return nil
 }
 
-// PostProjects operation middleware
-func (sh *strictHandler) PostProjects(ctx echo.Context) error {
-	var request PostProjectsRequestObject
+// PostProject operation middleware
+func (sh *strictHandler) PostProject(ctx echo.Context) error {
+	var request PostProjectRequestObject
 
-	var body PostProjectsJSONRequestBody
+	var body PostProjectJSONRequestBody
 	if err := ctx.Bind(&body); err != nil {
 		return err
 	}
 	request.Body = &body
 
 	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
-		return sh.ssi.PostProjects(ctx.Request().Context(), request.(PostProjectsRequestObject))
+		return sh.ssi.PostProject(ctx.Request().Context(), request.(PostProjectRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "PostProjects")
+		handler = middleware(handler, "PostProject")
 	}
 
 	response, err := handler(ctx, request)
 
 	if err != nil {
 		return err
-	} else if validResponse, ok := response.(PostProjectsResponseObject); ok {
-		return validResponse.VisitPostProjectsResponse(ctx.Response())
+	} else if validResponse, ok := response.(PostProjectResponseObject); ok {
+		return validResponse.VisitPostProjectResponse(ctx.Response())
 	} else if response != nil {
 		return fmt.Errorf("unexpected response type: %T", response)
 	}
@@ -867,29 +867,29 @@ func (sh *strictHandler) PutProject(ctx echo.Context, id int) error {
 	return nil
 }
 
-// PostSupportersSignIn operation middleware
-func (sh *strictHandler) PostSupportersSignIn(ctx echo.Context) error {
-	var request PostSupportersSignInRequestObject
+// PostSupporterSignIn operation middleware
+func (sh *strictHandler) PostSupporterSignIn(ctx echo.Context) error {
+	var request PostSupporterSignInRequestObject
 
-	var body PostSupportersSignInJSONRequestBody
+	var body PostSupporterSignInJSONRequestBody
 	if err := ctx.Bind(&body); err != nil {
 		return err
 	}
 	request.Body = &body
 
 	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
-		return sh.ssi.PostSupportersSignIn(ctx.Request().Context(), request.(PostSupportersSignInRequestObject))
+		return sh.ssi.PostSupporterSignIn(ctx.Request().Context(), request.(PostSupporterSignInRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "PostSupportersSignIn")
+		handler = middleware(handler, "PostSupporterSignIn")
 	}
 
 	response, err := handler(ctx, request)
 
 	if err != nil {
 		return err
-	} else if validResponse, ok := response.(PostSupportersSignInResponseObject); ok {
-		return validResponse.VisitPostSupportersSignInResponse(ctx.Response())
+	} else if validResponse, ok := response.(PostSupporterSignInResponseObject); ok {
+		return validResponse.VisitPostSupporterSignInResponse(ctx.Response())
 	} else if response != nil {
 		return fmt.Errorf("unexpected response type: %T", response)
 	}
@@ -911,17 +911,17 @@ var swaggerSpec = []string{
 	"i/cVAs/LD64FTlaoHDwOgoJ1oWHnAEA9s+rg4274qQYeDzjm4/T5VbBNN6wHVCP9F9s1IXK4xwldQN/w",
 	"UaG0OUUOwuue2bISPGpp0cWxjowVO3E8LaQUCkH90Om40uJ75uOWCT9oQu6Y0MuSLX3DU3JH3M452aQV",
 	"JIViuJoaODmTzyT7E1ZnBS5tsDiJSSLEDTMCOM2NALTIqeNlT5CNEcj4XHQYjFwXmnHQOjqbXGpSm3++",
-	"fT4FdedmtjtQ2h16f3JqDBcSOJWMxOTXE/PIOBKXVlWbEJQz0GPNFvwdc2O30DaSJo42bc2YRSZC48X2",
-	"c+cd4uIEGs9FurK9o+AI3J6mUmYssefH37TjYZd0+1IysHnZNDGBqgD7wEXG2vLL6elxNPCQYtVoRubr",
-	"EqLSCdGS6kgXSQKQQnpCRmQJNAWXtFPAdxcOBvG6ZcrIU6udCubGD8cyLcA7PSZqUHegokQUWRpxgVHB",
-	"jWVIeRqh54K0gAhFxPidIf1IrzjS+xMDw98ONKI1lIgUevo20JouBjRbVkT9/aybzh3Lp85qcD2QSfci",
-	"z6latfZpkU0FpAvt7imThMzMkXGi1dxoV5bsZlZ9Arww748JZn/bdhiCf76wfQKMSodX8TJ/ulDJjHK9",
-	"mwIn9pPjEF9rg/bEpNfdJ71SsJQlncRXzWJ+NdvMGhRgh/Rouw8t4eQwVOLJ60b70n9SN5aSKpoD2opx",
-	"tSZwLzPrkjnNNIxcK3FbgFrVnYSs+tBdRWR2TNiEOvc35AxCTr3Q2YJnC4aZ6ZD7SajGzFF4qLO2eWoq",
-	"Cm003jD1YEz5nDRes3QzgJi6vGR5yMwQNQ3ZXefeprb+18kTENL34+bD6YcXhxu/R6fcNOhz1mzNIY0U",
-	"aFGoBF5hdpi+bx/dFiG2LY6fB28E/paIryYR/5bpoDKlt5u4gaupanN33N1UcOv5xMnVv8n8CfZT+zfj",
-	"bxuqYauO5i67uaOqs8ukm81fI8fVtUJlJCZLRKnj8TgTCc2WQmP88fTje2KyuZSy3la9euO1GdUPtZr7",
-	"f3tXek+rrPef2Ql6M9v8FwAA//8FHvbgXSgAAA==",
+	"fT4FdedmtjtQ2h16f3JqDBcSOJWMxOTXE/PIOBKXVlWbEJQz0GPNFvwdc2O30DaSJo42bc2YRSZCY2PP",
+	"QFyUQOO5SFe2cxQcgduzVMqMJfb0+Jt2LOxSbl9CBvYumyYiUBVgH7i4WEt+OT09jgYeTqwazbh8XUJU",
+	"OiFaUh3pIkkAUkhPyIgsgabgUnYK+O7CgSBet0wZeWq1E8Hc+OFYpgVYp8dEDeoOVJSIIksjLjAquLEM",
+	"KU8j9FyQFhChiBi/M5Qf6RVHen9iQPjbgUa0RhKRQk/XBlrTxYBWy4qov591k7lj+dRZDa4DMsle5DlV",
+	"q9Y2LbKpgHSh3T1lRpGZOTJOtJob7cqC3cypT4AX5v0xwezv2g5D8M8Xtk+AUenwKl7mTxcqmVGudxNg",
+	"ufs6Bu+11mdPzHndZdIrxUpZz0l81azkV7PNrMEAdkKPtsvQEk0OQiWcvFa0L/sndVcpqaI5oC0YV2sC",
+	"9zKzLpnTTMPI9RG3BahV3UbIqgndVUNmx4RNqG1/Q84g5NTbnC14tmCYmfa4n4Oqg0ehoc7K5qmZKLTN",
+	"eIPUgyHlU9J4zdLNAF7q0pKlITM/1Cxk95x7W9r63yZPwEffj5sPpx9eHG78Dp1y057PWbMxhzRSoEWh",
+	"EniF2WG6vn1sW4TItjh+HrwR+FsivppE/Fumg8qU3m7hBq6lWqu9I3VGwYXnE+dW/xLzJ1hO7V+Kv62n",
+	"hu05mmvs5oKqTi6TbTZ9jRxX1gqVkZgsEaWOx+NMJDRbCo3xx9OP74lJ5lLKelv06nXXZlQ/1Gru/+1d",
+	"6T2tkt5/ZufnzWzzXwAAAP//cDKpWVgoAAA=",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file
