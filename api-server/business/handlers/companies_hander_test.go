@@ -41,7 +41,7 @@ func (s *TestCompaniesHandlerSuite) TestPostCompaniesSignIn_StatusOk() {
 		Email: "test@example.com",
 		Password: "password",
 	}
-	result := testutil.NewRequest().Post("/companies/signIn").WithHeader("Cookie", csrfTokenCookie).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithJsonBody(reqBody).GoWithHTTPHandler(s.T(), e)
+	result := testutil.NewRequest().Post("/companies/sign-in").WithHeader("Cookie", csrfTokenCookie).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithJsonBody(reqBody).GoWithHTTPHandler(s.T(), e)
 	assert.Equal(s.T(), http.StatusOK, result.Code())
 
 	cookieString := result.Recorder.Result().Header.Values("Set-Cookie")[0]
@@ -57,7 +57,7 @@ func (s *TestCompaniesHandlerSuite) TestPostCompaniesSignIn_BadRequest() {
 		Email: "test_@example.com",
 		Password: "password",
 	}
-	result := testutil.NewRequest().Post("/companies/signIn").WithHeader("Cookie", csrfTokenCookie).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithJsonBody(reqBody).GoWithHTTPHandler(s.T(), e)
+	result := testutil.NewRequest().Post("/companies/sign-in").WithHeader("Cookie", csrfTokenCookie).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithJsonBody(reqBody).GoWithHTTPHandler(s.T(), e)
 	assert.Equal(s.T(), int(http.StatusBadRequest), result.Code())
 
 	var res businessapi.CompanySignInBadRequestResponse

@@ -28,14 +28,9 @@ func (ch *companiesHandler) PostCompaniesSignIn(ctx context.Context, request bus
 	statusCode, tokenString, err := ch.companyService.SignIn(ctx, inputs)
 	switch (statusCode) {
 	case http.StatusInternalServerError:
-		return businessapi.PostCompaniesSignIn500JSONResponse{InternalServerErrorResponseJSONResponse: businessapi.InternalServerErrorResponseJSONResponse{
-			Code: http.StatusInternalServerError,
-			Message: err.Error(),
-		}}, nil
+		return businessapi.PostCompaniesSignIn500JSONResponse{Code: http.StatusInternalServerError, Message: err.Error(),}, nil
 	case http.StatusBadRequest:
-		return businessapi.PostCompaniesSignIn400JSONResponse{CompanySignInBadRequestResponseJSONResponse: businessapi.CompanySignInBadRequestResponseJSONResponse{
-			Errors: []string{err.Error()},
-		}}, nil
+		return businessapi.PostCompaniesSignIn400JSONResponse{Errors: []string{err.Error()}}, nil
 	}
 	
 	// NOTE: Cookieにtokenをセット
@@ -48,9 +43,8 @@ func (ch *companiesHandler) PostCompaniesSignIn(ctx context.Context, request bus
 		Secure:   false,
 		HttpOnly: true,
 	}
-	return businessapi.PostCompaniesSignIn200JSONResponse{CompanySignInOkResponseJSONResponse: businessapi.CompanySignInOkResponseJSONResponse{
-		Headers: businessapi.CompanySignInOkResponseResponseHeaders{
-			SetCookie: cookie.String(),
-		},
-	}}, nil
+	return businessapi.PostCompaniesSignIn200JSONResponse{
+		Body: businessapi.CompanySignInOkResponse{},
+		Headers: businessapi.PostCompaniesSignIn200ResponseHeaders{SetCookie: cookie.String()},
+	}, nil
 }
