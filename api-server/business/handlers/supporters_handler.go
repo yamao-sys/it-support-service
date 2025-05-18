@@ -28,14 +28,9 @@ func (sh *supportersHandler) PostSupportersSignIn(ctx context.Context, request b
 	statusCode, tokenString, err := sh.supporterService.SignIn(ctx, inputs)
 	switch (statusCode) {
 	case http.StatusInternalServerError:
-		return businessapi.PostSupportersSignIn500JSONResponse{InternalServerErrorResponseJSONResponse: businessapi.InternalServerErrorResponseJSONResponse{
-			Code: http.StatusInternalServerError,
-			Message: err.Error(),
-		}}, nil
+		return businessapi.PostSupportersSignIn500JSONResponse{Code: http.StatusInternalServerError, Message: err.Error()}, nil
 	case http.StatusBadRequest:
-		return businessapi.PostSupportersSignIn400JSONResponse{SupporterSignInBadRequestResponseJSONResponse: businessapi.SupporterSignInBadRequestResponseJSONResponse{
-			Errors: []string{err.Error()},
-		}}, nil
+		return businessapi.PostSupportersSignIn400JSONResponse{Errors: []string{err.Error()}}, nil
 	}
 	
 	// NOTE: Cookieにtokenをセット
@@ -48,9 +43,8 @@ func (sh *supportersHandler) PostSupportersSignIn(ctx context.Context, request b
 		Secure:   false,
 		HttpOnly: true,
 	}
-	return businessapi.PostSupportersSignIn200JSONResponse{SupporterSignInOkResponseJSONResponse: businessapi.SupporterSignInOkResponseJSONResponse{
-		Headers: businessapi.SupporterSignInOkResponseResponseHeaders{
-			SetCookie: cookie.String(),
-		},
-	}}, nil
+	return businessapi.PostSupportersSignIn200JSONResponse{
+		Body: businessapi.SupporterSignInOkResponse{},
+		Headers: businessapi.PostSupportersSignIn200ResponseHeaders{SetCookie: cookie.String()},
+	}, nil
 }
