@@ -510,6 +510,7 @@ components:
       required:
         - title
         - description
+        - isActive
       properties:
         title:
           type: string
