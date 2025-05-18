@@ -15,7 +15,7 @@ using OpenAPI;
 namespace BusinessService.Company {
   interface SignIn {
     @route("/sign-in")
-    @operationId("post-companies-sign-in")
+    @operationId("post-company-sign-in")
     @summary("Company Sign In")
     @post
     post(
