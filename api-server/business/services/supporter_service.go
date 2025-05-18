@@ -16,7 +16,7 @@ import (
 )
 
 type SupporterService interface {
-	SignIn(ctx context.Context, requestParams businessapi.PostSupportersSignInJSONRequestBody) (statusCode int, tokenString string, error error)
+	SignIn(ctx context.Context, requestParams businessapi.PostSupporterSignInJSONRequestBody) (statusCode int, tokenString string, error error)
 }
 
 type supporterService struct {
@@ -27,7 +27,7 @@ func NewSupporterService(db *sql.DB) SupporterService {
 	return &supporterService{db}
 }
 
-func (ss *supporterService) SignIn(ctx context.Context, requestParams businessapi.PostSupportersSignInJSONRequestBody) (statusCode int, tokenString string, error error) {
+func (ss *supporterService) SignIn(ctx context.Context, requestParams businessapi.PostSupporterSignInJSONRequestBody) (statusCode int, tokenString string, error error) {
 	// NOTE: emailからの取得
 	supporter, err := models.Supporters(qm.Where("email = ?", requestParams.Email)).One(ctx, ss.db)
 	if err != nil {

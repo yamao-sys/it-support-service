@@ -33,7 +33,7 @@ func (s *TestSupporterServiceSuite) TestSignIn_StatusOK() {
 	supporter := factories.SupporterFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.Supporter)
 	supporter.Insert(ctx, DBCon, boil.Infer())
 
-	requestParams := businessapi.PostSupportersSignInJSONRequestBody{Email: "test@example.com", Password: "password"}
+	requestParams := businessapi.PostSupporterSignInJSONRequestBody{Email: "test@example.com", Password: "password"}
 
 	statusCode, tokenString, err := testSupporterService.SignIn(ctx, requestParams)
 
@@ -47,7 +47,7 @@ func (s *TestSupporterServiceSuite) TestSignIn_BadRequest() {
 	supporter := factories.SupporterFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.Supporter)
 	supporter.Insert(ctx, DBCon, boil.Infer())
 
-	requestParams := businessapi.PostSupportersSignInJSONRequestBody{Email: "test_@example.com", Password: "password"}
+	requestParams := businessapi.PostSupporterSignInJSONRequestBody{Email: "test_@example.com", Password: "password"}
 
 	statusCode, tokenString, err := testSupporterService.SignIn(ctx, requestParams)
 

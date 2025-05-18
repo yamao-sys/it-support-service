@@ -8,7 +8,7 @@ import (
 )
 
 type SupportersHandler interface {
-	PostSupportersSignIn(ctx context.Context, request businessapi.PostSupportersSignInRequestObject) (businessapi.PostSupportersSignInResponseObject, error)
+	PostSupporterSignIn(ctx context.Context, request businessapi.PostSupporterSignInRequestObject) (businessapi.PostSupporterSignInResponseObject, error)
 }
 
 type supportersHandler struct {
@@ -19,8 +19,8 @@ func NewSupportersHandler(supporterService businessservices.SupporterService) Su
 	return &supportersHandler{supporterService}
 }
 
-func (sh *supportersHandler) PostSupportersSignIn(ctx context.Context, request businessapi.PostSupportersSignInRequestObject) (businessapi.PostSupportersSignInResponseObject, error) {
-	inputs := businessapi.PostSupportersSignInJSONRequestBody{
+func (sh *supportersHandler) PostSupporterSignIn(ctx context.Context, request businessapi.PostSupporterSignInRequestObject) (businessapi.PostSupporterSignInResponseObject, error) {
+	inputs := businessapi.PostSupporterSignInJSONRequestBody{
 		Email: request.Body.Email,
 		Password: request.Body.Password,
 	}
@@ -28,9 +28,9 @@ func (sh *supportersHandler) PostSupportersSignIn(ctx context.Context, request b
 	statusCode, tokenString, err := sh.supporterService.SignIn(ctx, inputs)
 	switch (statusCode) {
 	case http.StatusInternalServerError:
-		return businessapi.PostSupportersSignIn500JSONResponse{Code: http.StatusInternalServerError, Message: err.Error()}, nil
+		return businessapi.PostSupporterSignIn500JSONResponse{Code: http.StatusInternalServerError, Message: err.Error()}, nil
 	case http.StatusBadRequest:
-		return businessapi.PostSupportersSignIn400JSONResponse{Errors: []string{err.Error()}}, nil
+		return businessapi.PostSupporterSignIn400JSONResponse{Errors: []string{err.Error()}}, nil
 	}
 	
 	// NOTE: Cookieにtokenをセット
@@ -43,8 +43,8 @@ func (sh *supportersHandler) PostSupportersSignIn(ctx context.Context, request b
 		Secure:   false,
 		HttpOnly: true,
 	}
-	return businessapi.PostSupportersSignIn200JSONResponse{
+	return businessapi.PostSupporterSignIn200JSONResponse{
 		Body: businessapi.SupporterSignInOkResponse{},
-		Headers: businessapi.PostSupportersSignIn200ResponseHeaders{SetCookie: cookie.String()},
+		Headers: businessapi.PostSupporterSignIn200ResponseHeaders{SetCookie: cookie.String()},
 	}, nil
 }
