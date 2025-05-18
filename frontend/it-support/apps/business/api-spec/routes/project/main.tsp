@@ -19,7 +19,7 @@ namespace BusinessService.Project {
     @summary("Create Project")
     @get
     get(
-      @query pageToken: string,
+      @query pageToken?: string,
     ): SuccessResponse<ProjectsListResponse>
       | InternalServerErrorResponse;
 
