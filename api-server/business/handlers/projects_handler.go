@@ -13,7 +13,7 @@ import (
 
 type ProjectsHandler interface {
 	GetProjects(ctx context.Context, request businessapi.GetProjectsRequestObject) (businessapi.GetProjectsResponseObject, error)
-	PostProjects(ctx context.Context, request businessapi.PostProjectsRequestObject) (businessapi.PostProjectsResponseObject, error)
+	PostProject(ctx context.Context, request businessapi.PostProjectRequestObject) (businessapi.PostProjectResponseObject, error)
 	GetProject(ctx context.Context, request businessapi.GetProjectRequestObject) (businessapi.GetProjectResponseObject, error)
 	PutProject(ctx context.Context, request businessapi.PutProjectRequestObject) (businessapi.PutProjectResponseObject, error)
 }
@@ -69,7 +69,7 @@ func (ph *projectsHandler) GetProjects(ctx context.Context, request businessapi.
 	}), nil
 }
 
-func (ph *projectsHandler) PostProjects(ctx context.Context, request businessapi.PostProjectsRequestObject) (businessapi.PostProjectsResponseObject, error) {
+func (ph *projectsHandler) PostProject(ctx context.Context, request businessapi.PostProjectRequestObject) (businessapi.PostProjectResponseObject, error) {
 	companyID, _ := businesshelpers.ExtractCompanyID(ctx)
 
 	inputs := businessapi.ProjectStoreInput{
@@ -84,7 +84,7 @@ func (ph *projectsHandler) PostProjects(ctx context.Context, request businessapi
 
 	createdProject, validationErrors, err := ph.projectService.Create(ctx, &inputs, companyID)
 	if err != nil {
-		return businessapi.PostProjects500JSONResponse{Code: http.StatusInternalServerError}, err
+		return businessapi.PostProject500JSONResponse{Code: http.StatusInternalServerError}, err
 	}
 
 	mappedValidationErrors := ph.projectService.MappingValidationErrorStruct(validationErrors)
@@ -101,7 +101,7 @@ func (ph *projectsHandler) PostProjects(ctx context.Context, request businessapi
 		IsActive: createdProject.IsActive,
 		CreatedAt: createdProject.CreatedAt,
 	}
-	return businessapi.PostProjects200JSONResponse(businessapi.ProjectStoreResponse{Errors: mappedValidationErrors, Project: resProject}), nil
+	return businessapi.PostProject200JSONResponse(businessapi.ProjectStoreResponse{Errors: mappedValidationErrors, Project: resProject}), nil
 }
 
 func (ph *projectsHandler) GetProject(ctx context.Context, request businessapi.GetProjectRequestObject) (businessapi.GetProjectResponseObject, error) {
