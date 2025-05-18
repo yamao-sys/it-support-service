@@ -37,10 +37,6 @@ func ValidateProject(input *businessapi.ProjectStoreInput) error {
 			validation.When(input.MaxBudget != nil, validation.By(validateMinValue("予算(上限)"))),
 			validation.When(input.MaxBudget != nil && input.MinBudget != nil, validation.By(validateGreater("予算(上限)", "予算(下限)", input.MinBudget))),
 		),
-		validation.Field(
-			&input.IsActive,
-			validation.NotNil.Error("公開フラグは必須入力です。"),
-		),
 	)
 }
 
