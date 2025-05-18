@@ -6,5 +6,5 @@ model ProjectStoreInput {
   endDate?: plainDate;
   minBudget?: integer;
   maxBudget?: integer;
-  isActive?: boolean;
+  isActive: boolean;
 }
