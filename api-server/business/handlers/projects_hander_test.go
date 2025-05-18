@@ -95,8 +95,7 @@ func (s *TestProjectsHandlerSuite) TestGetProjectsFetchLists_StatusOk() {
 	result.UnmarshalBodyToObject(&res)
 	var projectIDs []int
 	for _, project := range res.Projects {
-		ID, _ := strconv.Atoi(*project.Id)
-		projectIDs = append(projectIDs, ID)
+		projectIDs = append(projectIDs, project.Id)
 	}
 	assert.Equal(s.T(), companyProductIDs.GetIDs(), projectIDs)
 
@@ -149,8 +148,7 @@ func (s *TestProjectsHandlerSuite) TestGetProjectsFetchLists_NotHavingNextPage_S
 	result.UnmarshalBodyToObject(&res)
 	var projectIDs []int
 	for _, project := range res.Projects {
-		ID, _ := strconv.Atoi(*project.Id)
-		projectIDs = append(projectIDs, ID)
+		projectIDs = append(projectIDs, project.Id)
 	}
 	assert.Equal(s.T(), companyProductIDs.GetIDs(), projectIDs)
 	assert.Equal(s.T(), "0", res.NextPageToken)
@@ -193,8 +191,7 @@ func (s *TestProjectsHandlerSuite) TestGetProjectsFetchLists_WithPageToken_Havin
 	result.UnmarshalBodyToObject(&res)
 	var projectIDs []int
 	for _, project := range res.Projects {
-		ID, _ := strconv.Atoi(*project.Id)
-		projectIDs = append(projectIDs, ID)
+		projectIDs = append(projectIDs, project.Id)
 	}
 	assert.Equal(s.T(), companyProductIDs.GetIDs(), projectIDs)
 	assert.Equal(s.T(), strconv.Itoa(project7.ID), res.NextPageToken)
@@ -256,20 +253,20 @@ func (s *TestProjectsHandlerSuite) TestPostProjectsCreate_StatusOk() {
 	minBudget := 10000
 	maxBudget := 20000
 	isActive := true
-	reqBody := businessapi.PostProjectsJSONRequestBody{Title: &title, Description: &description, StartDate: &startDate, EndDate: &endDate, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: &isActive}
+	reqBody := businessapi.PostProjectsJSONRequestBody{Title: title, Description: description, StartDate: &startDate, EndDate: &endDate, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: &isActive}
 	result := testutil.NewRequest().Post("/projects").WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithJsonBody(reqBody).GoWithHTTPHandler(s.T(), e)
 
 	assert.Equal(s.T(), http.StatusOK, result.Code())
 
 	var res businessapi.PostProjects200JSONResponse
 	result.UnmarshalBodyToObject(&res)
-	assert.Equal(s.T(), title, *res.Project.Title)
-	assert.Equal(s.T(), description, *res.Project.Description)
-	assert.Equal(s.T(), startDate, *res.Project.StartDate)
-	assert.Equal(s.T(), endDate, *res.Project.EndDate)
+	assert.Equal(s.T(), title, res.Project.Title)
+	assert.Equal(s.T(), description, res.Project.Description)
+	assert.Equal(s.T(), startDate, res.Project.StartDate)
+	assert.Equal(s.T(), endDate, res.Project.EndDate)
 	assert.Equal(s.T(), minBudget, *res.Project.MinBudget)
 	assert.Equal(s.T(), maxBudget, *res.Project.MaxBudget)
-	assert.Equal(s.T(), isActive, *res.Project.IsActive)
+	assert.Equal(s.T(), isActive, res.Project.IsActive)
 
 	expectedValidationErrors := businessapi.ProjectValidationError{}
 	assert.Equal(s.T(), expectedValidationErrors, res.Errors)
@@ -294,7 +291,7 @@ func (s *TestProjectsHandlerSuite) TestPostProjectsCreate_StatusForbidden() {
 	minBudget := 10000
 	maxBudget := 20000
 	isActive := true
-	reqBody := businessapi.PostProjectsJSONRequestBody{Title: &title, Description: &description, StartDate: &startDate, EndDate: &endDate, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: &isActive}
+	reqBody := businessapi.PostProjectsJSONRequestBody{Title: title, Description: description, StartDate: &startDate, EndDate: &endDate, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: &isActive}
 	result := testutil.NewRequest().Post("/projects").WithHeader("Cookie", cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithJsonBody(reqBody).GoWithHTTPHandler(s.T(), e)
 
 	assert.Equal(s.T(), http.StatusForbidden, result.Code())
@@ -317,7 +314,7 @@ func (s *TestProjectsHandlerSuite) TestPostProjectsCreate_StatusUnauthorized() {
 	minBudget := 10000
 	maxBudget := 20000
 	isActive := true
-	reqBody := businessapi.PostProjectsJSONRequestBody{Title: &title, Description: &description, StartDate: &startDate, EndDate: &endDate, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: &isActive}
+	reqBody := businessapi.PostProjectsJSONRequestBody{Title: title, Description: description, StartDate: &startDate, EndDate: &endDate, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: &isActive}
 	result := testutil.NewRequest().Post("/projects").WithHeader("Cookie", csrfTokenCookie).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithJsonBody(reqBody).GoWithHTTPHandler(s.T(), e)
 
 	assert.Equal(s.T(), http.StatusUnauthorized, result.Code())
@@ -341,7 +338,7 @@ func (s *TestProjectsHandlerSuite) TestPostProjectsCreate_StatusInternalServerEr
 	minBudget := 10000
 	maxBudget := 20000
 	isActive := true
-	reqBody := businessapi.PostProjectsJSONRequestBody{Title: &title, Description: &description, StartDate: &startDate, EndDate: &endDate, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: &isActive}
+	reqBody := businessapi.PostProjectsJSONRequestBody{Title: title, Description: description, StartDate: &startDate, EndDate: &endDate, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: &isActive}
 
 	mockProjectService := new(MockProjectService)
 	mockProjectService.On("FetchLists", mock.AnythingOfType("*context.valueCtx"), mock.AnythingOfType("int")).Return(models.ProjectSlice{}, 0, nil)
@@ -369,7 +366,7 @@ func (s *TestProjectsHandlerSuite) TestPostProjectsCreate_BadRequest_Required() 
 	description := ""
 	minBudget := 10000
 	maxBudget := 20000
-	reqBody := businessapi.PostProjectsJSONRequestBody{Title: &title, Description: &description, StartDate: nil, EndDate: nil, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: nil}
+	reqBody := businessapi.PostProjectsJSONRequestBody{Title: title, Description: description, StartDate: nil, EndDate: nil, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: nil}
 	result := testutil.NewRequest().Post("/projects").WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithJsonBody(reqBody).GoWithHTTPHandler(s.T(), e)
 
 	assert.Equal(s.T(), http.StatusOK, result.Code())
@@ -396,7 +393,7 @@ func (s *TestProjectsHandlerSuite) TestPostProjectsCreate_BadRequest_Required() 
 	assert.False(s.T(), exists)
 }
 
-func (s *TestProjectsHandlerSuite) TestGetProjectsId_StatusOk() {
+func (s *TestProjectsHandlerSuite) TestGetProject_StatusOk() {
 	company, cookieString := s.companySignIn()
 	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
 	project.Insert(ctx, DBCon, boil.Infer())
@@ -407,18 +404,18 @@ func (s *TestProjectsHandlerSuite) TestGetProjectsId_StatusOk() {
 
 	var res businessapi.PostProjects200JSONResponse
 	result.UnmarshalBodyToObject(&res)
-	assert.Equal(s.T(), project.Title, *res.Project.Title)
-	assert.Equal(s.T(), project.Description, *res.Project.Description)
+	assert.Equal(s.T(), project.Title, res.Project.Title)
+	assert.Equal(s.T(), project.Description, res.Project.Description)
 	assert.Equal(s.T(), project.StartDate.Format("2006-01-02"), res.Project.StartDate.Format("2006-01-02"))
 	assert.Equal(s.T(), project.EndDate.Format("2006-01-02"), res.Project.EndDate.Format("2006-01-02"))
 	assert.Equal(s.T(), project.MinBudget.Int, *res.Project.MinBudget)
 	assert.NotNil(s.T(), *res.Project.MinBudget)
 	assert.Equal(s.T(), project.MaxBudget.Int, *res.Project.MaxBudget)
 	assert.NotNil(s.T(), *res.Project.MaxBudget)
-	assert.Equal(s.T(), project.IsActive, *res.Project.IsActive)
+	assert.Equal(s.T(), project.IsActive, res.Project.IsActive)
 }
 
-func (s *TestProjectsHandlerSuite) TestGetProjectsId_EmptyBudget_StatusOk() {
+func (s *TestProjectsHandlerSuite) TestGetProject_EmptyBudget_StatusOk() {
 	company, cookieString := s.companySignIn()
 	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID, "MinBudget": null.Int{Int: 0, Valid: false}, "MaxBudget": null.Int{Int: 0, Valid: false}}).(*models.Project)
 	project.Insert(ctx, DBCon, boil.Infer())
@@ -429,16 +426,16 @@ func (s *TestProjectsHandlerSuite) TestGetProjectsId_EmptyBudget_StatusOk() {
 
 	var res businessapi.PostProjects200JSONResponse
 	result.UnmarshalBodyToObject(&res)
-	assert.Equal(s.T(), project.Title, *res.Project.Title)
-	assert.Equal(s.T(), project.Description, *res.Project.Description)
+	assert.Equal(s.T(), project.Title, res.Project.Title)
+	assert.Equal(s.T(), project.Description, res.Project.Description)
 	assert.Equal(s.T(), project.StartDate.Format("2006-01-02"), res.Project.StartDate.Format("2006-01-02"))
 	assert.Equal(s.T(), project.EndDate.Format("2006-01-02"), res.Project.EndDate.Format("2006-01-02"))
 	assert.Nil(s.T(), res.Project.MinBudget)
 	assert.Nil(s.T(), res.Project.MaxBudget)
-	assert.Equal(s.T(), project.IsActive, *res.Project.IsActive)
+	assert.Equal(s.T(), project.IsActive, res.Project.IsActive)
 }
 
-func (s *TestProjectsHandlerSuite) TestGetProjectsId_StatusNotFound() {
+func (s *TestProjectsHandlerSuite) TestGetProject_StatusNotFound() {
 	company, cookieString := s.companySignIn()
 	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
 	project.Insert(ctx, DBCon, boil.Infer())
@@ -447,12 +444,12 @@ func (s *TestProjectsHandlerSuite) TestGetProjectsId_StatusNotFound() {
 
 	assert.Equal(s.T(), http.StatusNotFound, result.Code())
 
-	var res businessapi.GetProjectsId404JSONResponse
+	var res businessapi.GetProject404JSONResponse
 	result.UnmarshalBodyToObject(&res)
 	assert.Equal(s.T(), http.StatusNotFound, res.Code)
 }
 
-func (s *TestProjectsHandlerSuite) TestGetProjectsId_StatusUnauthorized() {
+func (s *TestProjectsHandlerSuite) TestGetProject_StatusUnauthorized() {
 	company := factories.CompanyFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.Company)
 	company.Insert(ctx, DBCon, boil.Infer())
 	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
@@ -463,7 +460,7 @@ func (s *TestProjectsHandlerSuite) TestGetProjectsId_StatusUnauthorized() {
 	assert.Equal(s.T(), http.StatusUnauthorized, result.Code())
 }
 
-func (s *TestProjectsHandlerSuite) TestPutProjectsId_StatusOk() {
+func (s *TestProjectsHandlerSuite) TestPutProject_StatusOk() {
 	company, cookieString := s.companySignIn()
 	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
 	project.Insert(ctx, DBCon, boil.Infer())
@@ -477,20 +474,20 @@ func (s *TestProjectsHandlerSuite) TestPutProjectsId_StatusOk() {
 	minBudget := 10000
 	maxBudget := 20000
 	isActive := true
-	reqBody := businessapi.PutProjectsIdJSONRequestBody{Title: &title, Description: &description, StartDate: &startDate, EndDate: &endDate, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: &isActive}
+	reqBody := businessapi.PutProjectJSONRequestBody{Title: title, Description: description, StartDate: &startDate, EndDate: &endDate, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: &isActive}
 	result := testutil.NewRequest().Put("/projects/"+strconv.Itoa(project.ID)).WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithJsonBody(reqBody).GoWithHTTPHandler(s.T(), e)
 
 	assert.Equal(s.T(), http.StatusOK, result.Code())
 
 	var res businessapi.PostProjects200JSONResponse
 	result.UnmarshalBodyToObject(&res)
-	assert.Equal(s.T(), title, *res.Project.Title)
-	assert.Equal(s.T(), description, *res.Project.Description)
+	assert.Equal(s.T(), title, res.Project.Title)
+	assert.Equal(s.T(), description, res.Project.Description)
 	assert.Equal(s.T(), startDate.Format("2006-01-02"), res.Project.StartDate.Format("2006-01-02"))
 	assert.Equal(s.T(), endDate.Format("2006-01-02"), res.Project.EndDate.Format("2006-01-02"))
 	assert.Equal(s.T(), minBudget, *res.Project.MinBudget)
 	assert.Equal(s.T(), maxBudget, *res.Project.MaxBudget)
-	assert.Equal(s.T(), isActive, *res.Project.IsActive)
+	assert.Equal(s.T(), isActive, res.Project.IsActive)
 
 	expectedValidationErrors := businessapi.ProjectValidationError{}
 	assert.Equal(s.T(), expectedValidationErrors, res.Errors)
@@ -507,7 +504,7 @@ func (s *TestProjectsHandlerSuite) TestPutProjectsId_StatusOk() {
 	assert.Equal(s.T(), isActive, project.IsActive)
 }
 
-func (s *TestProjectsHandlerSuite) TestPutProjectsId_StatusForbidden() {
+func (s *TestProjectsHandlerSuite) TestPutProject_StatusForbidden() {
 	company, cookieString := s.companySignIn()
 	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
 	project.Insert(ctx, DBCon, boil.Infer())
@@ -521,7 +518,7 @@ func (s *TestProjectsHandlerSuite) TestPutProjectsId_StatusForbidden() {
 	minBudget := 10000
 	maxBudget := 20000
 	isActive := true
-	reqBody := businessapi.PutProjectsIdJSONRequestBody{Title: &title, Description: &description, StartDate: &startDate, EndDate: &endDate, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: &isActive}
+	reqBody := businessapi.PutProjectJSONRequestBody{Title: title, Description: description, StartDate: &startDate, EndDate: &endDate, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: &isActive}
 	result := testutil.NewRequest().Put("/projects/"+strconv.Itoa(project.ID)).WithHeader("Cookie", cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithJsonBody(reqBody).GoWithHTTPHandler(s.T(), e)
 
 	assert.Equal(s.T(), http.StatusForbidden, result.Code())
@@ -531,7 +528,7 @@ func (s *TestProjectsHandlerSuite) TestPutProjectsId_StatusForbidden() {
 	assert.NotEqual(s.T(), "test title", project.Title)
 }
 
-func (s *TestProjectsHandlerSuite) TestPutProjectsId_StatusUnauthorized() {
+func (s *TestProjectsHandlerSuite) TestPutProject_StatusUnauthorized() {
 	company := factories.CompanyFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.Company)
 	company.Insert(ctx, DBCon, boil.Infer())
 	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
@@ -546,7 +543,7 @@ func (s *TestProjectsHandlerSuite) TestPutProjectsId_StatusUnauthorized() {
 	minBudget := 10000
 	maxBudget := 20000
 	isActive := true
-	reqBody := businessapi.PutProjectsIdJSONRequestBody{Title: &title, Description: &description, StartDate: &startDate, EndDate: &endDate, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: &isActive}
+	reqBody := businessapi.PutProjectJSONRequestBody{Title: title, Description: description, StartDate: &startDate, EndDate: &endDate, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: &isActive}
 	result := testutil.NewRequest().Put("/projects/"+strconv.Itoa(project.ID)).WithHeader("Cookie", csrfTokenCookie).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithJsonBody(reqBody).GoWithHTTPHandler(s.T(), e)
 
 	assert.Equal(s.T(), http.StatusUnauthorized, result.Code())
@@ -556,7 +553,7 @@ func (s *TestProjectsHandlerSuite) TestPutProjectsId_StatusUnauthorized() {
 	assert.NotEqual(s.T(), "test title", project.Title)
 }
 
-func (s *TestProjectsHandlerSuite) TestPutProjectsId_StatusInternalServerError() {
+func (s *TestProjectsHandlerSuite) TestPutProject_StatusInternalServerError() {
 	company, cookieString := s.companySignIn()
 	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
 	project.Insert(ctx, DBCon, boil.Infer())
@@ -570,7 +567,7 @@ func (s *TestProjectsHandlerSuite) TestPutProjectsId_StatusInternalServerError()
 	minBudget := 10000
 	maxBudget := 20000
 	isActive := true
-	reqBody := businessapi.PutProjectsIdJSONRequestBody{Title: &title, Description: &description, StartDate: &startDate, EndDate: &endDate, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: &isActive}
+	reqBody := businessapi.PutProjectJSONRequestBody{Title: title, Description: description, StartDate: &startDate, EndDate: &endDate, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: &isActive}
 
 	mockProjectService := new(MockProjectService)
 	mockProjectService.On("FetchLists", mock.AnythingOfType("*context.valueCtx"), mock.AnythingOfType("int")).Return(models.ProjectSlice{}, 0, nil)
@@ -588,7 +585,7 @@ func (s *TestProjectsHandlerSuite) TestPutProjectsId_StatusInternalServerError()
 	assert.NotEqual(s.T(), "test title", project.Title)
 }
 
-func (s *TestProjectsHandlerSuite) TestPutProjectsId_BadRequest_Required() {
+func (s *TestProjectsHandlerSuite) TestPutProject_BadRequest_Required() {
 	company, cookieString := s.companySignIn()
 	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
 	project.Insert(ctx, DBCon, boil.Infer())
@@ -597,7 +594,7 @@ func (s *TestProjectsHandlerSuite) TestPutProjectsId_BadRequest_Required() {
 	description := ""
 	minBudget := 10000
 	maxBudget := 20000
-	reqBody := businessapi.PutProjectsIdJSONRequestBody{Title: &title, Description: &description, StartDate: nil, EndDate: nil, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: nil}
+	reqBody := businessapi.PutProjectJSONRequestBody{Title: title, Description: description, StartDate: nil, EndDate: nil, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: nil}
 	result := testutil.NewRequest().Put("/projects/"+strconv.Itoa(project.ID)).WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithJsonBody(reqBody).GoWithHTTPHandler(s.T(), e)
 
 	assert.Equal(s.T(), http.StatusOK, result.Code())
