@@ -95,7 +95,7 @@ func (s *WithDBSuite) companySignIn() (company *models.Company, cookieString str
 		Email: "test@example.com",
 		Password: "password",
 	}
-	result := testutil.NewRequest().Post("/companies/signIn").WithHeader("Cookie", csrfTokenCookie).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithJsonBody(reqBody).GoWithHTTPHandler(s.T(), e)
+	result := testutil.NewRequest().Post("/companies/sign-in").WithHeader("Cookie", csrfTokenCookie).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithJsonBody(reqBody).GoWithHTTPHandler(s.T(), e)
 	cookieString = result.Recorder.Result().Header.Values("Set-Cookie")[0]
 
 	return company, cookieString
@@ -110,7 +110,7 @@ func (s *WithDBSuite) supporterSignIn() (supporter *models.Supporter, cookieStri
 		Email: "test@example.com",
 		Password: "password",
 	}
-	result := testutil.NewRequest().Post("/supporters/signIn").WithHeader("Cookie", csrfTokenCookie).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithJsonBody(reqBody).GoWithHTTPHandler(s.T(), e)
+	result := testutil.NewRequest().Post("/supporters/sign-in").WithHeader("Cookie", csrfTokenCookie).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithJsonBody(reqBody).GoWithHTTPHandler(s.T(), e)
 	cookieString = result.Recorder.Result().Header.Values("Set-Cookie")[0]
 
 	return supporter, cookieString
