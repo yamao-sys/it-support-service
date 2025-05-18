@@ -9,7 +9,7 @@ type Props<T extends FieldValues> = {
   validationErrors: string[];
 };
 
-const BaseFormSlider = memo(function BaseFormSlider<T extends FieldValues>({
+function BaseFormSliderInner<T extends FieldValues>({
   label,
   control,
   name,
@@ -33,6 +33,8 @@ const BaseFormSlider = memo(function BaseFormSlider<T extends FieldValues>({
       )}
     </>
   );
-});
+}
+
+const BaseFormSlider = memo(BaseFormSliderInner) as typeof BaseFormSliderInner;
 
 export default BaseFormSlider;
