@@ -11,7 +11,7 @@ import (
 )
 
 type PlansHandler interface {
-	PostPlans(ctx context.Context, request businessapi.PostPlansRequestObject) (businessapi.PostPlansResponseObject, error)
+	PostPlan(ctx context.Context, request businessapi.PostPlanRequestObject) (businessapi.PostPlanResponseObject, error)
 }
 
 type plansHandler struct {
@@ -22,7 +22,7 @@ func NewPlansHandler(planService businessservices.PlanService) PlansHandler {
 	return &plansHandler{planService}
 }
 
-func (ph *plansHandler) PostPlans(ctx context.Context, request businessapi.PostPlansRequestObject) (businessapi.PostPlansResponseObject, error) {
+func (ph *plansHandler) PostPlan(ctx context.Context, request businessapi.PostPlanRequestObject) (businessapi.PostPlanResponseObject, error) {
 	supporterID, _ := businesshelpers.ExtractSupporterID(ctx)
 
 	inputs := businessapi.PlanStoreInput{
@@ -36,7 +36,7 @@ func (ph *plansHandler) PostPlans(ctx context.Context, request businessapi.PostP
 
 	createdPlan, validationErrors, err := ph.planService.Create(ctx, &inputs, supporterID)
 	if err != nil {
-		return businessapi.PostPlans500JSONResponse{Code: http.StatusInternalServerError}, err
+		return businessapi.PostPlan500JSONResponse{Code: http.StatusInternalServerError}, err
 	}
 
 	mappedValidationErrors := ph.planService.MappingValidationErrorStruct(validationErrors)
@@ -53,5 +53,5 @@ func (ph *plansHandler) PostPlans(ctx context.Context, request businessapi.PostP
 		CreatedAt: createdPlan.CreatedAt,
 	}
 
-	return businessapi.PostPlans200JSONResponse(businessapi.PlanStoreResponse{Errors: mappedValidationErrors, Plan: resPlan}), nil
+	return businessapi.PostPlan200JSONResponse(businessapi.PlanStoreResponse{Errors: mappedValidationErrors, Plan: resPlan}), nil
 }

@@ -52,7 +52,7 @@ func (s *TestPlansHandlerSuite) TearDownTest() {
 	s.CloseDB()
 }
 
-func (s *TestPlansHandlerSuite) TestPostPlansCreate_StatusOk() {
+func (s *TestPlansHandlerSuite) TestPostPlanCreate_StatusOk() {
 	company := factories.CompanyFactory.MustCreate().(*models.Company)
 	company.Insert(ctx, DBCon, boil.Infer())
 	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
@@ -67,12 +67,12 @@ func (s *TestPlansHandlerSuite) TestPostPlansCreate_StatusOk() {
 	parsedEndDate := time.Date(2025, 4, 10, 0, 0, 0, 0, time.UTC)
 	endDate := openapi_types.Date{Time: parsedEndDate}
 	unitPrice := 10000
-	reqBody := businessapi.PostPlansJSONRequestBody{ProjectId: projectID, Title: title, Description: description, StartDate: startDate, EndDate: endDate, UnitPrice: unitPrice}
+	reqBody := businessapi.PostPlanJSONRequestBody{ProjectId: projectID, Title: title, Description: description, StartDate: startDate, EndDate: endDate, UnitPrice: unitPrice}
 	result := testutil.NewRequest().Post("/plans").WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithJsonBody(reqBody).GoWithHTTPHandler(s.T(), e)
 
 	assert.Equal(s.T(), http.StatusOK, result.Code())
 
-	var res businessapi.PostPlans200JSONResponse
+	var res businessapi.PostPlan200JSONResponse
 	result.UnmarshalBodyToObject(&res)
 	assert.Equal(s.T(), projectID, res.Plan.ProjectId)
 	assert.Equal(s.T(), title, res.Plan.Title)
@@ -92,7 +92,7 @@ func (s *TestPlansHandlerSuite) TestPostPlansCreate_StatusOk() {
 	assert.True(s.T(), exists)
 }
 
-func (s *TestPlansHandlerSuite) TestPostPlansCreate_StatusForbidden() {
+func (s *TestPlansHandlerSuite) TestPostPlanCreate_StatusForbidden() {
 	company := factories.CompanyFactory.MustCreate().(*models.Company)
 	company.Insert(ctx, DBCon, boil.Infer())
 	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
@@ -107,7 +107,7 @@ func (s *TestPlansHandlerSuite) TestPostPlansCreate_StatusForbidden() {
 	parsedEndDate := time.Date(2025, 4, 10, 0, 0, 0, 0, time.UTC)
 	endDate := openapi_types.Date{Time: parsedEndDate}
 	unitPrice := 10000
-	reqBody := businessapi.PostPlansJSONRequestBody{ProjectId: projectID, Title: title, Description: description, StartDate: startDate, EndDate: endDate, UnitPrice: unitPrice}
+	reqBody := businessapi.PostPlanJSONRequestBody{ProjectId: projectID, Title: title, Description: description, StartDate: startDate, EndDate: endDate, UnitPrice: unitPrice}
 	result := testutil.NewRequest().Post("/plans").WithHeader("Cookie", cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithJsonBody(reqBody).GoWithHTTPHandler(s.T(), e)
 
 	assert.Equal(s.T(), http.StatusForbidden, result.Code())
@@ -120,7 +120,7 @@ func (s *TestPlansHandlerSuite) TestPostPlansCreate_StatusForbidden() {
 	assert.False(s.T(), exists)
 }
 
-func (s *TestPlansHandlerSuite) TestPostPlansCreate_StatusUnauthorized() {
+func (s *TestPlansHandlerSuite) TestPostPlanCreate_StatusUnauthorized() {
 	company := factories.CompanyFactory.MustCreate().(*models.Company)
 	company.Insert(ctx, DBCon, boil.Infer())
 	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
@@ -134,7 +134,7 @@ func (s *TestPlansHandlerSuite) TestPostPlansCreate_StatusUnauthorized() {
 	parsedEndDate := time.Date(2025, 4, 10, 0, 0, 0, 0, time.UTC)
 	endDate := openapi_types.Date{Time: parsedEndDate}
 	unitPrice := 10000
-	reqBody := businessapi.PostPlansJSONRequestBody{ProjectId: projectID, Title: title, Description: description, StartDate: startDate, EndDate: endDate, UnitPrice: unitPrice}
+	reqBody := businessapi.PostPlanJSONRequestBody{ProjectId: projectID, Title: title, Description: description, StartDate: startDate, EndDate: endDate, UnitPrice: unitPrice}
 	result := testutil.NewRequest().Post("/plans").WithHeader("Cookie", csrfTokenCookie).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithJsonBody(reqBody).GoWithHTTPHandler(s.T(), e)
 
 	assert.Equal(s.T(), http.StatusUnauthorized, result.Code())
@@ -146,7 +146,7 @@ func (s *TestPlansHandlerSuite) TestPostPlansCreate_StatusUnauthorized() {
 	assert.False(s.T(), exists)
 }
 
-func (s *TestPlansHandlerSuite) TestPostPlansCreate_StatusInternalServerError() {
+func (s *TestPlansHandlerSuite) TestPostPlanCreate_StatusInternalServerError() {
 	company := factories.CompanyFactory.MustCreate().(*models.Company)
 	company.Insert(ctx, DBCon, boil.Infer())
 	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
@@ -161,7 +161,7 @@ func (s *TestPlansHandlerSuite) TestPostPlansCreate_StatusInternalServerError() 
 	parsedEndDate := time.Date(2025, 4, 10, 0, 0, 0, 0, time.UTC)
 	endDate := openapi_types.Date{Time: parsedEndDate}
 	unitPrice := 10000
-	reqBody := businessapi.PostPlansJSONRequestBody{ProjectId: projectID, Title: title, Description: description, StartDate: startDate, EndDate: endDate, UnitPrice: unitPrice}
+	reqBody := businessapi.PostPlanJSONRequestBody{ProjectId: projectID, Title: title, Description: description, StartDate: startDate, EndDate: endDate, UnitPrice: unitPrice}
 
 	mockPlanService := new(MockPlanService)
 	mockPlanService.On("Create", mock.AnythingOfType("*context.valueCtx"), mock.AnythingOfType("*businessapi.PlanStoreInput"), mock.AnythingOfType("int") ).Return(models.Plan{}, nil, errors.New("internal server error"))
@@ -180,7 +180,7 @@ func (s *TestPlansHandlerSuite) TestPostPlansCreate_StatusInternalServerError() 
 	assert.False(s.T(), exists)
 }
 
-func (s *TestPlansHandlerSuite) TestPostPlansCreate_BadRequest_Required() {
+func (s *TestPlansHandlerSuite) TestPostPlanCreate_BadRequest_Required() {
 	company := factories.CompanyFactory.MustCreate().(*models.Company)
 	company.Insert(ctx, DBCon, boil.Infer())
 	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
@@ -190,12 +190,12 @@ func (s *TestPlansHandlerSuite) TestPostPlansCreate_BadRequest_Required() {
 	projectID := project.ID
 	title := ""
 	description := ""
-	reqBody := businessapi.PostPlansJSONRequestBody{ProjectId: projectID, Title: title, Description: description}
+	reqBody := businessapi.PostPlanJSONRequestBody{ProjectId: projectID, Title: title, Description: description}
 	result := testutil.NewRequest().Post("/plans").WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithJsonBody(reqBody).GoWithHTTPHandler(s.T(), e)
 
 	assert.Equal(s.T(), http.StatusOK, result.Code())
 
-	var res businessapi.PostPlans200JSONResponse
+	var res businessapi.PostPlan200JSONResponse
 	result.UnmarshalBodyToObject(&res)
 
 	titleErrorMessages := []string{"支援タイトルは必須入力です。"}
