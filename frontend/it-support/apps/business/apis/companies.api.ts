@@ -12,7 +12,7 @@ const client = createClient<paths>({
 });
 
 export async function postCompanySignIn(input: CompanySignInInput) {
-  const { response } = await client.POST("/companies/signIn", {
+  const { response } = await client.POST("/companies/sign-in", {
     ...(await getRequestHeaders()),
     body: input,
   });
