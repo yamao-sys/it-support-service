@@ -8,8 +8,12 @@ import { useRouter } from "next/navigation";
 import { FC } from "react";
 
 const ProjectNewContainer: FC = () => {
-  // NOTE: booleanはControlで制御する上で初期値が要るので設定
-  const doCreateProjectInput: ProjectStoreInput = { isActive: true };
+  // NOTE: requiredに設定したfieldはControlで制御する上で初期値が要るので設定
+  const doCreateProjectInput: ProjectStoreInput = {
+    title: "",
+    description: "",
+    isActive: true,
+  };
   const { control, handleSubmit, validationErrors, setValidationErrors } =
     useProjectStore(doCreateProjectInput);
 

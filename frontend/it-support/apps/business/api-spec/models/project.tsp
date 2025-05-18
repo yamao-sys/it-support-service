@@ -1,13 +1,15 @@
 @summary("Project")
 model Project {
-  id: string;
-  name: string;
+  id: integer;
+  title: string;
   description: string;
   startDate: plainDate;
   endDate: plainDate;
   minBudget?: integer;
   maxBudget?: integer;
   isActive: boolean;
+
+  @format("date-time")
   createdAt: string;
 }
 

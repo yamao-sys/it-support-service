@@ -81,8 +81,6 @@ services:
       - 3102:3102 # Businessテスト用のポート
     volumes:
       - ./frontend:/app
-      - ./api-server/api/registration/:/app/it-support/openapi/registration
-      - ./api-server/api/business/:/app/it-support/openapi/business
     restart: always
     tty: true
     stdin_open: true

@@ -15,7 +15,7 @@ using OpenAPI;
 @useAuth([SecuritySchema])
 namespace BusinessService.Plan {
   interface Root {
-    @operationId("post-plans")
+    @operationId("post-plan")
     @summary("Create Plan")
     @post
     post(

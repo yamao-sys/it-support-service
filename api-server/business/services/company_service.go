@@ -16,7 +16,7 @@ import (
 )
 
 type CompanyService interface {
-	SignIn(ctx context.Context, requestParams businessapi.PostCompaniesSignInJSONRequestBody) (statusCode int, tokenString string, error error)
+	SignIn(ctx context.Context, requestParams businessapi.PostCompanySignInJSONRequestBody) (statusCode int, tokenString string, error error)
 }
 
 type companyService struct {
@@ -27,7 +27,7 @@ func NewCompanyService(db *sql.DB) CompanyService {
 	return &companyService{db}
 }
 
-func (cs *companyService) SignIn(ctx context.Context, requestParams businessapi.PostCompaniesSignInJSONRequestBody) (statusCode int, tokenString string, error error) {
+func (cs *companyService) SignIn(ctx context.Context, requestParams businessapi.PostCompanySignInJSONRequestBody) (statusCode int, tokenString string, error error) {
 	// NOTE: emailからの取得
 	company, err := models.Companies(qm.Where("email = ?", requestParams.Email)).One(ctx, cs.db)
 	if err != nil {

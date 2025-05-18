@@ -33,7 +33,7 @@ func (s *TestCompanyServiceSuite) TestSignIn_StatusOK() {
 	company := factories.CompanyFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.Company)
 	company.Insert(ctx, DBCon, boil.Infer())
 
-	requestParams := businessapi.PostCompaniesSignInJSONRequestBody{Email: "test@example.com", Password: "password"}
+	requestParams := businessapi.PostCompanySignInJSONRequestBody{Email: "test@example.com", Password: "password"}
 
 	statusCode, tokenString, err := testCompanyService.SignIn(ctx, requestParams)
 
@@ -47,7 +47,7 @@ func (s *TestCompanyServiceSuite) TestSignIn_BadRequest() {
 	company := factories.CompanyFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.Company)
 	company.Insert(ctx, DBCon, boil.Infer())
 
-	requestParams := businessapi.PostCompaniesSignInJSONRequestBody{Email: "test_@example.com", Password: "password"}
+	requestParams := businessapi.PostCompanySignInJSONRequestBody{Email: "test_@example.com", Password: "password"}
 
 	statusCode, tokenString, err := testCompanyService.SignIn(ctx, requestParams)
 

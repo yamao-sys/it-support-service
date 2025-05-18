@@ -19,11 +19,11 @@ namespace BusinessService.Project {
     @summary("Create Project")
     @get
     get(
-      @query pageToken: string,
+      @query pageToken?: string,
     ): SuccessResponse<ProjectsListResponse>
       | InternalServerErrorResponse;
 
-    @operationId("post-projects")
+    @operationId("post-project")
     @summary("Create Project")
     @post
     post(

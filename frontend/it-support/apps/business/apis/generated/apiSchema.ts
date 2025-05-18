@@ -1,4 +1,21 @@
 export interface paths {
+  "/companies/sign-in": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Company Sign In */
+    post: operations["post-company-sign-in"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/csrf": {
     parameters: {
       query?: never;
@@ -16,7 +33,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/supporters/signIn": {
+  "/plans": {
     parameters: {
       query?: never;
       header?: never;
@@ -25,25 +42,8 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    /** Supporter SignIn */
-    post: operations["post-supporters-sign_in"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/companies/signIn": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** SignIn */
-    post: operations["post-companies-sign_in"];
+    /** Create Plan */
+    post: operations["post-plan"];
     delete?: never;
     options?: never;
     head?: never;
@@ -57,11 +57,11 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    /** Project List */
+    /** Create Project */
     get: operations["get-projects"];
     put?: never;
-    /** Project Create */
-    post: operations["post-projects"];
+    /** Create Project */
+    post: operations["post-project"];
     delete?: never;
     options?: never;
     head?: never;
@@ -75,11 +75,28 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    /** Project Show */
-    get: operations["get-projects-id"];
-    /** Project Update */
-    put: operations["put-projects-id"];
+    /** Get Project */
+    get: operations["get-project"];
+    /** Update Project */
+    put: operations["put-project"];
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/supporters/sign-in": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Supporter Sign In */
+    post: operations["post-supporter-sign-in"];
     delete?: never;
     options?: never;
     head?: never;
@@ -90,25 +107,96 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
-    /**
-     * Project Model
-     * @description Project
-     */
-    Project: {
-      id?: string;
-      title?: string;
-      description?: string;
-      /** Format: date */
-      start_date?: Date;
-      /** Format: date */
-      end_date?: Date;
-      min_budget?: number;
-      max_budget?: number;
-      isActive?: boolean;
-      /** Format: date-time */
-      created_at?: string;
+    /** Company SignIn BadRequestError Response */
+    CompanySignInBadRequestResponse: {
+      errors: string[];
     };
-    /** ProjectValidationErrors */
+    /** Company SignIn Input */
+    CompanySignInInput: {
+      email: string;
+      password: string;
+    };
+    /** Company SignIn Ok Response */
+    CompanySignInOkResponse: Record<string, never>;
+    /** CsrfResponse */
+    CsrfResponse: {
+      csrfToken: string;
+    };
+    /** Plan */
+    Plan: {
+      id: number;
+      projectId: number;
+      title: string;
+      description: string;
+      /** Format: date */
+      startDate: Date;
+      /** Format: date */
+      endDate: Date;
+      unitPrice: number;
+      /** Format: date-time */
+      createdAt: string;
+    };
+    /** Plan Store Input */
+    PlanStoreInput: {
+      projectId: number;
+      title: string;
+      description: string;
+      /** Format: date */
+      startDate: Date;
+      /** Format: date */
+      endDate: Date;
+      unitPrice: number;
+    };
+    /** Plan Store Response */
+    PlanStoreResponse: {
+      plan: components["schemas"]["Plan"];
+      errors: components["schemas"]["PlanValidationError"];
+    };
+    /** Plan Validation Error */
+    PlanValidationError: {
+      title?: string[];
+      description?: string[];
+      startDate?: string[];
+      endDate?: string[];
+      unitPrice?: string[];
+    };
+    /** Project */
+    Project: {
+      id: number;
+      title: string;
+      description: string;
+      /** Format: date */
+      startDate: Date;
+      /** Format: date */
+      endDate: Date;
+      minBudget?: number;
+      maxBudget?: number;
+      isActive: boolean;
+      /** Format: date-time */
+      createdAt: string;
+    };
+    /** Project Response */
+    ProjectResponse: {
+      project: components["schemas"]["Project"];
+    };
+    /** Project Store Input */
+    ProjectStoreInput: {
+      title: string;
+      description: string;
+      /** Format: date */
+      startDate?: Date;
+      /** Format: date */
+      endDate?: Date;
+      minBudget?: number;
+      maxBudget?: number;
+      isActive: boolean;
+    };
+    /** Project Store Response */
+    ProjectStoreResponse: {
+      project: components["schemas"]["Project"];
+      errors: components["schemas"]["ProjectValidationError"];
+    };
+    /** Project Validation Error */
     ProjectValidationError: {
       title?: string[];
       description?: string[];
@@ -118,163 +206,77 @@ export interface components {
       maxBudget?: string[];
       isActive?: string[];
     };
-  };
-  responses: {
-    /** @description Csrf response */
-    CsrfResponse: {
-      headers: {
-        [name: string]: unknown;
-      };
-      content: {
-        "application/json": {
-          csrfToken: string;
-        };
-      };
-    };
-    /** @description Supporter SignIn Response */
-    SupporterSignInOkResponse: {
-      headers: {
-        "Set-Cookie"?: string;
-        [name: string]: unknown;
-      };
-      content: {
-        "application/json": Record<string, never>;
-      };
-    };
-    /** @description Supporter SignIn BadRequest Response */
-    SupporterSignInBadRequestResponse: {
-      headers: {
-        [name: string]: unknown;
-      };
-      content: {
-        "application/json": {
-          errors: string[];
-        };
-      };
-    };
-    /** @description Company SignIn Response */
-    CompanySignInOkResponse: {
-      headers: {
-        "Set-Cookie"?: string;
-        [name: string]: unknown;
-      };
-      content: {
-        "application/json": Record<string, never>;
-      };
-    };
-    /** @description Company SignIn BadRequest Response */
-    CompanySignInBadRequestResponse: {
-      headers: {
-        [name: string]: unknown;
-      };
-      content: {
-        "application/json": {
-          errors: string[];
-        };
-      };
-    };
-    /** @description Project Store Response */
-    ProjectStoreResponse: {
-      headers: {
-        [name: string]: unknown;
-      };
-      content: {
-        "application/json": {
-          project: components["schemas"]["Project"];
-          errors: components["schemas"]["ProjectValidationError"];
-        };
-      };
-    };
-    /** @description Projects List Response */
+    /** Projects List Response */
     ProjectsListResponse: {
-      headers: {
-        [name: string]: unknown;
-      };
-      content: {
-        "application/json": {
-          projects: components["schemas"]["Project"][];
-          nextPageToken: string;
-        };
-      };
+      projects: components["schemas"]["Project"][];
+      nextPageToken: string;
     };
-    /** @description Project Response */
-    ProjectResponse: {
-      headers: {
-        [name: string]: unknown;
-      };
-      content: {
-        "application/json": {
-          project: components["schemas"]["Project"];
-        };
-      };
+    /** Supporter SignIn BadRequestError Response */
+    SupporterSignInBadRequestResponse: {
+      errors: string[];
     };
-    /** @description Not Found Error Response */
-    NotFoundErrorResponse: {
-      headers: {
-        [name: string]: unknown;
-      };
-      content: {
-        "application/json": {
-          code: number;
-          message: string;
-        };
-      };
-    };
-    /** @description Internal Server Error Response */
-    InternalServerErrorResponse: {
-      headers: {
-        [name: string]: unknown;
-      };
-      content: {
-        "application/json": {
-          code: number;
-          message: string;
-        };
-      };
-    };
-  };
-  parameters: never;
-  requestBodies: {
-    /** @description Project Store Inputs */
-    ProjectStoreInput: {
-      content: {
-        "application/json": {
-          title?: string;
-          description?: string;
-          /** Format: date */
-          startDate?: Date;
-          /** Format: date */
-          endDate?: Date;
-          minBudget?: number;
-          maxBudget?: number;
-          isActive?: boolean;
-        };
-      };
-    };
-    /** @description Supporter SignIn  Input */
+    /** Supporter SignIn Input */
     SupporterSignInInput: {
-      content: {
-        "application/json": {
-          email: string;
-          password: string;
-        };
-      };
+      email: string;
+      password: string;
     };
-    /** @description Company SignIn  Input */
-    CompanySignInInput: {
-      content: {
-        "application/json": {
-          email: string;
-          password: string;
-        };
-      };
-    };
+    /** Supporter SignIn Ok Response */
+    SupporterSignInOkResponse: Record<string, never>;
   };
+  responses: never;
+  parameters: never;
+  requestBodies: never;
   headers: never;
   pathItems: never;
 }
 export type $defs = Record<string, never>;
 export interface operations {
+  "post-company-sign-in": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CompanySignInInput"];
+      };
+    };
+    responses: {
+      /** @description The request has succeeded. */
+      200: {
+        headers: {
+          "Set-Cookie": string;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CompanySignInOkResponse"];
+        };
+      };
+      /** @description The server could not understand the request due to invalid syntax. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CompanySignInBadRequestResponse"];
+        };
+      };
+      /** @description Server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            code: number;
+            message: string;
+          };
+        };
+      };
+    };
+  };
   "get-csrf": {
     parameters: {
       query?: never;
@@ -284,36 +286,63 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["CsrfResponse"];
-      500: components["responses"]["InternalServerErrorResponse"];
+      /** @description The request has succeeded. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CsrfResponse"];
+        };
+      };
+      /** @description Server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            code: number;
+            message: string;
+          };
+        };
+      };
     };
   };
-  "post-supporters-sign_in": {
+  "post-plan": {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    requestBody?: components["requestBodies"]["SupporterSignInInput"];
-    responses: {
-      200: components["responses"]["SupporterSignInOkResponse"];
-      400: components["responses"]["SupporterSignInBadRequestResponse"];
-      500: components["responses"]["InternalServerErrorResponse"];
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PlanStoreInput"];
+      };
     };
-  };
-  "post-companies-sign_in": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: components["requestBodies"]["CompanySignInInput"];
     responses: {
-      200: components["responses"]["CompanySignInOkResponse"];
-      400: components["responses"]["CompanySignInBadRequestResponse"];
-      500: components["responses"]["InternalServerErrorResponse"];
+      /** @description The request has succeeded. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PlanStoreResponse"];
+        };
+      };
+      /** @description Server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            code: number;
+            message: string;
+          };
+        };
+      };
     };
   };
   "get-projects": {
@@ -327,24 +356,66 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["ProjectsListResponse"];
-      500: components["responses"]["InternalServerErrorResponse"];
+      /** @description The request has succeeded. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ProjectsListResponse"];
+        };
+      };
+      /** @description Server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            code: number;
+            message: string;
+          };
+        };
+      };
     };
   };
-  "post-projects": {
+  "post-project": {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    requestBody?: components["requestBodies"]["ProjectStoreInput"];
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ProjectStoreInput"];
+      };
+    };
     responses: {
-      200: components["responses"]["ProjectStoreResponse"];
-      500: components["responses"]["InternalServerErrorResponse"];
+      /** @description The request has succeeded. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ProjectStoreResponse"];
+        };
+      };
+      /** @description Server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            code: number;
+            message: string;
+          };
+        };
+      };
     };
   };
-  "get-projects-id": {
+  "get-project": {
     parameters: {
       query?: never;
       header?: never;
@@ -355,11 +426,42 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["ProjectResponse"];
-      404: components["responses"]["NotFoundErrorResponse"];
+      /** @description The request has succeeded. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ProjectResponse"];
+        };
+      };
+      /** @description The server cannot find the requested resource. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            code: number;
+            message: string;
+          };
+        };
+      };
+      /** @description Server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            code: number;
+            message: string;
+          };
+        };
+      };
     };
   };
-  "put-projects-id": {
+  "put-project": {
     parameters: {
       query?: never;
       header?: never;
@@ -368,10 +470,91 @@ export interface operations {
       };
       cookie?: never;
     };
-    requestBody?: components["requestBodies"]["ProjectStoreInput"];
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ProjectStoreInput"];
+      };
+    };
     responses: {
-      200: components["responses"]["ProjectStoreResponse"];
-      500: components["responses"]["InternalServerErrorResponse"];
+      /** @description The request has succeeded. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ProjectStoreResponse"];
+        };
+      };
+      /** @description The server cannot find the requested resource. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            code: number;
+            message: string;
+          };
+        };
+      };
+      /** @description Server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            code: number;
+            message: string;
+          };
+        };
+      };
+    };
+  };
+  "post-supporter-sign-in": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SupporterSignInInput"];
+      };
+    };
+    responses: {
+      /** @description The request has succeeded. */
+      200: {
+        headers: {
+          "Set-Cookie": string;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SupporterSignInOkResponse"];
+        };
+      };
+      /** @description The server could not understand the request due to invalid syntax. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SupporterSignInBadRequestResponse"];
+        };
+      };
+      /** @description Server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            code: number;
+            message: string;
+          };
+        };
+      };
     };
   };
 }

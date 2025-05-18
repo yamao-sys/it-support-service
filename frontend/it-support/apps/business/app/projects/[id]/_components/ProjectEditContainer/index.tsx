@@ -15,10 +15,10 @@ const ProjectEditContainer: FC<Props> = ({ project }: Props) => {
   const doUpdateProjectInput: ProjectStoreInput = {
     title: project.title,
     description: project.description,
-    startDate: project.start_date,
-    endDate: project.end_date,
-    minBudget: project.min_budget,
-    maxBudget: project.max_budget,
+    startDate: project.startDate,
+    endDate: project.endDate,
+    minBudget: project.minBudget,
+    maxBudget: project.maxBudget,
     isActive: project.isActive,
   };
   const { control, handleSubmit, validationErrors, setValidationErrors } =

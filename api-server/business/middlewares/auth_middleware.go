@@ -47,7 +47,7 @@ func needsAuthenticate(operationID string) (bool) {
 	spec, _ := businessapi.GetSwagger()
 	for _, pathItem := range spec.Paths.Map() {
 		for _, op := range pathItem.Operations() {
-			if op.OperationID != operationID {
+			if op.OperationID != operationID || op.Security == nil {
 				continue
 			}
 			return len(*op.Security) > 0

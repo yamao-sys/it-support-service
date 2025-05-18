@@ -7,7 +7,9 @@ model Plan {
   startDate: plainDate;
   endDate: plainDate;
   unitPrice: integer;
-  createdAt: plainTime;
+
+  @format("date-time")
+  createdAt: string;
 }
 
 @summary("Plan Validation Error")

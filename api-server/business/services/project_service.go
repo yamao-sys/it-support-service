@@ -64,8 +64,8 @@ func (ps *projectService) Create(ctx context.Context, requestParams *businessapi
 
 	project = models.Project{}
 	project.CompanyID = companyID
-	project.Title = *requestParams.Title
-	project.Description = *requestParams.Description
+	project.Title = requestParams.Title
+	project.Description = requestParams.Description
 	project.StartDate = requestParams.StartDate.Time
 	project.EndDate = requestParams.EndDate.Time
 	if requestParams.MinBudget != nil {
@@ -74,7 +74,7 @@ func (ps *projectService) Create(ctx context.Context, requestParams *businessapi
 	if requestParams.MaxBudget != nil {
 		project.MaxBudget = null.Int{Int: *requestParams.MaxBudget, Valid: true}
 	}
-	project.IsActive = *requestParams.IsActive
+	project.IsActive = requestParams.IsActive
 
 	createErr := project.Insert(ctx, ps.db, boil.Infer())
 	if createErr != nil {
@@ -104,8 +104,8 @@ func (ps *projectService) Update(ctx context.Context, requestParams *businessapi
 	if doUpdateProject == nil {
 		return models.Project{}, nil, errors.New("not found")
 	}
-	doUpdateProject.Title = *requestParams.Title
-	doUpdateProject.Description = *requestParams.Description
+	doUpdateProject.Title = requestParams.Title
+	doUpdateProject.Description = requestParams.Description
 	doUpdateProject.StartDate = requestParams.StartDate.Time
 	doUpdateProject.EndDate = requestParams.EndDate.Time
 	if requestParams.MinBudget != nil {
@@ -114,7 +114,7 @@ func (ps *projectService) Update(ctx context.Context, requestParams *businessapi
 	if requestParams.MaxBudget != nil {
 		doUpdateProject.MaxBudget = null.Int{Int: *requestParams.MaxBudget, Valid: true}
 	}
-	doUpdateProject.IsActive = *requestParams.IsActive
+	doUpdateProject.IsActive = requestParams.IsActive
 
 	_, updateErr := doUpdateProject.Update(ctx, ps.db, boil.Infer())
 	if updateErr != nil {

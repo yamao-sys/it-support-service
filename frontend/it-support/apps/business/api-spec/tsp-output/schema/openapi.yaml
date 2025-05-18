@@ -8,6 +8,7 @@ tags:
   - name: csrf
   - name: supporters
   - name: projects
+  - name: plans
 paths:
   /companies/sign-in:
     post:
@@ -18,10 +19,10 @@ paths:
         '200':
           description: The request has succeeded.
           headers:
-            headers:
+            Set-Cookie:
               required: true
               schema:
-                $ref: '#/components/schemas/CompanySignInOkResponseHeader'
+                type: string
           content:
             application/json:
               schema:
@@ -82,6 +83,42 @@ paths:
                   - message
       tags:
         - csrf
+  /plans:
+    post:
+      operationId: post-plan
+      summary: Create Plan
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlanStoreResponse'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  message:
+                    type: string
+                required:
+                  - code
+                  - message
+      tags:
+        - plans
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlanStoreInput'
+      security:
+        - ApiKeyAuth: []
   /projects:
     get:
       operationId: get-projects
@@ -89,7 +126,7 @@ paths:
       parameters:
         - name: pageToken
           in: query
-          required: true
+          required: false
           schema:
             type: string
           explode: false
@@ -119,7 +156,7 @@ paths:
       security:
         - ApiKeyAuth: []
     post:
-      operationId: post-projects
+      operationId: post-project
       summary: Create Project
       parameters: []
       responses:
@@ -265,10 +302,10 @@ paths:
         '200':
           description: The request has succeeded.
           headers:
-            headers:
+            Set-Cookie:
               required: true
               schema:
-                $ref: '#/components/schemas/SupporterSignInOkResponseHeader'
+                type: string
           content:
             application/json:
               schema:
@@ -327,14 +364,6 @@ components:
     CompanySignInOkResponse:
       type: object
       title: Company SignIn Ok Response
-    CompanySignInOkResponseHeader:
-      type: object
-      required:
-        - Set-Cookie
-      properties:
-        Set-Cookie:
-          type: string
-      title: Company SignIn Error Response
     CsrfResponse:
       type: object
       required:
@@ -343,11 +372,103 @@ components:
         csrfToken:
           type: string
       title: CsrfResponse
+    Plan:
+      type: object
+      required:
+        - id
+        - projectId
+        - title
+        - description
+        - startDate
+        - endDate
+        - unitPrice
+        - createdAt
+      properties:
+        id:
+          type: integer
+        projectId:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        unitPrice:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+      title: Plan
+    PlanStoreInput:
+      type: object
+      required:
+        - projectId
+        - title
+        - description
+        - startDate
+        - endDate
+        - unitPrice
+      properties:
+        projectId:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        unitPrice:
+          type: integer
+      title: Plan Store Input
+    PlanStoreResponse:
+      type: object
+      required:
+        - plan
+        - errors
+      properties:
+        plan:
+          $ref: '#/components/schemas/Plan'
+        errors:
+          $ref: '#/components/schemas/PlanValidationError'
+      title: Plan Store Response
+    PlanValidationError:
+      type: object
+      properties:
+        title:
+          type: array
+          items:
+            type: string
+        description:
+          type: array
+          items:
+            type: string
+        startDate:
+          type: array
+          items:
+            type: string
+        endDate:
+          type: array
+          items:
+            type: string
+        unitPrice:
+          type: array
+          items:
+            type: string
+      title: Plan Validation Error
     Project:
       type: object
       required:
         - id
-        - name
+        - title
         - description
         - startDate
         - endDate
@@ -355,8 +476,8 @@ components:
         - createdAt
       properties:
         id:
-          type: string
-        name:
+          type: integer
+        title:
           type: string
         description:
           type: string
@@ -374,6 +495,7 @@ components:
           type: boolean
         createdAt:
           type: string
+          format: date-time
       title: Project
     ProjectResponse:
       type: object
@@ -388,8 +510,6 @@ components:
       required:
         - title
         - description
-        - startDate
-        - endDate
         - isActive
       properties:
         title:
@@ -489,14 +609,6 @@ components:
     SupporterSignInOkResponse:
       type: object
       title: Supporter SignIn Ok Response
-    SupporterSignInOkResponseHeader:
-      type: object
-      required:
-        - Set-Cookie
-      properties:
-        Set-Cookie:
-          type: string
-      title: Supporter SignIn Error Response
   securitySchemes:
     ApiKeyAuth:
       type: apiKey

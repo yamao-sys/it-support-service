@@ -20,7 +20,7 @@ namespace BusinessService.Company {
     @post
     post(
       @body body: CompanySignInInput,
-    ): SuccessResponseWithHeader<CompanySignInOkResponse, CompanySignInOkResponseHeader>
+    ): SuccessResponseWithHeader<CompanySignInOkResponse>
       | BadRequestErrorResponse<CompanySignInBadRequestResponse>
       | InternalServerErrorResponse;
   }

@@ -6,13 +6,12 @@ import (
 	businessservices "apps/business/services"
 	"context"
 	"net/http"
-	"strconv"
 
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
 type PlansHandler interface {
-	PostPlans(ctx context.Context, request businessapi.PostPlansRequestObject) (businessapi.PostPlansResponseObject, error)
+	PostPlan(ctx context.Context, request businessapi.PostPlanRequestObject) (businessapi.PostPlanResponseObject, error)
 }
 
 type plansHandler struct {
@@ -23,7 +22,7 @@ func NewPlansHandler(planService businessservices.PlanService) PlansHandler {
 	return &plansHandler{planService}
 }
 
-func (ph *plansHandler) PostPlans(ctx context.Context, request businessapi.PostPlansRequestObject) (businessapi.PostPlansResponseObject, error) {
+func (ph *plansHandler) PostPlan(ctx context.Context, request businessapi.PostPlanRequestObject) (businessapi.PostPlanResponseObject, error) {
 	supporterID, _ := businesshelpers.ExtractSupporterID(ctx)
 
 	inputs := businessapi.PlanStoreInput{
@@ -37,26 +36,22 @@ func (ph *plansHandler) PostPlans(ctx context.Context, request businessapi.PostP
 
 	createdPlan, validationErrors, err := ph.planService.Create(ctx, &inputs, supporterID)
 	if err != nil {
-		res := businessapi.InternalServerErrorResponseJSONResponse{Code: http.StatusInternalServerError}
-		return businessapi.PostPlans500JSONResponse{InternalServerErrorResponseJSONResponse: res}, err
+		return businessapi.PostPlan500JSONResponse{Code: http.StatusInternalServerError}, err
 	}
 
 	mappedValidationErrors := ph.planService.MappingValidationErrorStruct(validationErrors)
-	planID := strconv.Itoa(createdPlan.ID)
-	projectID := strconv.Itoa(createdPlan.ProjectID)
 	startDate := openapi_types.Date{Time: createdPlan.StartDate}
 	endDate := openapi_types.Date{Time: createdPlan.EndDate}
 	resPlan := businessapi.Plan{
-		Id: &planID,
-		ProjectId: &projectID,
-		Title: &createdPlan.Title,
-		Description: &createdPlan.Description,
-		StartDate: &startDate,
-		EndDate: &endDate,
-		UnitPrice: &createdPlan.UnitPrice.Int,
-		CreatedAt: &createdPlan.CreatedAt,
+		Id: createdPlan.ID,
+		ProjectId: createdPlan.ProjectID,
+		Title: createdPlan.Title,
+		Description: createdPlan.Description,
+		StartDate: startDate,
+		EndDate: endDate,
+		UnitPrice: createdPlan.UnitPrice.Int,
+		CreatedAt: createdPlan.CreatedAt,
 	}
 
-	res := businessapi.PlanStoreResponseJSONResponse{Errors: mappedValidationErrors, Plan: resPlan}
-	return businessapi.PostPlans200JSONResponse{PlanStoreResponseJSONResponse: res}, nil
+	return businessapi.PostPlan200JSONResponse(businessapi.PlanStoreResponse{Errors: mappedValidationErrors, Plan: resPlan}), nil
 }

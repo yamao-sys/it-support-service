@@ -20,7 +20,7 @@ namespace BusinessService.Supporter {
     @post
     post(
       @body body: SupporterSignInInput,
-    ): SuccessResponseWithHeader<SupporterSignInOkResponse, SupporterSignInOkResponseHeader>
+    ): SuccessResponseWithHeader<SupporterSignInOkResponse>
       | BadRequestErrorResponse<SupporterSignInBadRequestResponse>
       | InternalServerErrorResponse;
   }
