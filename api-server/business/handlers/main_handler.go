@@ -18,8 +18,8 @@ type MainHandler interface {
 	// handlers /projects
 	GetProjects(ctx context.Context, request businessapi.GetProjectsRequestObject) (businessapi.GetProjectsResponseObject, error)
 	PostProjects(ctx context.Context, request businessapi.PostProjectsRequestObject) (businessapi.PostProjectsResponseObject, error)
-	GetProjectsId(ctx context.Context, request businessapi.GetProjectsIdRequestObject) (businessapi.GetProjectsIdResponseObject, error)
-	PutProjectsId(ctx context.Context, request businessapi.PutProjectsIdRequestObject) (businessapi.PutProjectsIdResponseObject, error)
+	GetProject(ctx context.Context, request businessapi.GetProjectRequestObject) (businessapi.GetProjectResponseObject, error)
+	PutProject(ctx context.Context, request businessapi.PutProjectRequestObject) (businessapi.PutProjectResponseObject, error)
 
 	// handlers /plans
 	PostPlans(ctx context.Context, request businessapi.PostPlansRequestObject) (businessapi.PostPlansResponseObject, error)
@@ -68,15 +68,13 @@ func (mh *mainHandler) PostProjects(ctx context.Context, request businessapi.Pos
 	return res, err
 }
 
-//lint:ignore ST1003 oapi-codegenの自動生成メソッド名
-func (mh *mainHandler) GetProjectsId(ctx context.Context, request businessapi.GetProjectsIdRequestObject) (businessapi.GetProjectsIdResponseObject, error) {
-	res, err := mh.projectsHandler.GetProjectsId(ctx, request)
+func (mh *mainHandler) GetProject(ctx context.Context, request businessapi.GetProjectRequestObject) (businessapi.GetProjectResponseObject, error) {
+	res, err := mh.projectsHandler.GetProject(ctx, request)
 	return res, err
 }
 
-//lint:ignore ST1003 oapi-codegenの自動生成メソッド名
-func (mh *mainHandler) PutProjectsId(ctx context.Context, request businessapi.PutProjectsIdRequestObject) (businessapi.PutProjectsIdResponseObject, error) {
-	res, err := mh.projectsHandler.PutProjectsId(ctx, request)
+func (mh *mainHandler) PutProject(ctx context.Context, request businessapi.PutProjectRequestObject) (businessapi.PutProjectResponseObject, error) {
+	res, err := mh.projectsHandler.PutProject(ctx, request)
 	return res, err
 }
 
