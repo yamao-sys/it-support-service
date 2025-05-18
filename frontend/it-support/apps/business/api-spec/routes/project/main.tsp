@@ -23,7 +23,7 @@ namespace BusinessService.Project {
     ): SuccessResponse<ProjectsListResponse>
       | InternalServerErrorResponse;
 
-    @operationId("post-projects")
+    @operationId("post-project")
     @summary("Create Project")
     @post
     post(
