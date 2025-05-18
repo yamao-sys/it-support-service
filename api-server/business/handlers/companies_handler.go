@@ -8,7 +8,7 @@ import (
 )
 
 type CompaniesHandler interface {
-	PostCompaniesSignIn(ctx context.Context, request businessapi.PostCompaniesSignInRequestObject) (businessapi.PostCompaniesSignInResponseObject, error)
+	PostCompanySignIn(ctx context.Context, request businessapi.PostCompanySignInRequestObject) (businessapi.PostCompanySignInResponseObject, error)
 }
 
 type companiesHandler struct {
@@ -19,8 +19,8 @@ func NewCompaniesHandler(companyService businessservices.CompanyService) Compani
 	return &companiesHandler{companyService}
 }
 
-func (ch *companiesHandler) PostCompaniesSignIn(ctx context.Context, request businessapi.PostCompaniesSignInRequestObject) (businessapi.PostCompaniesSignInResponseObject, error) {
-	inputs := businessapi.PostCompaniesSignInJSONRequestBody{
+func (ch *companiesHandler) PostCompanySignIn(ctx context.Context, request businessapi.PostCompanySignInRequestObject) (businessapi.PostCompanySignInResponseObject, error) {
+	inputs := businessapi.PostCompanySignInJSONRequestBody{
 		Email: request.Body.Email,
 		Password: request.Body.Password,
 	}
@@ -28,9 +28,9 @@ func (ch *companiesHandler) PostCompaniesSignIn(ctx context.Context, request bus
 	statusCode, tokenString, err := ch.companyService.SignIn(ctx, inputs)
 	switch (statusCode) {
 	case http.StatusInternalServerError:
-		return businessapi.PostCompaniesSignIn500JSONResponse{Code: http.StatusInternalServerError, Message: err.Error(),}, nil
+		return businessapi.PostCompanySignIn500JSONResponse{Code: http.StatusInternalServerError, Message: err.Error(),}, nil
 	case http.StatusBadRequest:
-		return businessapi.PostCompaniesSignIn400JSONResponse{Errors: []string{err.Error()}}, nil
+		return businessapi.PostCompanySignIn400JSONResponse{Errors: []string{err.Error()}}, nil
 	}
 	
 	// NOTE: Cookieにtokenをセット
@@ -43,8 +43,8 @@ func (ch *companiesHandler) PostCompaniesSignIn(ctx context.Context, request bus
 		Secure:   false,
 		HttpOnly: true,
 	}
-	return businessapi.PostCompaniesSignIn200JSONResponse{
+	return businessapi.PostCompanySignIn200JSONResponse{
 		Body: businessapi.CompanySignInOkResponse{},
-		Headers: businessapi.PostCompaniesSignIn200ResponseHeaders{SetCookie: cookie.String()},
+		Headers: businessapi.PostCompanySignIn200ResponseHeaders{SetCookie: cookie.String()},
 	}, nil
 }
