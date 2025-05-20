@@ -2,7 +2,7 @@ package businessservices
 
 import (
 	businessapi "apps/api/business"
-	models "apps/models/generated"
+	models "apps/models"
 	"apps/test/factories"
 	"errors"
 	"testing"
@@ -13,8 +13,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"github.com/volatiletech/null/v8"
-	"github.com/volatiletech/sqlboiler/v4/boil"
-	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
 type TestProjectServiceSuite struct {
@@ -35,149 +33,137 @@ func (s *TestProjectServiceSuite) TearDownTest() {
 
 func (s *TestProjectServiceSuite) TestProjectFetchLists_NotHavingNextPage_StatusOK() {
 	company := factories.CompanyFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.Company)
-	company.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(company)
 
 	project1 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
-	project1.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(project1)
 	project2 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
-	project2.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(project2)
 	project3 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
-	project3.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(project3)
 	project4 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
-	project4.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(project4)
 	project5 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
-	project5.Insert(ctx, DBCon, boil.Infer())
-	companyProductIDs, _ := models.Projects(
-		qm.Select("projects.id"),
-		qm.Where("company_id = ?", company.ID),
-	).All(ctx, DBCon)
+	DBCon.Create(project5)
+	var companyProductIDs []int
+	DBCon.Model(&models.Project{}).Where("company_id = ?", company.ID).Pluck("id", &companyProductIDs)
 
 	otherCompany := factories.CompanyFactory.MustCreateWithOption(map[string]interface{}{"Email": "test_other@example.com"}).(*models.Company)
-	otherCompany.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(otherCompany)
 	otherCompanyProduct := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": otherCompany.ID}).(*models.Project)
-	otherCompanyProduct.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(otherCompanyProduct)
 
-	fetchedProducts, nextPageToken, err := testProjectService.FetchLists(ctx, company.ID, 0)
+	fetchedProducts, nextPageToken, err := testProjectService.FetchLists(company.ID, 0)
 	var fetchedProductIDs []int
 	for _, fetchedProduct := range fetchedProducts {
 		fetchedProductIDs = append(fetchedProductIDs, fetchedProduct.ID)
 	}
-	assert.ElementsMatch(s.T(), companyProductIDs.GetIDs(), fetchedProductIDs)
+	assert.ElementsMatch(s.T(), companyProductIDs, fetchedProductIDs)
 	assert.Equal(s.T(), 0, nextPageToken)
 	assert.Nil(s.T(), err)
 }
 
 func (s *TestProjectServiceSuite) TestProjectFetchLists_HavingNextPage_StatusOK() {
 	company := factories.CompanyFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.Company)
-	company.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(company)
 
 	project1 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
-	project1.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(project1)
 	project2 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
-	project2.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(project2)
 	project3 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
-	project3.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(project3)
 	project4 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
-	project4.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(project4)
 	project5 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
-	project5.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(project5)
 	project6 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
-	project6.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(project6)
 
-	companyProductIDs, _ := models.Projects(
-		qm.Select("projects.id"),
-		qm.Where("company_id = ?", company.ID),
-		qm.Where("id != ?", project6.ID),
-	).All(ctx, DBCon)
+	var companyProductIDs []int
+	DBCon.Model(&models.Project{}).Where("company_id = ?", company.ID) .Where("id != ?", project6.ID).Pluck("id", &companyProductIDs)
 
 	otherCompany := factories.CompanyFactory.MustCreateWithOption(map[string]interface{}{"Email": "test_other@example.com"}).(*models.Company)
-	otherCompany.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(otherCompany)
 	otherCompanyProduct := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": otherCompany.ID}).(*models.Project)
-	otherCompanyProduct.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(otherCompanyProduct)
 
-	fetchedProducts, nextPageToken, err := testProjectService.FetchLists(ctx, company.ID, 0)
+	fetchedProducts, nextPageToken, err := testProjectService.FetchLists(company.ID, 0)
 	var fetchedProductIDs []int
 	for _, fetchedProduct := range fetchedProducts {
 		fetchedProductIDs = append(fetchedProductIDs, fetchedProduct.ID)
 	}
-	assert.ElementsMatch(s.T(), companyProductIDs.GetIDs(), fetchedProductIDs)
+	assert.ElementsMatch(s.T(), companyProductIDs, fetchedProductIDs)
 	assert.Equal(s.T(), project6.ID, nextPageToken)
 	assert.Nil(s.T(), err)
 }
 
 func (s *TestProjectServiceSuite) TestProjectFetchLists_WithPageToken_NotHavingNextPage_StatusOK() {
 	company := factories.CompanyFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.Company)
-	company.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(company)
 
 	project1 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
-	project1.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(project1)
 	project2 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
-	project2.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(project2)
 	project3 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
-	project3.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(project3)
 	project4 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
-	project4.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(project4)
 	project5 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
-	project5.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(project5)
 	project6 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
-	project6.Insert(ctx, DBCon, boil.Infer())
-	companyProductIDs, _ := models.Projects(
-		qm.Select("projects.id"),
-		qm.Where("company_id = ?", company.ID),
-		qm.Where("id >= ?", project2.ID),
-	).All(ctx, DBCon)
+	DBCon.Create(project6)
+	var companyProductIDs []int
+	DBCon.Model(&models.Project{}).Where("company_id = ?", company.ID).Where("id >= ?", project2.ID).Pluck("id", &companyProductIDs)
 
 	otherCompany := factories.CompanyFactory.MustCreateWithOption(map[string]interface{}{"Email": "test_other@example.com"}).(*models.Company)
-	otherCompany.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(otherCompany)
 	otherCompanyProduct := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": otherCompany.ID}).(*models.Project)
-	otherCompanyProduct.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(otherCompanyProduct)
 
-	fetchedProducts, nextPageToken, err := testProjectService.FetchLists(ctx, company.ID, project2.ID)
+	fetchedProducts, nextPageToken, err := testProjectService.FetchLists(company.ID, project2.ID)
 	var fetchedProductIDs []int
 	for _, fetchedProduct := range fetchedProducts {
 		fetchedProductIDs = append(fetchedProductIDs, fetchedProduct.ID)
 	}
-	assert.ElementsMatch(s.T(), companyProductIDs.GetIDs(), fetchedProductIDs)
+	assert.ElementsMatch(s.T(), companyProductIDs, fetchedProductIDs)
 	assert.Equal(s.T(), 0, nextPageToken)
 	assert.Nil(s.T(), err)
 }
 
 func (s *TestProjectServiceSuite) TestProjectFetchLists_WithPageToken_HavingNextPage_StatusOK() {
 	company := factories.CompanyFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.Company)
-	company.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(company)
 
 	project1 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
-	project1.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(project1)
 	project2 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
-	project2.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(project2)
 	project3 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
-	project3.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(project3)
 	project4 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
-	project4.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(project4)
 	project5 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
-	project5.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(project5)
 	project6 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
-	project6.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(project6)
 	project7 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
-	project7.Insert(ctx, DBCon, boil.Infer())
-	companyProductIDs, _ := models.Projects(
-		qm.Select("projects.id"),
-		qm.Where("company_id = ?", company.ID),
-		qm.Where("id >= ?", project2.ID),
-		qm.Where("id < ?", project7.ID),
-	).All(ctx, DBCon)
+	DBCon.Create(project7)
+	var companyProductIDs []int
+	DBCon.Model(&models.Project{}).Where("company_id = ?", company.ID).Where("id >= ?", project2.ID).Where("id < ?", project7.ID).Pluck("id", &companyProductIDs)
 
 	otherCompany := factories.CompanyFactory.MustCreateWithOption(map[string]interface{}{"Email": "test_other@example.com"}).(*models.Company)
-	otherCompany.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(otherCompany)
 	otherCompanyProduct := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": otherCompany.ID}).(*models.Project)
-	otherCompanyProduct.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(otherCompanyProduct)
 
-	fetchedProducts, nextPageToken, err := testProjectService.FetchLists(ctx, company.ID, project2.ID)
+	fetchedProducts, nextPageToken, err := testProjectService.FetchLists(company.ID, project2.ID)
 	var fetchedProductIDs []int
 	for _, fetchedProduct := range fetchedProducts {
 		fetchedProductIDs = append(fetchedProductIDs, fetchedProduct.ID)
 	}
-	assert.ElementsMatch(s.T(), companyProductIDs.GetIDs(), fetchedProductIDs)
+	assert.ElementsMatch(s.T(), companyProductIDs, fetchedProductIDs)
 	assert.Equal(s.T(), project7.ID, nextPageToken)
 	assert.Nil(s.T(), err)
 }
@@ -185,7 +171,7 @@ func (s *TestProjectServiceSuite) TestProjectFetchLists_WithPageToken_HavingNext
 func (s *TestProjectServiceSuite) TestProjectCreate_WithOnlyRequired_StatusOK() {
 	// NOTE: テスト用企業の作成
 	company := factories.CompanyFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.Company)
-	company.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(company)
 
 	title := "test title"
 	description := "test description"
@@ -196,7 +182,7 @@ func (s *TestProjectServiceSuite) TestProjectCreate_WithOnlyRequired_StatusOK() 
 	isActive := true
 	requestParams := businessapi.ProjectStoreInput{Title: title, Description: description, StartDate: &startDate, EndDate: &endDate, IsActive: isActive}
 
-	createdProject, validatorErrors, err := testProjectService.Create(ctx, &requestParams, company.ID)
+	createdProject, validatorErrors, err := testProjectService.Create(&requestParams, company.ID)
 	mappedValidationErrors := testProjectService.MappingValidationErrorStruct(validatorErrors)
 	expectedValidationErrors := businessapi.ProjectValidationError{}
 	assert.Equal(s.T(), expectedValidationErrors, mappedValidationErrors)
@@ -216,7 +202,7 @@ func (s *TestProjectServiceSuite) TestProjectCreate_WithOnlyRequired_StatusOK() 
 func (s *TestProjectServiceSuite) TestProjectCreate_WithOptional_StatusOK() {
 	// NOTE: テスト用企業の作成
 	company := factories.CompanyFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.Company)
-	company.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(company)
 
 	title := "test title"
 	description := "test description"
@@ -229,7 +215,7 @@ func (s *TestProjectServiceSuite) TestProjectCreate_WithOptional_StatusOK() {
 	isActive := true
 	requestParams := businessapi.ProjectStoreInput{Title: title, Description: description, StartDate: &startDate, EndDate: &endDate, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: isActive}
 
-	createdProject, validatorErrors, err := testProjectService.Create(ctx, &requestParams, company.ID)
+	createdProject, validatorErrors, err := testProjectService.Create(&requestParams, company.ID)
 	mappedValidationErrors := testProjectService.MappingValidationErrorStruct(validatorErrors)
 	expectedValidationErrors := businessapi.ProjectValidationError{}
 	assert.Equal(s.T(), expectedValidationErrors, mappedValidationErrors)
@@ -249,7 +235,7 @@ func (s *TestProjectServiceSuite) TestProjectCreate_WithOptional_StatusOK() {
 func (s *TestProjectServiceSuite) TestProjectCreate_BadRequest_Required() {
 	// NOTE: テスト用企業の作成
 	company := factories.CompanyFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.Company)
-	company.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(company)
 
 	title := ""
 	description := ""
@@ -257,7 +243,7 @@ func (s *TestProjectServiceSuite) TestProjectCreate_BadRequest_Required() {
 	maxBudget := 20000
 	requestParams := businessapi.ProjectStoreInput{Title: title, Description: description, StartDate: nil, EndDate: nil, MinBudget: &minBudget, MaxBudget: &maxBudget}
 
-	createdProject, validatorErrors, err := testProjectService.Create(ctx, &requestParams, company.ID)
+	createdProject, validatorErrors, err := testProjectService.Create(&requestParams, company.ID)
 	mappedValidationErrors := testProjectService.MappingValidationErrorStruct(validatorErrors)
 
 	// NOTE: projectが作られていないこと
@@ -278,7 +264,7 @@ func (s *TestProjectServiceSuite) TestProjectCreate_BadRequest_Required() {
 func (s *TestProjectServiceSuite) TestProjectCreate_BadRequest_Greater() {
 	// NOTE: テスト用企業の作成
 	company := factories.CompanyFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.Company)
-	company.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(company)
 
 	title := "test title"
 	description := "test description"
@@ -291,7 +277,7 @@ func (s *TestProjectServiceSuite) TestProjectCreate_BadRequest_Greater() {
 	isActive := false
 	requestParams := businessapi.ProjectStoreInput{Title: title, Description: description, StartDate: &startDate, EndDate: &endDate, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: isActive}
 
-	createdProject, validatorErrors, err := testProjectService.Create(ctx, &requestParams, company.ID)
+	createdProject, validatorErrors, err := testProjectService.Create(&requestParams, company.ID)
 	mappedValidationErrors := testProjectService.MappingValidationErrorStruct(validatorErrors)
 
 	// NOTE: projectが作られていないこと
@@ -308,7 +294,7 @@ func (s *TestProjectServiceSuite) TestProjectCreate_BadRequest_Greater() {
 func (s *TestProjectServiceSuite) TestProjectCreate_BadRequest_Threshold() {
 	// NOTE: テスト用企業の作成
 	company := factories.CompanyFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.Company)
-	company.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(company)
 
 	title := randomdata.RandStringRunes(71)
 	description := "test description"
@@ -321,7 +307,7 @@ func (s *TestProjectServiceSuite) TestProjectCreate_BadRequest_Threshold() {
 	isActive := false
 	requestParams := businessapi.ProjectStoreInput{Title: title, Description: description, StartDate: &startDate, EndDate: &endDate, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: isActive}
 
-	createdProject, validatorErrors, err := testProjectService.Create(ctx, &requestParams, company.ID)
+	createdProject, validatorErrors, err := testProjectService.Create(&requestParams, company.ID)
 	mappedValidationErrors := testProjectService.MappingValidationErrorStruct(validatorErrors)
 
 	// NOTE: projectが作られていないこと
@@ -340,12 +326,12 @@ func (s *TestProjectServiceSuite) TestProjectCreate_BadRequest_Threshold() {
 func (s *TestProjectServiceSuite) TestProjectFetch_StatusOK() {
 	// NOTE: テスト用企業の作成
 	company := factories.CompanyFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.Company)
-	company.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(company)
 	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
-	project.Insert(ctx, DBCon, boil.Infer())
-	project.Reload(ctx, DBCon)
+	DBCon.Create(project)
+	DBCon.Model(project).Take(project)
 
-	fetchedProduct, err := testProjectService.Fetch(ctx, project.ID)
+	fetchedProduct, err := testProjectService.Fetch(project.ID)
 	
 	// NOTE: レスポンスのprojectの値の確認
 	assert.Equal(s.T(), project.ID, fetchedProduct.ID)
@@ -358,12 +344,12 @@ func (s *TestProjectServiceSuite) TestProjectFetch_StatusOK() {
 func (s *TestProjectServiceSuite) TestProjectFetch_NotFound() {
 	// NOTE: テスト用企業の作成
 	company := factories.CompanyFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.Company)
-	company.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(company)
 	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
-	project.Insert(ctx, DBCon, boil.Infer())
-	project.Reload(ctx, DBCon)
+	DBCon.Create(project)
+	DBCon.Model(project).Take(project)
 
-	fetchedProduct, err := testProjectService.Fetch(ctx, project.ID+1)
+	fetchedProduct, err := testProjectService.Fetch(project.ID+1)
 	
 	// NOTE: レスポンスのprojectの値の確認
 	assert.Equal(s.T(), 0, fetchedProduct.ID)
@@ -376,10 +362,10 @@ func (s *TestProjectServiceSuite) TestProjectFetch_NotFound() {
 func (s *TestProjectServiceSuite) TestProjectUpdate_WithOnlyRequired_StatusOK() {
 	// NOTE: テスト用企業の作成
 	company := factories.CompanyFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.Company)
-	company.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(company)
 	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID, "MinBudget": null.Int{Int: 0, Valid: false}, "MaxBudget": null.Int{Int: 0, Valid: false}}).(*models.Project)
-	project.Insert(ctx, DBCon, boil.Infer())
-	project.Reload(ctx, DBCon)
+	DBCon.Create(project)
+	DBCon.Model(project).Take(project)
 
 	title := "test title"
 	description := "test description"
@@ -390,7 +376,7 @@ func (s *TestProjectServiceSuite) TestProjectUpdate_WithOnlyRequired_StatusOK() 
 	isActive := true
 	requestParams := businessapi.ProjectStoreInput{Title: title, Description: description, StartDate: &startDate, EndDate: &endDate, IsActive: isActive}
 
-	updatedProject, validatorErrors, err := testProjectService.Update(ctx, &requestParams, project.ID)
+	updatedProject, validatorErrors, err := testProjectService.Update(&requestParams, project.ID)
 	mappedValidationErrors := testProjectService.MappingValidationErrorStruct(validatorErrors)
 	expectedValidationErrors := businessapi.ProjectValidationError{}
 	assert.Equal(s.T(), expectedValidationErrors, mappedValidationErrors)
@@ -409,7 +395,7 @@ func (s *TestProjectServiceSuite) TestProjectUpdate_WithOnlyRequired_StatusOK() 
 	assert.Nil(s.T(), err)
 
 	// NOTE: DBの値が更新されていること
-	project.Reload(ctx, DBCon)
+	DBCon.Model(project).Take(project)
 	assert.Equal(s.T(), company.ID, project.CompanyID)
 	assert.Equal(s.T(), "test title", project.Title)
 	assert.Equal(s.T(), "test description", project.Description)
@@ -423,10 +409,10 @@ func (s *TestProjectServiceSuite) TestProjectUpdate_WithOnlyRequired_StatusOK() 
 func (s *TestProjectServiceSuite) TestProjectUpdate_WithOptional_StatusOK() {
 	// NOTE: テスト用企業の作成
 	company := factories.CompanyFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.Company)
-	company.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(company)
 	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID, "MinBudget": null.Int{Int: 0, Valid: false}, "MaxBudget": null.Int{Int: 0, Valid: false}}).(*models.Project)
-	project.Insert(ctx, DBCon, boil.Infer())
-	project.Reload(ctx, DBCon)
+	DBCon.Create(project)
+	DBCon.Model(project).Take(project)
 
 	title := "test title"
 	description := "test description"
@@ -439,7 +425,7 @@ func (s *TestProjectServiceSuite) TestProjectUpdate_WithOptional_StatusOK() {
 	isActive := true
 	requestParams := businessapi.ProjectStoreInput{Title: title, Description: description, StartDate: &startDate, EndDate: &endDate, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: isActive}
 
-	updatedProject, validatorErrors, err := testProjectService.Update(ctx, &requestParams, project.ID)
+	updatedProject, validatorErrors, err := testProjectService.Update(&requestParams, project.ID)
 	mappedValidationErrors := testProjectService.MappingValidationErrorStruct(validatorErrors)
 	expectedValidationErrors := businessapi.ProjectValidationError{}
 	assert.Equal(s.T(), expectedValidationErrors, mappedValidationErrors)
@@ -458,7 +444,7 @@ func (s *TestProjectServiceSuite) TestProjectUpdate_WithOptional_StatusOK() {
 	assert.Nil(s.T(), err)
 
 	// NOTE: DBの値が更新されていること
-	project.Reload(ctx, DBCon)
+	DBCon.Model(project).Take(project)
 	assert.Equal(s.T(), company.ID, project.CompanyID)
 	assert.Equal(s.T(), "test title", project.Title)
 	assert.Equal(s.T(), "test description", project.Description)
@@ -472,10 +458,9 @@ func (s *TestProjectServiceSuite) TestProjectUpdate_WithOptional_StatusOK() {
 func (s *TestProjectServiceSuite) TestProjectUpdate_BadRequest_Required() {
 	// NOTE: テスト用企業の作成
 	company := factories.CompanyFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.Company)
-	company.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(company)
 	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
-	project.Insert(ctx, DBCon, boil.Infer())
-	project.Reload(ctx, DBCon)
+	DBCon.Create(project)
 
 	title := ""
 	description := ""
@@ -483,14 +468,14 @@ func (s *TestProjectServiceSuite) TestProjectUpdate_BadRequest_Required() {
 	maxBudget := 20000
 	requestParams := businessapi.ProjectStoreInput{Title: title, Description: description, StartDate: nil, EndDate: nil, MinBudget: &minBudget, MaxBudget: &maxBudget}
 
-	updatedProject, validatorErrors, err := testProjectService.Update(ctx, &requestParams, project.ID)
+	updatedProject, validatorErrors, err := testProjectService.Update(&requestParams, project.ID)
 	mappedValidationErrors := testProjectService.MappingValidationErrorStruct(validatorErrors)
 
 	// NOTE: レスポンスのprojectの値の確認
 	assert.Equal(s.T(), models.Project{}, updatedProject)
 	
 	// NOTE: DBのprojectが更新されていないこと
-	project.Reload(ctx, DBCon)
+	DBCon.Model(project).Take(project)
 	assert.NotEqual(s.T(), "", project.Title)
 
 	titleErrorMessages := []string{"案件タイトルは必須入力です。"}
@@ -508,10 +493,10 @@ func (s *TestProjectServiceSuite) TestProjectUpdate_BadRequest_Required() {
 func (s *TestProjectServiceSuite) TestProjectUpdate_BadRequest_Greater() {
 	// NOTE: テスト用企業の作成
 	company := factories.CompanyFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.Company)
-	company.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(company)
 	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
-	project.Insert(ctx, DBCon, boil.Infer())
-	project.Reload(ctx, DBCon)
+	DBCon.Create(project)
+	DBCon.Model(project).Take(project)
 
 	title := randomdata.RandStringRunes(70)
 	description := "test description"
@@ -524,14 +509,14 @@ func (s *TestProjectServiceSuite) TestProjectUpdate_BadRequest_Greater() {
 	isActive := false
 	requestParams := businessapi.ProjectStoreInput{Title: title, Description: description, StartDate: &startDate, EndDate: &endDate, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: isActive}
 
-	updatedProject, validatorErrors, err := testProjectService.Create(ctx, &requestParams, company.ID)
+	updatedProject, validatorErrors, err := testProjectService.Create(&requestParams, company.ID)
 	mappedValidationErrors := testProjectService.MappingValidationErrorStruct(validatorErrors)
 
 	// NOTE: レスポンスのprojectの値の確認
 	assert.Equal(s.T(), models.Project{}, updatedProject)
 	
 	// NOTE: DBのprojectが更新されていないこと
-	project.Reload(ctx, DBCon)
+	DBCon.Model(project).Take(project)
 	assert.NotEqual(s.T(), title, project.Title)
 
 	endDateErrorMessages := []string{"案件終了日と案件開始日の前後関係が不適です。"}
@@ -545,10 +530,10 @@ func (s *TestProjectServiceSuite) TestProjectUpdate_BadRequest_Greater() {
 func (s *TestProjectServiceSuite) TestProjectUpdate_BadRequest_Threshold() {
 	// NOTE: テスト用企業の作成
 	company := factories.CompanyFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.Company)
-	company.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(company)
 	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
-	project.Insert(ctx, DBCon, boil.Infer())
-	project.Reload(ctx, DBCon)
+	DBCon.Create(project)
+	DBCon.Model(project).Take(project)
 
 	title := randomdata.RandStringRunes(71)
 	description := "test description"
@@ -561,14 +546,14 @@ func (s *TestProjectServiceSuite) TestProjectUpdate_BadRequest_Threshold() {
 	isActive := false
 	requestParams := businessapi.ProjectStoreInput{Title: title, Description: description, StartDate: &startDate, EndDate: &endDate, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: isActive}
 
-	updatedProject, validatorErrors, err := testProjectService.Create(ctx, &requestParams, company.ID)
+	updatedProject, validatorErrors, err := testProjectService.Create(&requestParams, company.ID)
 
 	mappedValidationErrors := testProjectService.MappingValidationErrorStruct(validatorErrors)
 	// NOTE: レスポンスのprojectの値の確認
 	assert.Equal(s.T(), models.Project{}, updatedProject)
 	
 	// NOTE: DBのprojectが更新されていないこと
-	project.Reload(ctx, DBCon)
+	DBCon.Model(project).Take(project)
 	assert.NotEqual(s.T(), title, project.Title)
 
 	titleErrorMessages := []string{"案件タイトルは1 ~ 70文字での入力をお願いします。"}
@@ -584,10 +569,9 @@ func (s *TestProjectServiceSuite) TestProjectUpdate_BadRequest_Threshold() {
 func (s *TestProjectServiceSuite) TestProjectUpdate_StatusNotFound() {
 	// NOTE: テスト用企業の作成
 	company := factories.CompanyFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.Company)
-	company.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(company)
 	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
-	project.Insert(ctx, DBCon, boil.Infer())
-	project.Reload(ctx, DBCon)
+	DBCon.Create(project)
 
 	title := "test title"
 	description := "test description"
@@ -600,7 +584,7 @@ func (s *TestProjectServiceSuite) TestProjectUpdate_StatusNotFound() {
 	isActive := true
 	requestParams := businessapi.ProjectStoreInput{Title: title, Description: description, StartDate: &startDate, EndDate: &endDate, MinBudget: &minBudget, MaxBudget: &maxBudget, IsActive: isActive}
 
-	updatedProject, validatorErrors, err := testProjectService.Update(ctx, &requestParams, project.ID+1)
+	updatedProject, validatorErrors, err := testProjectService.Update(&requestParams, project.ID+1)
 
 	// NOTE: レスポンスのprojectの値の確認
 	assert.Equal(s.T(), models.Project{}, updatedProject)

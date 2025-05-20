@@ -2,7 +2,7 @@ package businessservices
 
 import (
 	businessapi "apps/api/business"
-	models "apps/models/generated"
+	models "apps/models"
 	"apps/test/factories"
 	"testing"
 	"time"
@@ -12,7 +12,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"github.com/volatiletech/null/v8"
-	"github.com/volatiletech/sqlboiler/v4/boil"
 )
 
 type TestPlanServiceSuite struct {
@@ -34,11 +33,11 @@ func (s *TestPlanServiceSuite) TearDownTest() {
 func (s *TestPlanServiceSuite) TestPlanCreate_StatusOK() {
 	// NOTE: テスト用Project, Supporterの作成
 	company := factories.CompanyFactory.MustCreate().(*models.Company)
-	company.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(company)
 	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
-	project.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(project)
 	supporter := factories.SupporterFactory.MustCreate().(*models.Supporter)
-	supporter.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(supporter)
 
 	title := randomdata.RandStringRunes(70)
 	description := "test description"
@@ -49,7 +48,7 @@ func (s *TestPlanServiceSuite) TestPlanCreate_StatusOK() {
 	unitPrice := 10000
 	requestParams := businessapi.PlanStoreInput{ProjectId: project.ID, Title: title, Description: description, StartDate: startDate, EndDate: endDate, UnitPrice: unitPrice}
 
-	createdPlan, validatorErrors, err := testPlanService.Create(ctx, &requestParams, supporter.ID)
+	createdPlan, validatorErrors, err := testPlanService.Create(&requestParams, supporter.ID)
 	mappedValidationErrors := testPlanService.MappingValidationErrorStruct(validatorErrors)
 	expectedValidationErrors := businessapi.PlanValidationError{}
 	assert.Equal(s.T(), expectedValidationErrors, mappedValidationErrors)
@@ -69,17 +68,17 @@ func (s *TestPlanServiceSuite) TestPlanCreate_StatusOK() {
 func (s *TestPlanServiceSuite) TestPlanCreate_BadRequest_Required() {
 	// NOTE: テスト用Project, Supporterの作成
 	company := factories.CompanyFactory.MustCreate().(*models.Company)
-	company.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(company)
 	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
-	project.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(project)
 	supporter := factories.SupporterFactory.MustCreate().(*models.Supporter)
-	supporter.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(supporter)
 
 	title := ""
 	description := ""
 	requestParams := businessapi.PlanStoreInput{ProjectId: project.ID, Title: title, Description: description}
 
-	createdPlan, validatorErrors, err := testPlanService.Create(ctx, &requestParams, supporter.ID)
+	createdPlan, validatorErrors, err := testPlanService.Create(&requestParams, supporter.ID)
 	mappedValidationErrors := testPlanService.MappingValidationErrorStruct(validatorErrors)
 
 	// NOTE: planが作られていないこと
@@ -102,11 +101,11 @@ func (s *TestPlanServiceSuite) TestPlanCreate_BadRequest_Required() {
 func (s *TestPlanServiceSuite) TestPlanCreate_BadRequest_Greater() {
 	// NOTE: テスト用Project, Supporterの作成
 	company := factories.CompanyFactory.MustCreate().(*models.Company)
-	company.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(company)
 	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
-	project.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(project)
 	supporter := factories.SupporterFactory.MustCreate().(*models.Supporter)
-	supporter.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(supporter)
 
 	title := randomdata.RandStringRunes(70)
 	description := "test description"
@@ -117,7 +116,7 @@ func (s *TestPlanServiceSuite) TestPlanCreate_BadRequest_Greater() {
 	unitPrice := 10000
 	requestParams := businessapi.PlanStoreInput{ProjectId: project.ID, Title: title, Description: description, StartDate: startDate, EndDate: endDate, UnitPrice: unitPrice}
 
-	createdPlan, validatorErrors, err := testPlanService.Create(ctx, &requestParams, supporter.ID)
+	createdPlan, validatorErrors, err := testPlanService.Create(&requestParams, supporter.ID)
 	mappedValidationErrors := testPlanService.MappingValidationErrorStruct(validatorErrors)
 
 	// NOTE: planが作られていないこと
@@ -132,11 +131,11 @@ func (s *TestPlanServiceSuite) TestPlanCreate_BadRequest_Greater() {
 func (s *TestPlanServiceSuite) TestPlanCreate_BadRequest_Threshold() {
 	// NOTE: テスト用Project, Supporterの作成
 	company := factories.CompanyFactory.MustCreate().(*models.Company)
-	company.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(company)
 	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
-	project.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(project)
 	supporter := factories.SupporterFactory.MustCreate().(*models.Supporter)
-	supporter.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(supporter)
 
 	title := randomdata.RandStringRunes(71)
 	description := "test description"
@@ -147,7 +146,7 @@ func (s *TestPlanServiceSuite) TestPlanCreate_BadRequest_Threshold() {
 	unitPrice := 10000
 	requestParams := businessapi.PlanStoreInput{ProjectId: project.ID, Title: title, Description: description, StartDate: startDate, EndDate: endDate, UnitPrice: unitPrice}
 
-	createdPlan, validatorErrors, err := testPlanService.Create(ctx, &requestParams, supporter.ID)
+	createdPlan, validatorErrors, err := testPlanService.Create(&requestParams, supporter.ID)
 	mappedValidationErrors := testPlanService.MappingValidationErrorStruct(validatorErrors)
 
 	// NOTE: planが作られていないこと
