@@ -1,21 +1,18 @@
 package factories
 
 import (
-	models "apps/models/generated"
-	"database/sql"
+	models "apps/models"
 	"time"
 
 	"github.com/Pallinder/go-randomdata"
 	"github.com/bluele/factory-go/factory"
 	"github.com/volatiletech/null/v8"
-	"github.com/volatiletech/sqlboiler/v4/boil"
 )
 
 var ProjectFactory = factory.NewFactory(
 	&models.Project{},
 ).Attr("CompanyID", func(args factory.Args) (interface{}, error) {
 	company := CompanyFactory.MustCreate().(*models.Company)
-	company.Insert(args.Context(), args.Instance().(*sql.DB), boil.Infer())
 	return company.ID, nil
 }).Attr("Title", func(args factory.Args) (interface{}, error) {
 	return randomdata.RandStringRunes(15), nil
