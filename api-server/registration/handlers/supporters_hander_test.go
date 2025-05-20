@@ -2,7 +2,7 @@ package registrationhandlers
 
 import (
 	registrationapi "apps/api/registration"
-	models "apps/models/generated"
+	models "apps/models"
 	"bytes"
 	"encoding/json"
 	"mime/multipart"
@@ -14,7 +14,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"github.com/volatiletech/null/v8"
-	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 
 	"github.com/oapi-codegen/testutil"
 )
@@ -207,12 +206,10 @@ func (s *TestSupportersHandlerSuite) TestPostAuthSignUp_SuccessRequiredFields() 
 	assert.Equal(s.T(), "{}", string(jsonErrors))
 
 	// NOTE: Supporterが作成されていることを確認
-	supporter, err := models.Supporters(
-		qm.Where("email = ?", "test@example.com"),
-	).One(ctx, DBCon)
-	if err != nil {
-		s.T().Fatalf("failed to create supporter %v", err)
-	}
+	var supporter models.Supporter
+	DBCon.Where("email = ?", "test@example.com").Take(&supporter)
+	assert.Equal(s.T(), "first_name", supporter.FirstName)
+	assert.Equal(s.T(), "last_name", supporter.LastName)
 	// NOTE: Birthdayはnullとなっている
 	assert.Equal(s.T(), null.Time{}, supporter.Birthday)
 	assert.Equal(s.T(), "", supporter.FrontIdentification)
@@ -261,12 +258,10 @@ func (s *TestSupportersHandlerSuite) TestPostAuthSignUp_SuccessWithOptionalField
 	assert.Equal(s.T(), "{}", string(jsonErrors))
 
 	// NOTE: Supporterが作成されていることを確認
-	supporter, err := models.Supporters(
-		qm.Where("email = ?", "test@example.com"),
-	).One(ctx, DBCon)
-	if err != nil {
-		s.T().Fatalf("failed to create supporter %v", err)
-	}
+	var supporter models.Supporter
+	DBCon.Where("email = ?", "test@example.com").Take(&supporter)
+	assert.Equal(s.T(), "first_name", supporter.FirstName)
+	assert.Equal(s.T(), "last_name", supporter.LastName)
 	id := strconv.Itoa(supporter.ID)
 	assert.Equal(s.T(), "1992-07-07", supporter.Birthday.Time.Format("2006-01-02"))
 	assert.Equal(s.T(), "supporters/"+id+"/frontIdentificationFile.png", supporter.FrontIdentification)
@@ -315,12 +310,10 @@ func (s *TestSupportersHandlerSuite) TestPostAuthSignUp_SuccessWithEmptyBirthday
 	assert.Equal(s.T(), "{}", string(jsonErrors))
 
 	// NOTE: Supporterが作成されていることを確認
-	supporter, err := models.Supporters(
-		qm.Where("email = ?", "test@example.com"),
-	).One(ctx, DBCon)
-	if err != nil {
-		s.T().Fatalf("failed to create supporter %v", err)
-	}
+	var supporter models.Supporter
+	DBCon.Where("email = ?", "test@example.com").Take(&supporter)
+	assert.Equal(s.T(), "first_name", supporter.FirstName)
+	assert.Equal(s.T(), "last_name", supporter.LastName)
 	id := strconv.Itoa(supporter.ID)
 	// NOTE: Birthdayはnullとなっている
 	assert.Equal(s.T(), null.Time{}, supporter.Birthday)

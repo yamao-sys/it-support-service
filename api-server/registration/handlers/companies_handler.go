@@ -35,7 +35,7 @@ func (ch *companiesHandler) PostCompanyValidateSignUp(ctx context.Context, reque
 		return registrationapi.PostCompanyValidateSignUp500JSONResponse{Code: http.StatusInternalServerError, Message: mappingErr.Error()}, nil
 	}
 
-	err := ch.companiesService.ValidateSignUp(ctx, &inputStruct)
+	err := ch.companiesService.ValidateSignUp(&inputStruct)
 	validationError := ch.mappingValidationErrorStruct(err)
 
 	res := &registrationapi.CompanySignUpResponse{
@@ -53,7 +53,7 @@ func (ch *companiesHandler) PostCompanySignUp(ctx context.Context, request regis
 		return registrationapi.PostCompanySignUp500JSONResponse{Code: http.StatusInternalServerError, Message: mappingErr.Error()}, nil
 	}
 
-	err := ch.companiesService.ValidateSignUp(ctx, &inputStruct)
+	err := ch.companiesService.ValidateSignUp(&inputStruct)
 	if err != nil {
 		validationError := ch.mappingValidationErrorStruct(err)
 	
