@@ -8,13 +8,15 @@ import (
 	"github.com/DATA-DOG/go-txdb"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/stretchr/testify/suite"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 )
 
 type WithDBSuite struct {
 	suite.Suite
 }
 
-var DBCon *sql.DB
+var DBCon *gorm.DB
 var ctx context.Context
 
 // func (s *WithDBSuite) SetupSuite()                           {} // テストスイート実施前の処理
@@ -25,18 +27,27 @@ var ctx context.Context
 // func (s *WithDBSuite) AfterTest(suiteName, testName string)  {} // テストケース終了後の処理
 
 func init() {
-	txdb.Register("txdb-service", "mysql", database.GetDsn())
+	txdb.Register("txdb-registration-service", "mysql", database.GetDsn())
 	ctx = context.Background()
 }
 
 func (s *WithDBSuite) SetDBCon() {
-	db, err := sql.Open("txdb-service", "connect")
+	db, err := sql.Open("txdb-registration-service", "connect")
 	if err != nil {
 		s.T().Fatalf("failed to initialize DB: %v", err)
 	}
-	DBCon = db
+	gormDB, err := gorm.Open(
+		mysql.New(mysql.Config{
+			Conn: db,
+		}),
+		&gorm.Config{},
+	)
+	if err != nil {
+		s.T().Fatalf("failed to open gorm DB: %v", err)
+	}
+	DBCon = gormDB
 }
 
 func (s *WithDBSuite) CloseDB() {
-	DBCon.Close()
+	database.Close(DBCon)
 }

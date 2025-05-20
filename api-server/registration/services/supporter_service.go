@@ -2,35 +2,34 @@ package registrationservices
 
 import (
 	registrationapi "apps/api/registration"
-	models "apps/models/generated"
+	models "apps/models"
 	registrationvalidator "apps/registration/validators"
 	"context"
-	"database/sql"
 	"io"
 	"os"
 	"strconv"
 
 	"github.com/volatiletech/null/v8"
-	"github.com/volatiletech/sqlboiler/v4/boil"
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 
 	"cloud.google.com/go/storage"
 )
 
 type SupporterService interface {
-	ValidateSignUp(ctx context.Context, request *registrationapi.PostSupporterValidateSignUpMultipartRequestBody) error
+	ValidateSignUp(request *registrationapi.PostSupporterValidateSignUpMultipartRequestBody) error
 	SignUp(ctx context.Context, requestParams registrationapi.PostSupporterSignUpMultipartRequestBody) error
 }
 
 type supporterService struct {
-	db *sql.DB
+	db *gorm.DB
 }
 
-func NewSupporterService(db *sql.DB) SupporterService {
+func NewSupporterService(db *gorm.DB) SupporterService {
 	return &supporterService{db}
 }
 
-func (ss *supporterService) ValidateSignUp(ctx context.Context, request *registrationapi.PostSupporterValidateSignUpMultipartRequestBody) error {
+func (ss *supporterService) ValidateSignUp(request *registrationapi.PostSupporterValidateSignUpMultipartRequestBody) error {
 	return registrationvalidator.ValidateSignUpSupporter(request)
 }
 
@@ -51,10 +50,7 @@ func (ss *supporterService) SignUp(ctx context.Context, requestParams registrati
 		return err
 	}
 	supporter.Password = hashedPassword
-	createErr := supporter.Insert(ctx, ss.db, boil.Infer())
-	if createErr != nil {
-		return createErr
-	}
+	ss.db.Create(&supporter)
 
 	client, err := storage.NewClient(ctx)
 	if err != nil {
@@ -66,7 +62,6 @@ func (ss *supporterService) SignUp(ctx context.Context, requestParams registrati
 		return nil
 	}
 
-	supporter.Reload(ctx, ss.db)
 	supporterID := strconv.Itoa(supporter.ID)
 
 	bucket := client.Bucket(os.Getenv("STORAGE_BUCKET_NAME"))
@@ -89,8 +84,7 @@ func (ss *supporterService) SignUp(ctx context.Context, requestParams registrati
 		}
 		supporter.BackIdentification = backIdentificationPath
 	}
-	_, updateIdenfiticationErr := supporter.Update(ctx, ss.db, boil.Infer())
-	return updateIdenfiticationErr
+	return ss.db.Save(&supporter).Error
 }
 
 // NOTE: パスワードの文字列をハッシュ化する
