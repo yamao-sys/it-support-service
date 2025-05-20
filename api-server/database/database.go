@@ -1,25 +1,30 @@
 package database
 
 import (
-	"crypto/tls"
-	"database/sql"
-	"log"
 	"os"
 
-	"github.com/go-sql-driver/mysql"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 )
 
-func Init() *sql.DB {
+var (
+	DB  *gorm.DB
+	err error
+)
+
+
+func Init() *gorm.DB {
 	// DBインスタンス生成
-	db, err := sql.Open("mysql", GetDsn())
+	DB, err = gorm.Open(mysql.Open(GetDsn()), &gorm.Config{})
 	if err != nil {
 		panic(err)
 	}
-	return db
+	return DB
 }
 
-func Close(db *sql.DB) {
-	if err := db.Close(); err != nil {
+func Close(db *gorm.DB) {
+	sqlDB, _ := db.DB()
+	if err := sqlDB.Close(); err != nil {
 		panic(err)
 	}
 }
@@ -34,13 +39,7 @@ func GetDsn() string {
 	if os.Getenv("APP_ENV") != "production" {
 		return baseDsn
 	}
-	
-	err := mysql.RegisterTLSConfig("tidb", &tls.Config{
-		MinVersion: tls.VersionTLS12,
-		ServerName: os.Getenv("MYSQL_HOST"),
-	})
-	if err != nil {
-		log.Fatalf("failed to register TLS config: %v", err)
-	}
-	return baseDsn+"&tls=tidb"
+
+	// NOTE: 本番環境ではTiDBに接続するためにTLSを有効にする
+	return baseDsn+"&tls=true"
 }
