@@ -14,8 +14,6 @@ COPY business /app/business
 COPY test /app/test
 
 RUN go mod tidy && \
-	go install github.com/volatiletech/sqlboiler/v4@latest && \
-	go install github.com/volatiletech/sqlboiler/v4/drivers/sqlboiler-mysql@latest && \
 	go install github.com/joho/godotenv/cmd/godotenv@latest
 
 # NOTE: ビルド
