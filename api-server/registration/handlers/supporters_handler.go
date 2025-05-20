@@ -36,7 +36,7 @@ func (sh *supportersHandler) PostSupporterValidateSignUp(ctx context.Context, re
 		return registrationapi.PostSupporterValidateSignUp500JSONResponse{Code: http.StatusInternalServerError, Message: mappingErr.Error()}, nil
 	}
 
-	err := sh.supporterService.ValidateSignUp(ctx, &inputStruct)
+	err := sh.supporterService.ValidateSignUp(&inputStruct)
 	validationError := sh.mappingValidationErrorStruct(err)
 	return registrationapi.PostSupporterValidateSignUp200JSONResponse(registrationapi.SupporterSignUpResponse{Code: http.StatusOK, Errors: validationError}), nil
 }
@@ -49,7 +49,7 @@ func (sh *supportersHandler) PostSupporterSignUp(ctx context.Context, request re
 		return registrationapi.PostSupporterSignUp500JSONResponse{Code: http.StatusInternalServerError, Message: mappingErr.Error()}, nil
 	}
 
-	err := sh.supporterService.ValidateSignUp(ctx, &inputStruct)
+	err := sh.supporterService.ValidateSignUp(&inputStruct)
 	if err != nil {
 		validationError := sh.mappingValidationErrorStruct(err)
 	

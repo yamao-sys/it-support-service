@@ -3,22 +3,20 @@ package businessservices
 import (
 	businessapi "apps/api/business"
 	businessvalidators "apps/business/validators"
-	models "apps/models/generated"
-	"context"
-	"database/sql"
+	models "apps/models"
 
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/volatiletech/null/v8"
-	"github.com/volatiletech/sqlboiler/v4/boil"
+	"gorm.io/gorm"
 )
 
 type PlanService interface {
-	Create(ctx context.Context, requestParams *businessapi.PlanStoreInput, supporterID int) (plan models.Plan, validatorErrors error, error error)
+	Create(requestParams *businessapi.PlanStoreInput, supporterID int) (plan models.Plan, validatorErrors error, error error)
 	MappingValidationErrorStruct(err error) businessapi.PlanValidationError
 }
 
 type planService struct {
-	db *sql.DB
+	db *gorm.DB
 }
 
 type StatusNum int
@@ -31,11 +29,11 @@ const (
 	Rewarded
 )
 
-func NewPlanService(db *sql.DB) PlanService {
+func NewPlanService(db *gorm.DB) PlanService {
 	return &planService{db}
 }
 
-func (ps *planService) Create(ctx context.Context, requestParams *businessapi.PlanStoreInput, supporterID int) (plan models.Plan, validatorErrors error, error error) {
+func (ps *planService) Create(requestParams *businessapi.PlanStoreInput, supporterID int) (plan models.Plan, validatorErrors error, error error) {
 	// NOTE: バリデーションチェック
 	validatorErrors = businessvalidators.ValidatePlan(requestParams)
 	if validatorErrors != nil {
@@ -51,11 +49,7 @@ func (ps *planService) Create(ctx context.Context, requestParams *businessapi.Pl
 	plan.EndDate = requestParams.EndDate.Time
 	plan.UnitPrice = null.Int{Int: requestParams.UnitPrice, Valid: true}
 
-	createErr := plan.Insert(ctx, ps.db, boil.Infer())
-	if createErr != nil {
-		return models.Plan{}, nil, createErr
-	}
-
+	ps.db.Create(&plan)
 	return plan, nil, nil
 }
 

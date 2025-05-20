@@ -33,7 +33,7 @@ func (ph *projectsHandler) GetProjects(ctx context.Context, request businessapi.
 		pageToken, _ = strconv.Atoi(*request.Params.PageToken)
 	}
 
-	projects, nextPageToken, err := ph.projectService.FetchLists(ctx, companyID, pageToken)
+	projects, nextPageToken, err := ph.projectService.FetchLists(companyID, pageToken)
 	if err != nil {
 		return businessapi.GetProjects500JSONResponse{Code: http.StatusInternalServerError}, err
 	}
@@ -82,7 +82,7 @@ func (ph *projectsHandler) PostProject(ctx context.Context, request businessapi.
 		IsActive: request.Body.IsActive,
 	}
 
-	createdProject, validationErrors, err := ph.projectService.Create(ctx, &inputs, companyID)
+	createdProject, validationErrors, err := ph.projectService.Create(&inputs, companyID)
 	if err != nil {
 		return businessapi.PostProject500JSONResponse{Code: http.StatusInternalServerError}, err
 	}
@@ -106,7 +106,7 @@ func (ph *projectsHandler) PostProject(ctx context.Context, request businessapi.
 
 func (ph *projectsHandler) GetProject(ctx context.Context, request businessapi.GetProjectRequestObject) (businessapi.GetProjectResponseObject, error) {
 	projectID := request.Id
-	project, err := ph.projectService.Fetch(ctx, projectID)
+	project, err := ph.projectService.Fetch(projectID)
 	if err != nil {
 		return businessapi.GetProject404JSONResponse{Code: http.StatusNotFound}, nil
 	}
@@ -146,7 +146,7 @@ func (ph *projectsHandler) PutProject(ctx context.Context, request businessapi.P
 		IsActive: request.Body.IsActive,
 	}
 
-	updatedProject, validationErrors, err := ph.projectService.Update(ctx, &inputs, projectID)
+	updatedProject, validationErrors, err := ph.projectService.Update(&inputs, projectID)
 	if err != nil {
 		return businessapi.PutProject500JSONResponse{Code: http.StatusInternalServerError}, err
 	}

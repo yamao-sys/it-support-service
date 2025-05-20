@@ -2,7 +2,7 @@ package registrationservices
 
 import (
 	registrationapi "apps/api/registration"
-	models "apps/models/generated"
+	models "apps/models"
 	"bytes"
 	"strconv"
 	"testing"
@@ -12,7 +12,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"github.com/volatiletech/null/v8"
-	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
@@ -41,7 +40,7 @@ func (s *TestSupporterServiceSuite) TestValidateSignUp_SuccessRequiredFields() {
 		Password: "Password",
 	}
 
-	result := testSupporterService.ValidateSignUp(ctx, &requestParams)
+	result := testSupporterService.ValidateSignUp(&requestParams)
 
 	assert.Nil(s.T(), result)
 }
@@ -54,7 +53,7 @@ func (s *TestSupporterServiceSuite) TestValidateSignUp_ValidationErrorRequiredFi
 		Password: "",
 	}
 
-	result := testSupporterService.ValidateSignUp(ctx, &requestParams)
+	result := testSupporterService.ValidateSignUp(&requestParams)
 
 	assert.NotNil(s.T(), result)
 	if errors, ok := result.(validation.Errors); ok {
@@ -95,7 +94,7 @@ func (s *TestSupporterServiceSuite) TestValidateSignUp_SuccessWithOptionalFields
 		BackIdentification: &backIdentificationFile,
 	}
 
-	result := testSupporterService.ValidateSignUp(ctx, &requestParams)
+	result := testSupporterService.ValidateSignUp(&requestParams)
 
 	assert.Nil(s.T(), result)
 }
@@ -120,7 +119,7 @@ func (s *TestSupporterServiceSuite) TestValidateSignUp_ValidationErrorWithOption
 		BackIdentification: &identificationFile,
 	}
 
-	result := testSupporterService.ValidateSignUp(ctx, &requestParams)
+	result := testSupporterService.ValidateSignUp(&requestParams)
 
 	assert.NotNil(s.T(), result)
 	if errors, ok := result.(validation.Errors); ok {
@@ -148,17 +147,13 @@ func (s *TestSupporterServiceSuite) TestSignUp_SuccessRequiredFields() {
 
 	assert.Nil(s.T(), result)
 
-	// NOTE: ユーザが作成されていることを確認
-	user, err := models.Supporters(
-		qm.Where("email = ?", "test@example.com"),
-	).One(ctx, DBCon)
-	if err != nil {
-		s.T().Fatalf("failed to create user %v", err)
-	}
+	// NOTE: サポータが作成されていることを確認
+	var supporter models.Supporter
+	DBCon.Where("email = ?", "test@example.com").Take(&supporter)
 	// NOTE: Birthdayはnullとなっている
-	assert.Equal(s.T(), null.Time{}, user.Birthday)
-	assert.Equal(s.T(), "", user.FrontIdentification)
-	assert.Equal(s.T(), "", user.BackIdentification)
+	assert.Equal(s.T(), null.Time{}, supporter.Birthday)
+	assert.Equal(s.T(), "", supporter.FrontIdentification)
+	assert.Equal(s.T(), "", supporter.BackIdentification)
 }
 
 func (s *TestSupporterServiceSuite) TestSignUp_SuccessWithOptionalFields() {
@@ -188,17 +183,13 @@ func (s *TestSupporterServiceSuite) TestSignUp_SuccessWithOptionalFields() {
 
 	assert.Nil(s.T(), result)
 
-	// NOTE: が作成されていることを確認
-	user, err := models.Supporters(
-		qm.Where("email = ?", "test@example.com"),
-	).One(ctx, DBCon)
-	if err != nil {
-		s.T().Fatalf("failed to create user %v", err)
-	}
-	id := strconv.Itoa(user.ID)
-	assert.Equal(s.T(), "1992-07-07", user.Birthday.Time.Format("2006-01-02"))
-	assert.Equal(s.T(), "supporters/"+id+"/frontIdentificationFile.png", user.FrontIdentification)
-	assert.Equal(s.T(), "supporters/"+id+"/backIdentificationFile.jpg", user.BackIdentification)
+	// NOTE: サポータが作成されていることを確認
+	var supporter models.Supporter
+	DBCon.Where("email = ?", "test@example.com").Take(&supporter)
+	id := strconv.Itoa(supporter.ID)
+	assert.Equal(s.T(), "1992-07-07", supporter.Birthday.Time.Format("2006-01-02"))
+	assert.Equal(s.T(), "supporters/"+id+"/frontIdentificationFile.png", supporter.FrontIdentification)
+	assert.Equal(s.T(), "supporters/"+id+"/backIdentificationFile.jpg", supporter.BackIdentification)
 }
 
 func TestSupporterService(t *testing.T) {

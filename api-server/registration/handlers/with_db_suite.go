@@ -5,13 +5,14 @@ import (
 	"apps/database"
 	registrationmiddlewares "apps/registration/middlewares"
 	registrationservices "apps/registration/services"
-	"context"
 	"database/sql"
 
 	"github.com/DATA-DOG/go-txdb"
 	"github.com/labstack/echo/v4"
 	"github.com/oapi-codegen/testutil"
 	"github.com/stretchr/testify/suite"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 )
 
 type WithDBSuite struct {
@@ -19,9 +20,7 @@ type WithDBSuite struct {
 }
 
 var (
-	DBCon *sql.DB
-	ctx   context.Context
-	// token string
+	DBCon *gorm.DB
 	e *echo.Echo
 	csrfToken string
 	csrfTokenCookie string
@@ -35,22 +34,29 @@ var (
 // func (s *WithDBSuite) AfterTest(suiteName, testName string)  {} // テストケース終了後の処理
 
 func init() {
-	txdb.Register("txdb-controller", "mysql", database.GetDsn())
-	ctx = context.Background()
-
+	txdb.Register("txdb-registration-handler", "mysql", database.GetDsn())
 	e = registrationmiddlewares.ApplyMiddlewares(echo.New())
 }
 
 func (s *WithDBSuite) SetDBCon() {
-	db, err := sql.Open("txdb-controller", "connect")
+	db, err := sql.Open("txdb-registration-handler", "connect")
 	if err != nil {
 		s.T().Fatalf("failed to initialize DB: %v", err)
 	}
-	DBCon = db
+	gormDB, err := gorm.Open(
+		mysql.New(mysql.Config{
+			Conn: db,
+		}),
+		&gorm.Config{},
+	)
+	if err != nil {
+		s.T().Fatalf("failed to open gorm DB: %v", err)
+	}
+	DBCon = gormDB
 }
 
 func (s *WithDBSuite) CloseDB() {
-	DBCon.Close()
+	database.Close(DBCon)
 }
 
 func (s *WithDBSuite) SetCsrfHeaderValues() {

@@ -3,7 +3,7 @@ package businesshandlers
 import (
 	businessapi "apps/api/business"
 	businessservices "apps/business/services"
-	models "apps/models/generated"
+	models "apps/models"
 	"apps/test/factories"
 	"net/http"
 	"testing"
@@ -12,7 +12,6 @@ import (
 	"github.com/oapi-codegen/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"github.com/volatiletech/sqlboiler/v4/boil"
 )
 
 type TestCompaniesHandlerSuite struct {
@@ -35,7 +34,7 @@ func (s *TestCompaniesHandlerSuite) TearDownTest() {
 func (s *TestCompaniesHandlerSuite) TestPostCompaniesSignIn_StatusOk() {
 	// NOTE: テスト用企業の作成
 	company := factories.CompanyFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.Company)
-	company.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(company)
 
 	reqBody := businessapi.CompanySignInInput{
 		Email: "test@example.com",
@@ -51,7 +50,7 @@ func (s *TestCompaniesHandlerSuite) TestPostCompaniesSignIn_StatusOk() {
 func (s *TestCompaniesHandlerSuite) TestPostCompaniesSignIn_BadRequest() {
 	// NOTE: テスト用企業の作成
 	company := factories.CompanyFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.Company)
-	company.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(company)
 
 	reqBody := businessapi.CompanySignInInput{
 		Email: "test_@example.com",

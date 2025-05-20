@@ -3,9 +3,8 @@ package businesshandlers
 import (
 	businessapi "apps/api/business"
 	businessservices "apps/business/services"
-	models "apps/models/generated"
+	models "apps/models"
 	"apps/test/factories"
-	"context"
 	"errors"
 	"net/http"
 	"testing"
@@ -18,7 +17,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
-	"github.com/volatiletech/sqlboiler/v4/boil"
 )
 
 type TestPlansHandlerSuite struct {
@@ -29,8 +27,8 @@ type MockPlanService struct {
     mock.Mock
 }
 
-func (m *MockPlanService) Create(ctx context.Context, requestParams *businessapi.PlanStoreInput, supporterID int) (plan models.Plan, validatorErrors error, error error) {
-    args := m.Called(ctx, requestParams, supporterID)
+func (m *MockPlanService) Create(requestParams *businessapi.PlanStoreInput, supporterID int) (plan models.Plan, validatorErrors error, error error) {
+    args := m.Called(requestParams, supporterID)
 	return args.Get(0).(models.Plan), args.Error(1), args.Error(2)
 }
 
@@ -54,9 +52,9 @@ func (s *TestPlansHandlerSuite) TearDownTest() {
 
 func (s *TestPlansHandlerSuite) TestPostPlanCreate_StatusOk() {
 	company := factories.CompanyFactory.MustCreate().(*models.Company)
-	company.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(company)
 	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
-	project.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(project)
 	supporter, cookieString := s.supporterSignIn()
 
 	projectID := project.ID
@@ -85,18 +83,16 @@ func (s *TestPlansHandlerSuite) TestPostPlanCreate_StatusOk() {
 	assert.Equal(s.T(), expectedValidationErrors, res.Errors)
 
 	// NOTE: DBの値を確認
-	exists, _ := models.Plans(
-		models.PlanWhere.SupporterID.EQ(supporter.ID),
-		models.PlanWhere.Title.EQ(title),
-	).Exists(ctx, DBCon)
-	assert.True(s.T(), exists)
+	var createdPlan models.Plan
+	count := DBCon.Where("supporter_id = ? AND title = ?", supporter.ID, title).First(&createdPlan).RowsAffected
+	assert.Equal(s.T(), int64(1), count)
 }
 
 func (s *TestPlansHandlerSuite) TestPostPlanCreate_StatusForbidden() {
 	company := factories.CompanyFactory.MustCreate().(*models.Company)
-	company.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(company)
 	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
-	project.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(project)
 	supporter, cookieString := s.supporterSignIn()
 
 	projectID := project.ID
@@ -113,18 +109,16 @@ func (s *TestPlansHandlerSuite) TestPostPlanCreate_StatusForbidden() {
 	assert.Equal(s.T(), http.StatusForbidden, result.Code())
 
 	// NOTE: DBの値を確認
-	exists, _ := models.Plans(
-		models.PlanWhere.SupporterID.EQ(supporter.ID),
-		models.PlanWhere.Title.EQ(title),
-	).Exists(ctx, DBCon)
-	assert.False(s.T(), exists)
+	var createdPlan models.Plan
+	count := DBCon.Where("supporter_id = ? AND title = ?", supporter.ID, title).First(&createdPlan).RowsAffected
+	assert.Equal(s.T(), int64(0), count)
 }
 
 func (s *TestPlansHandlerSuite) TestPostPlanCreate_StatusUnauthorized() {
 	company := factories.CompanyFactory.MustCreate().(*models.Company)
-	company.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(company)
 	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
-	project.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(project)
 
 	projectID := project.ID
 	title := randomdata.RandStringRunes(70)
@@ -140,17 +134,16 @@ func (s *TestPlansHandlerSuite) TestPostPlanCreate_StatusUnauthorized() {
 	assert.Equal(s.T(), http.StatusUnauthorized, result.Code())
 
 	// NOTE: DBの値を確認
-	exists, _ := models.Plans(
-		models.PlanWhere.Title.EQ(title),
-	).Exists(ctx, DBCon)
-	assert.False(s.T(), exists)
+	var createdPlan models.Plan
+	count := DBCon.Where("title = ?", title).First(&createdPlan).RowsAffected
+	assert.Equal(s.T(), int64(0), count)
 }
 
 func (s *TestPlansHandlerSuite) TestPostPlanCreate_StatusInternalServerError() {
 	company := factories.CompanyFactory.MustCreate().(*models.Company)
-	company.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(company)
 	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
-	project.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(project)
 	supporter, cookieString := s.supporterSignIn()
 
 	projectID := project.ID
@@ -164,7 +157,7 @@ func (s *TestPlansHandlerSuite) TestPostPlanCreate_StatusInternalServerError() {
 	reqBody := businessapi.PostPlanJSONRequestBody{ProjectId: projectID, Title: title, Description: description, StartDate: startDate, EndDate: endDate, UnitPrice: unitPrice}
 
 	mockPlanService := new(MockPlanService)
-	mockPlanService.On("Create", mock.AnythingOfType("*context.valueCtx"), mock.AnythingOfType("*businessapi.PlanStoreInput"), mock.AnythingOfType("int") ).Return(models.Plan{}, nil, errors.New("internal server error"))
+	mockPlanService.On("Create", mock.AnythingOfType("*businessapi.PlanStoreInput"), mock.AnythingOfType("int")).Return(models.Plan{}, nil, errors.New("internal server error"))
 	mockPlanService.On("MappingValidationErrorStruct", mock.AnythingOfType("error")).Return(businessapi.PlanValidationError{})
 	s.initializeHandlers(businessservices.NewProjectService(DBCon), mockPlanService)
 
@@ -173,18 +166,16 @@ func (s *TestPlansHandlerSuite) TestPostPlanCreate_StatusInternalServerError() {
 	assert.Equal(s.T(), http.StatusInternalServerError, result.Code())
 
 	// NOTE: DBの値を確認
-	exists, _ := models.Plans(
-		models.PlanWhere.SupporterID.EQ(supporter.ID),
-		models.PlanWhere.Title.EQ(title),
-	).Exists(ctx, DBCon)
-	assert.False(s.T(), exists)
+	var createdPlan models.Plan
+	count := DBCon.Where("supporter_id = ? AND title = ?", supporter.ID, title).First(&createdPlan).RowsAffected
+	assert.Equal(s.T(), int64(0), count)
 }
 
 func (s *TestPlansHandlerSuite) TestPostPlanCreate_BadRequest_Required() {
 	company := factories.CompanyFactory.MustCreate().(*models.Company)
-	company.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(company)
 	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
-	project.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(project)
 	supporter, cookieString := s.supporterSignIn()
 
 	projectID := project.ID
@@ -210,11 +201,9 @@ func (s *TestPlansHandlerSuite) TestPostPlanCreate_BadRequest_Required() {
 	assert.Equal(s.T(), unitPriceErrorMessages, *res.Errors.UnitPrice)
 
 	// NOTE: DBの値を確認
-	exists, _ := models.Plans(
-		models.PlanWhere.SupporterID.EQ(supporter.ID),
-		models.PlanWhere.Title.EQ(title),
-	).Exists(ctx, DBCon)
-	assert.False(s.T(), exists)
+	var createdPlan models.Plan
+	count := DBCon.Where("supporter_id = ? AND title = ?", supporter.ID, title).First(&createdPlan).RowsAffected
+	assert.Equal(s.T(), int64(0), count)
 }
 
 func TestPlansHandler(t *testing.T) {

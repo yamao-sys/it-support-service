@@ -2,7 +2,7 @@ package registrationservices
 
 import (
 	registrationapi "apps/api/registration"
-	models "apps/models/generated"
+	models "apps/models"
 	"bytes"
 	"strconv"
 	"testing"
@@ -10,7 +10,6 @@ import (
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
@@ -38,7 +37,7 @@ func (s *TestCompanyServiceSuite) TestValidateSignUp_SuccessRequiredFields() {
 		Password: "Password",
 	}
 
-	result := testCompanyService.ValidateSignUp(ctx, &requestParams)
+	result := testCompanyService.ValidateSignUp(&requestParams)
 
 	assert.Nil(s.T(), result)
 }
@@ -50,7 +49,7 @@ func (s *TestCompanyServiceSuite) TestValidateSignUp_ValidationErrorRequiredFiel
 		Password: "",
 	}
 
-	result := testCompanyService.ValidateSignUp(ctx, &requestParams)
+	result := testCompanyService.ValidateSignUp(&requestParams)
 
 	assert.NotNil(s.T(), result)
 	if errors, ok := result.(validation.Errors); ok {
@@ -86,7 +85,7 @@ func (s *TestCompanyServiceSuite) TestValidateSignUp_SuccessWithOptionalFields()
 		FinalTaxReturn: &finalTaxReturn,
 	}
 
-	result := testCompanyService.ValidateSignUp(ctx, &requestParams)
+	result := testCompanyService.ValidateSignUp(&requestParams)
 
 	assert.Nil(s.T(), result)
 }
@@ -107,7 +106,7 @@ func (s *TestCompanyServiceSuite) TestValidateSignUp_ValidationErrorWithOptional
 		FinalTaxReturn: &finalTaxReturn,
 	}
 
-	result := testCompanyService.ValidateSignUp(ctx, &requestParams)
+	result := testCompanyService.ValidateSignUp(&requestParams)
 
 	assert.NotNil(s.T(), result)
 	if errors, ok := result.(validation.Errors); ok {
@@ -133,12 +132,9 @@ func (s *TestCompanyServiceSuite) TestSignUp_SuccessRequiredFields() {
 	assert.Nil(s.T(), result)
 
 	// NOTE: 企業が作成されていることを確認
-	company, err := models.Companies(
-		qm.Where("email = ?", "test@example.com"),
-	).One(ctx, DBCon)
-	if err != nil {
-		s.T().Fatalf("failed to create company %v", err)
-	}
+	var company models.Company
+	DBCon.Where("email = ?", "test@example.com").Take(&company)
+	assert.Equal(s.T(), "name", company.Name)
 	assert.Equal(s.T(), "", company.FinalTaxReturn)
 }
 
@@ -165,12 +161,9 @@ func (s *TestCompanyServiceSuite) TestSignUp_SuccessWithOptionalFields() {
 	assert.Nil(s.T(), result)
 
 	// NOTE: が作成されていることを確認
-	company, err := models.Companies(
-		qm.Where("email = ?", "test@example.com"),
-	).One(ctx, DBCon)
-	if err != nil {
-		s.T().Fatalf("failed to create company %v", err)
-	}
+	var company models.Company
+	DBCon.Where("email = ?", "test@example.com").Take(&company)
+	assert.Equal(s.T(), "name", company.Name)
 	id := strconv.Itoa(company.ID)
 	assert.Equal(s.T(), "companies/"+id+"/finalTaxReturn.png", company.FinalTaxReturn)
 }

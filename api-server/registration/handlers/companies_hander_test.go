@@ -2,7 +2,7 @@ package registrationhandlers
 
 import (
 	registrationapi "apps/api/registration"
-	models "apps/models/generated"
+	models "apps/models"
 	"bytes"
 	"encoding/json"
 	"mime/multipart"
@@ -13,7 +13,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 
 	"github.com/oapi-codegen/testutil"
 )
@@ -184,12 +183,9 @@ func (s *TestCompaniesHandlerSuite) TestPostAuthSignUp_SuccessRequiredFields() {
 	assert.Equal(s.T(), "{}", string(jsonErrors))
 
 	// NOTE: Companyが作成されていることを確認
-	company, err := models.Companies(
-		qm.Where("email = ?", "test@example.com"),
-	).One(ctx, DBCon)
-	if err != nil {
-		s.T().Fatalf("failed to create company %v", err)
-	}
+	var company models.Company
+	DBCon.Where("email = ?", "test@example.com").Take(&company)
+	assert.Equal(s.T(), "name", company.Name)
 	assert.Equal(s.T(), "", company.FinalTaxReturn)
 }
 
@@ -227,12 +223,8 @@ func (s *TestCompaniesHandlerSuite) TestPostAuthSignUp_SuccessWithOptionalFields
 	assert.Equal(s.T(), "{}", string(jsonErrors))
 
 	// NOTE: companyが作成されていることを確認
-	company, err := models.Companies(
-		qm.Where("email = ?", "test@example.com"),
-	).One(ctx, DBCon)
-	if err != nil {
-		s.T().Fatalf("failed to create company %v", err)
-	}
+	var company models.Company
+	DBCon.Where("email = ?", "test@example.com").Take(&company)
 	id := strconv.Itoa(company.ID)
 	assert.Equal(s.T(), "companies/"+id+"/finalTaxReturn.png", company.FinalTaxReturn)
 }

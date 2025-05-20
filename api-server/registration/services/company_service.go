@@ -2,34 +2,33 @@ package registrationservices
 
 import (
 	registrationapi "apps/api/registration"
-	models "apps/models/generated"
+	models "apps/models"
 	registrationvalidator "apps/registration/validators"
 	"context"
-	"database/sql"
 	"io"
 	"os"
 	"strconv"
 
-	"github.com/volatiletech/sqlboiler/v4/boil"
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 
 	"cloud.google.com/go/storage"
 )
 
 type CompanyService interface {
-	ValidateSignUp(ctx context.Context, request *registrationapi.PostCompanyValidateSignUpMultipartRequestBody) error
+	ValidateSignUp(request *registrationapi.PostCompanyValidateSignUpMultipartRequestBody) error
 	SignUp(ctx context.Context, requestParams registrationapi.PostCompanySignUpMultipartRequestBody) error
 }
 
 type companyService struct {
-	db *sql.DB
+	db *gorm.DB
 }
 
-func NewCompanyService(db *sql.DB) CompanyService {
+func NewCompanyService(db *gorm.DB) CompanyService {
 	return &companyService{db}
 }
 
-func (cs *companyService) ValidateSignUp(ctx context.Context, request *registrationapi.PostCompanyValidateSignUpMultipartRequestBody) error {
+func (cs *companyService) ValidateSignUp(request *registrationapi.PostCompanyValidateSignUpMultipartRequestBody) error {
 	return registrationvalidator.ValidateSignUpCompany(request)
 }
 
@@ -45,10 +44,7 @@ func (cs *companyService) SignUp(ctx context.Context, requestParams registration
 		return err
 	}
 	company.Password = hashedPassword
-	createErr := company.Insert(ctx, cs.db, boil.Infer())
-	if createErr != nil {
-		return createErr
-	}
+	cs.db.Create(&company)
 
 	client, err := storage.NewClient(ctx)
 	if err != nil {
@@ -60,7 +56,6 @@ func (cs *companyService) SignUp(ctx context.Context, requestParams registration
 		return nil
 	}
 
-	company.Reload(ctx, cs.db)
 	companyID := strconv.Itoa(company.ID)
 
 	bucket := client.Bucket(os.Getenv("STORAGE_BUCKET_NAME"))
@@ -72,8 +67,7 @@ func (cs *companyService) SignUp(ctx context.Context, requestParams registration
 		return uploadFinalTaxReturnErr
 	}
 	company.FinalTaxReturn = finalTaxReturnPath
-	_, updateIdenfiticationErr := company.Update(ctx, cs.db, boil.Infer())
-	return updateIdenfiticationErr
+	return cs.db.Save(&company).Error
 }
 
 // NOTE: パスワードの文字列をハッシュ化する

@@ -1,7 +1,7 @@
 package factories
 
 import (
-	models "apps/models/generated"
+	models "apps/models"
 	"log"
 
 	"github.com/Pallinder/go-randomdata"
