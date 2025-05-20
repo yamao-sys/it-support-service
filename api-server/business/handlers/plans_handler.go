@@ -34,7 +34,7 @@ func (ph *plansHandler) PostPlan(ctx context.Context, request businessapi.PostPl
 		UnitPrice: request.Body.UnitPrice,
 	}
 
-	createdPlan, validationErrors, err := ph.planService.Create(ctx, &inputs, supporterID)
+	createdPlan, validationErrors, err := ph.planService.Create(&inputs, supporterID)
 	if err != nil {
 		return businessapi.PostPlan500JSONResponse{Code: http.StatusInternalServerError}, err
 	}

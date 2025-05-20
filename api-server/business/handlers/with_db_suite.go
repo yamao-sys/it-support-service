@@ -5,16 +5,16 @@ import (
 	businessmiddlewares "apps/business/middlewares"
 	businessservices "apps/business/services"
 	"apps/database"
-	models "apps/models/generated"
+	models "apps/models"
 	"apps/test/factories"
-	"context"
 	"database/sql"
 
 	"github.com/DATA-DOG/go-txdb"
 	"github.com/labstack/echo/v4"
 	"github.com/oapi-codegen/testutil"
 	"github.com/stretchr/testify/suite"
-	"github.com/volatiletech/sqlboiler/v4/boil"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 )
 
 type WithDBSuite struct {
@@ -22,8 +22,7 @@ type WithDBSuite struct {
 }
 
 var (
-	DBCon *sql.DB
-	ctx   context.Context
+	DBCon *gorm.DB
 	// token string
 	e *echo.Echo
 	csrfToken string
@@ -38,22 +37,30 @@ var (
 // func (s *WithDBSuite) AfterTest(suiteName, testName string)  {} // テストケース終了後の処理
 
 func init() {
-	txdb.Register("txdb-controller", "mysql", database.GetDsn())
-	ctx = context.Background()
+	txdb.Register("txdb-handler", "mysql", database.GetDsn())
 
 	e = businessmiddlewares.ApplyMiddlewares(echo.New())
 }
 
 func (s *WithDBSuite) SetDBCon() {
-	db, err := sql.Open("txdb-controller", "connect")
+	db, err := sql.Open("txdb-handler", "connect")
 	if err != nil {
 		s.T().Fatalf("failed to initialize DB: %v", err)
 	}
-	DBCon = db
+	gormDB, err := gorm.Open(
+		mysql.New(mysql.Config{
+			Conn: db,
+		}),
+		&gorm.Config{},
+	)
+	if err != nil {
+		s.T().Fatalf("failed to open gorm DB: %v", err)
+	}
+	DBCon = gormDB
 }
 
 func (s *WithDBSuite) CloseDB() {
-	DBCon.Close()
+	database.Close(DBCon)
 }
 
 func (s *WithDBSuite) SetCsrfHeaderValues() {
@@ -89,7 +96,7 @@ func (s *WithDBSuite) initializeHandlers(projectService businessservices.Project
 func (s *WithDBSuite) companySignIn() (company *models.Company, cookieString string) {
 	// NOTE: テスト用企業の作成
 	company = factories.CompanyFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.Company)
-	company.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(company)
 
 	reqBody := businessapi.CompanySignInInput{
 		Email: "test@example.com",
@@ -104,7 +111,7 @@ func (s *WithDBSuite) companySignIn() (company *models.Company, cookieString str
 func (s *WithDBSuite) supporterSignIn() (supporter *models.Supporter, cookieString string) {
 	// NOTE: テスト用サポータの作成
 	supporter = factories.SupporterFactory.MustCreateWithOption(map[string]interface{}{"Email": "test@example.com"}).(*models.Supporter)
-	supporter.Insert(ctx, DBCon, boil.Infer())
+	DBCon.Create(supporter)
 
 	reqBody := businessapi.SupporterSignInInput{
 		Email: "test@example.com",
