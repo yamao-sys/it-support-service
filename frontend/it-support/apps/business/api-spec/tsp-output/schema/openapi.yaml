@@ -9,6 +9,7 @@ tags:
   - name: supporters
   - name: projects
   - name: plans
+  - name: to-projects
 paths:
   /companies/sign-in:
     post:
@@ -338,6 +339,68 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/SupporterSignInInput'
+  /to-projects:
+    get:
+      operationId: get-to-projects
+      summary: Get Projects for Supporters
+      parameters:
+        - name: pageToken
+          in: query
+          required: false
+          schema:
+            type: string
+          explode: false
+        - name: startDate
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+          explode: false
+        - name: endDate
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+          explode: false
+        - name: minBudget
+          in: query
+          required: false
+          schema:
+            type: integer
+          explode: false
+        - name: maxBudget
+          in: query
+          required: false
+          schema:
+            type: integer
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ToProjectsListResponse'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  message:
+                    type: string
+                required:
+                  - code
+                  - message
+      tags:
+        - to-projects
+      security:
+        - ApiKeyAuth: []
 components:
   schemas:
     CompanySignInBadRequestResponse:
@@ -609,6 +672,45 @@ components:
     SupporterSignInOkResponse:
       type: object
       title: Supporter SignIn Ok Response
+    ToProject:
+      type: object
+      required:
+        - id
+        - title
+        - description
+        - startDate
+        - endDate
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        minBudget:
+          type: integer
+        maxBudget:
+          type: integer
+      title: Project for Supporters
+    ToProjectsListResponse:
+      type: object
+      required:
+        - projects
+        - nextPageToken
+      properties:
+        projects:
+          type: array
+          items:
+            $ref: '#/components/schemas/ToProject'
+        nextPageToken:
+          type: string
+      title: Projects List Response for Supporters
   securitySchemes:
     ApiKeyAuth:
       type: apiKey
