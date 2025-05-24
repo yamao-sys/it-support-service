@@ -5,7 +5,6 @@ import (
 	registrationservices "apps/registration/services"
 	"bytes"
 	"context"
-	"fmt"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -30,10 +29,7 @@ func NewCompaniesHandler(companiesService registrationservices.CompanyService) C
 func (ch *companiesHandler) PostCompanyValidateSignUp(ctx context.Context, request registrationapi.PostCompanyValidateSignUpRequestObject) (registrationapi.PostCompanyValidateSignUpResponseObject, error) {
 	reader := request.Body
 	// NOTE: バリデーションチェックを行う構造体
-	inputStruct, mappingErr := ch.mappingInputStruct(reader)
-	if mappingErr != nil {
-		return registrationapi.PostCompanyValidateSignUp500Response{}, nil
-	}
+	inputStruct := ch.mappingInputStruct(reader)
 
 	err := ch.companiesService.ValidateSignUp(&inputStruct)
 	validationError := ch.mappingValidationErrorStruct(err)
@@ -48,10 +44,7 @@ func (ch *companiesHandler) PostCompanyValidateSignUp(ctx context.Context, reque
 func (ch *companiesHandler) PostCompanySignUp(ctx context.Context, request registrationapi.PostCompanySignUpRequestObject) (registrationapi.PostCompanySignUpResponseObject, error) {
 	reader := request.Body
 	// NOTE: バリデーションチェックを行う構造体
-	inputStruct, mappingErr := ch.mappingInputStruct(reader)
-	if mappingErr != nil {
-		return registrationapi.PostCompanySignUp500Response{}, nil
-	}
+	inputStruct := ch.mappingInputStruct(reader)
 
 	err := ch.companiesService.ValidateSignUp(&inputStruct)
 	if err != nil {
@@ -76,7 +69,7 @@ func (ch *companiesHandler) PostCompanySignUp(ctx context.Context, request regis
 	return registrationapi.PostCompanySignUp200JSONResponse(registrationapi.CompanySignUpResponse{Code: res.Code, Errors: res.Errors}), nil
 }
 
-func (ch *companiesHandler) mappingInputStruct(reader *multipart.Reader) (registrationapi.PostCompanyValidateSignUpMultipartRequestBody, error) {
+func (ch *companiesHandler) mappingInputStruct(reader *multipart.Reader) (registrationapi.PostCompanyValidateSignUpMultipartRequestBody) {
 	var inputStruct registrationapi.PostCompanyValidateSignUpMultipartRequestBody
 
 	for {
@@ -85,19 +78,13 @@ func (ch *companiesHandler) mappingInputStruct(reader *multipart.Reader) (regist
 			// NOTE: 全てのパートを読み終えた場合
 			break
 		}
-		if err != nil {
-			return inputStruct, fmt.Errorf("failed to read multipart part: %w", err)
-		}
 
 		// NOTE: 各パートのヘッダー情報を取得
 		partName := part.FormName()
 		filename := part.FileName()
 
 		var buf bytes.Buffer
-		if _, err := io.Copy(&buf, part); err != nil {
-			fmt.Println(err)
-			return inputStruct, fmt.Errorf("failed to copy content: %w", err)
-		}
+		io.Copy(&buf, part)
 
 		switch partName {
 		case "name":
@@ -113,7 +100,7 @@ func (ch *companiesHandler) mappingInputStruct(reader *multipart.Reader) (regist
 		}
 	}
 
-	return inputStruct, nil
+	return inputStruct
 }
 
 func (ch *companiesHandler) mappingValidationErrorStruct(err error) registrationapi.CompanySignUpValidationError {

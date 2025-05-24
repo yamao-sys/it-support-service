@@ -5,7 +5,6 @@ import (
 	registrationservices "apps/registration/services"
 	"bytes"
 	"context"
-	"fmt"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -31,10 +30,7 @@ func NewSupportersHandler(supporterService registrationservices.SupporterService
 func (sh *supportersHandler) PostSupporterValidateSignUp(ctx context.Context, request registrationapi.PostSupporterValidateSignUpRequestObject) (registrationapi.PostSupporterValidateSignUpResponseObject, error) {
 	reader := request.Body
 	// NOTE: バリデーションチェックを行う構造体
-	inputStruct, mappingErr := sh.mappingInputStruct(reader)
-	if mappingErr != nil {
-		return registrationapi.PostSupporterValidateSignUp500Response{}, nil
-	}
+	inputStruct := sh.mappingInputStruct(reader)
 
 	err := sh.supporterService.ValidateSignUp(&inputStruct)
 	validationError := sh.mappingValidationErrorStruct(err)
@@ -44,10 +40,7 @@ func (sh *supportersHandler) PostSupporterValidateSignUp(ctx context.Context, re
 func (sh *supportersHandler) PostSupporterSignUp(ctx context.Context, request registrationapi.PostSupporterSignUpRequestObject) (registrationapi.PostSupporterSignUpResponseObject, error) {
 	reader := request.Body
 	// NOTE: バリデーションチェックを行う構造体
-	inputStruct, mappingErr := sh.mappingInputStruct(reader)
-	if mappingErr != nil {
-		return registrationapi.PostSupporterSignUp500Response{}, nil
-	}
+	inputStruct := sh.mappingInputStruct(reader)
 
 	err := sh.supporterService.ValidateSignUp(&inputStruct)
 	if err != nil {
@@ -68,7 +61,7 @@ func (sh *supportersHandler) PostSupporterSignUp(ctx context.Context, request re
 	return registrationapi.PostSupporterSignUp200JSONResponse(registrationapi.SupporterSignUpResponse{Code: http.StatusOK, Errors: registrationapi.SupporterSignUpValidationError{}}), nil
 }
 
-func (sh *supportersHandler) mappingInputStruct(reader *multipart.Reader) (registrationapi.PostSupporterValidateSignUpMultipartRequestBody, error) {
+func (sh *supportersHandler) mappingInputStruct(reader *multipart.Reader) (registrationapi.PostSupporterValidateSignUpMultipartRequestBody) {
 	var inputStruct registrationapi.PostSupporterValidateSignUpMultipartRequestBody
 
 	for {
@@ -77,19 +70,13 @@ func (sh *supportersHandler) mappingInputStruct(reader *multipart.Reader) (regis
 			// NOTE: 全てのパートを読み終えた場合
 			break
 		}
-		if err != nil {
-			return inputStruct, fmt.Errorf("failed to read multipart part: %w", err)
-		}
 
 		// NOTE: 各パートのヘッダー情報を取得
 		partName := part.FormName()
 		filename := part.FileName()
 
 		var buf bytes.Buffer
-		if _, err := io.Copy(&buf, part); err != nil {
-			fmt.Println(err)
-			return inputStruct, fmt.Errorf("failed to copy content: %w", err)
-		}
+		io.Copy(&buf, part)
 
 		switch partName {
 		case "firstName":
@@ -106,11 +93,7 @@ func (sh *supportersHandler) mappingInputStruct(reader *multipart.Reader) (regis
 				continue
 			}
 			
-			parsedTime, parseErr := time.Parse("2006-01-02", birthday)
-			if parseErr != nil {
-				fmt.Println(parseErr)
-				return inputStruct, fmt.Errorf("failed to parse birthday: %w", parseErr)
-			}
+			parsedTime, _ := time.Parse("2006-01-02", birthday)
 			inputStruct.Birthday = &openapi_types.Date{Time: parsedTime}
 		case "frontIdentification":
 			var frontIdentification openapi_types.File
@@ -123,7 +106,7 @@ func (sh *supportersHandler) mappingInputStruct(reader *multipart.Reader) (regis
 		}
 	}
 
-	return inputStruct, nil
+	return inputStruct
 }
 
 func (sh *supportersHandler) mappingValidationErrorStruct(err error) registrationapi.SupporterSignUpValidationError {
