@@ -3,6 +3,7 @@ package businessservices
 import (
 	models "apps/models"
 	"apps/test/factories"
+	"errors"
 	"testing"
 	"time"
 
@@ -48,7 +49,7 @@ func (s *TestToProjectServiceSuite) TearDownTest() {
 	s.CloseDB()
 }
 
-func (s *TestToProjectServiceSuite) TestProjectFetchLists_EmptyArgs_NotHavingNextPage_StatusOK() {
+func (s *TestToProjectServiceSuite) TestToProjectFetchLists_EmptyArgs_NotHavingNextPage_StatusOK() {
 	var companyProductIDs []int
 	DBCon.Model(&models.Project{}).Where("company_id = ?", company.ID).Pluck("id", &companyProductIDs)
 
@@ -61,7 +62,7 @@ func (s *TestToProjectServiceSuite) TestProjectFetchLists_EmptyArgs_NotHavingNex
 	assert.Equal(s.T(), 0, nextPageToken)
 }
 
-func (s *TestToProjectServiceSuite) TestProjectFetchLists_EmptyArgs_HavingNextPage_StatusOK() {
+func (s *TestToProjectServiceSuite) TestToProjectFetchLists_EmptyArgs_HavingNextPage_StatusOK() {
 	project6 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
 	DBCon.Create(project6)
 
@@ -77,7 +78,7 @@ func (s *TestToProjectServiceSuite) TestProjectFetchLists_EmptyArgs_HavingNextPa
 	assert.Equal(s.T(), project6.ID, nextPageToken)
 }
 
-func (s *TestToProjectServiceSuite) TestProjectFetchLists_WithOnlyPageToken_NotHavingNextPage_StatusOK() {
+func (s *TestToProjectServiceSuite) TestToProjectFetchLists_WithOnlyPageToken_NotHavingNextPage_StatusOK() {
 	project6 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
 	DBCon.Create(project6)
 	var companyProductIDs []int
@@ -92,7 +93,7 @@ func (s *TestToProjectServiceSuite) TestProjectFetchLists_WithOnlyPageToken_NotH
 	assert.Equal(s.T(), 0, nextPageToken)
 }
 
-func (s *TestToProjectServiceSuite) TestProjectFetchLists_WithOnlyPageToken_HavingNextPage_StatusOK() {
+func (s *TestToProjectServiceSuite) TestToProjectFetchLists_WithOnlyPageToken_HavingNextPage_StatusOK() {
 	project6 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
 	DBCon.Create(project6)
 	project7 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
@@ -109,7 +110,7 @@ func (s *TestToProjectServiceSuite) TestProjectFetchLists_WithOnlyPageToken_Havi
 	assert.Equal(s.T(), project7.ID, nextPageToken)
 }
 
-func (s *TestToProjectServiceSuite) TestProjectFetchLists_WithOnlyStartDate_NotHavingNextPage_StatusOK() {
+func (s *TestToProjectServiceSuite) TestToProjectFetchLists_WithOnlyStartDate_NotHavingNextPage_StatusOK() {
 	project6 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID, "StartDate": time.Date(2025, 5, 29, 0, 0, 0, 0, time.Local)}).(*models.Project)
 	DBCon.Create(project6)
 	var companyProductIDs []int
@@ -124,7 +125,7 @@ func (s *TestToProjectServiceSuite) TestProjectFetchLists_WithOnlyStartDate_NotH
 	assert.Equal(s.T(), 0, nextPageToken)
 }
 
-func (s *TestToProjectServiceSuite) TestProjectFetchLists_WithOnlyStartDate_HavingNextPage_StatusOK() {
+func (s *TestToProjectServiceSuite) TestToProjectFetchLists_WithOnlyStartDate_HavingNextPage_StatusOK() {
 	project6 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID, "StartDate": time.Date(2025, 5, 29, 0, 0, 0, 0, time.Local)}).(*models.Project)
 	DBCon.Create(project6)
 	var companyProductIDs []int
@@ -139,7 +140,7 @@ func (s *TestToProjectServiceSuite) TestProjectFetchLists_WithOnlyStartDate_Havi
 	assert.Equal(s.T(), project6.ID, nextPageToken)
 }
 
-func (s *TestToProjectServiceSuite) TestProjectFetchLists_WithOnlyEndDate_NotHavingNextPage_StatusOK() {
+func (s *TestToProjectServiceSuite) TestToProjectFetchLists_WithOnlyEndDate_NotHavingNextPage_StatusOK() {
 	project6 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID, "EndDate": time.Date(2025, 5, 29, 0, 0, 0, 0, time.Local)}).(*models.Project)
 	DBCon.Create(project6)
 	var companyProductIDs []int
@@ -154,7 +155,7 @@ func (s *TestToProjectServiceSuite) TestProjectFetchLists_WithOnlyEndDate_NotHav
 	assert.Equal(s.T(), 0, nextPageToken)
 }
 
-func (s *TestToProjectServiceSuite) TestProjectFetchLists_WithOnlyEndDate_HavingNextPage_StatusOK() {
+func (s *TestToProjectServiceSuite) TestToProjectFetchLists_WithOnlyEndDate_HavingNextPage_StatusOK() {
 	project6 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID, "EndDate": time.Date(2025, 5, 29, 0, 0, 0, 0, time.Local)}).(*models.Project)
 	DBCon.Create(project6)
 	var companyProductIDs []int
@@ -169,7 +170,7 @@ func (s *TestToProjectServiceSuite) TestProjectFetchLists_WithOnlyEndDate_Having
 	assert.Equal(s.T(), project6.ID, nextPageToken)
 }
 
-func (s *TestToProjectServiceSuite) TestProjectFetchLists_WithPageTokenAndStartDate_NotHavingNextPage_StatusOK() {
+func (s *TestToProjectServiceSuite) TestToProjectFetchLists_WithPageTokenAndStartDate_NotHavingNextPage_StatusOK() {
 	project6 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID, "StartDate": time.Date(2025, 5, 29, 0, 0, 0, 0, time.Local)}).(*models.Project)
 	DBCon.Create(project6)
 	var companyProductIDs []int
@@ -184,7 +185,7 @@ func (s *TestToProjectServiceSuite) TestProjectFetchLists_WithPageTokenAndStartD
 	assert.Equal(s.T(), 0, nextPageToken)
 }
 
-func (s *TestToProjectServiceSuite) TestProjectFetchLists_WithPageTokenAndStartDate_HavingNextPage_StatusOK() {
+func (s *TestToProjectServiceSuite) TestToProjectFetchLists_WithPageTokenAndStartDate_HavingNextPage_StatusOK() {
 	project6 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID, "StartDate": time.Date(2025, 5, 29, 0, 0, 0, 0, time.Local)}).(*models.Project)
 	DBCon.Create(project6)
 	var companyProductIDs []int
@@ -199,7 +200,7 @@ func (s *TestToProjectServiceSuite) TestProjectFetchLists_WithPageTokenAndStartD
 	assert.Equal(s.T(), project6.ID, nextPageToken)
 }
 
-func (s *TestToProjectServiceSuite) TestProjectFetchLists_WithPageTokenAndEndDate_NotHavingNextPage_StatusOK() {
+func (s *TestToProjectServiceSuite) TestToProjectFetchLists_WithPageTokenAndEndDate_NotHavingNextPage_StatusOK() {
 	project6 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID, "EndDate": time.Date(2025, 5, 29, 0, 0, 0, 0, time.Local)}).(*models.Project)
 	DBCon.Create(project6)
 	var companyProductIDs []int
@@ -214,7 +215,7 @@ func (s *TestToProjectServiceSuite) TestProjectFetchLists_WithPageTokenAndEndDat
 	assert.Equal(s.T(), 0, nextPageToken)
 }
 
-func (s *TestToProjectServiceSuite) TestProjectFetchLists_WithPageTokenAndEndDate_HavingNextPage_StatusOK() {
+func (s *TestToProjectServiceSuite) TestToProjectFetchLists_WithPageTokenAndEndDate_HavingNextPage_StatusOK() {
 	project6 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID, "EndDate": time.Date(2025, 5, 29, 0, 0, 0, 0, time.Local)}).(*models.Project)
 	DBCon.Create(project6)
 	var companyProductIDs []int
@@ -229,7 +230,7 @@ func (s *TestToProjectServiceSuite) TestProjectFetchLists_WithPageTokenAndEndDat
 	assert.Equal(s.T(), project6.ID, nextPageToken)
 }
 
-func (s *TestToProjectServiceSuite) TestProjectFetchLists_WithStartDateAndEndDate_NotHavingNextPage_StatusOK() {
+func (s *TestToProjectServiceSuite) TestToProjectFetchLists_WithStartDateAndEndDate_NotHavingNextPage_StatusOK() {
 	project6 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID, "StartDate": time.Date(2025, 5, 29, 0, 0, 0, 0, time.Local), "EndDate": time.Date(2025, 5, 29, 0, 0, 0, 0, time.Local)}).(*models.Project)
 	DBCon.Create(project6)
 	var companyProductIDs []int
@@ -244,7 +245,7 @@ func (s *TestToProjectServiceSuite) TestProjectFetchLists_WithStartDateAndEndDat
 	assert.Equal(s.T(), 0, nextPageToken)
 }
 
-func (s *TestToProjectServiceSuite) TestProjectFetchLists_WithStartDateAndEndDate_HavingNextPage_StatusOK() {
+func (s *TestToProjectServiceSuite) TestToProjectFetchLists_WithStartDateAndEndDate_HavingNextPage_StatusOK() {
 	project6 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID, "StartDate": time.Date(2025, 5, 29, 0, 0, 0, 0, time.Local), "EndDate": time.Date(2025, 5, 29, 0, 0, 0, 0, time.Local)}).(*models.Project)
 	DBCon.Create(project6)
 	var companyProductIDs []int
@@ -259,7 +260,7 @@ func (s *TestToProjectServiceSuite) TestProjectFetchLists_WithStartDateAndEndDat
 	assert.Equal(s.T(), project6.ID, nextPageToken)
 }
 
-func (s *TestToProjectServiceSuite) TestProjectFetchLists_WithPageTokenAndStartDateAndEndDate_NotHavingNextPage_StatusOK() {
+func (s *TestToProjectServiceSuite) TestToProjectFetchLists_WithPageTokenAndStartDateAndEndDate_NotHavingNextPage_StatusOK() {
 	project6 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID, "StartDate": time.Date(2025, 5, 29, 0, 0, 0, 0, time.Local), "EndDate": time.Date(2025, 5, 29, 0, 0, 0, 0, time.Local)}).(*models.Project)
 	DBCon.Create(project6)
 	var companyProductIDs []int
@@ -274,7 +275,7 @@ func (s *TestToProjectServiceSuite) TestProjectFetchLists_WithPageTokenAndStartD
 	assert.Equal(s.T(), 0, nextPageToken)
 }
 
-func (s *TestToProjectServiceSuite) TestProjectFetchLists_WithPageTokenAndStartDateAndEndDate_HavingNextPage_StatusOK() {
+func (s *TestToProjectServiceSuite) TestToProjectFetchLists_WithPageTokenAndStartDateAndEndDate_HavingNextPage_StatusOK() {
 	project6 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID, "StartDate": time.Date(2025, 5, 29, 0, 0, 0, 0, time.Local), "EndDate": time.Date(2025, 5, 29, 0, 0, 0, 0, time.Local)}).(*models.Project)
 	DBCon.Create(project6)
 	var companyProductIDs []int
@@ -287,6 +288,36 @@ func (s *TestToProjectServiceSuite) TestProjectFetchLists_WithPageTokenAndStartD
 	}
 	assert.ElementsMatch(s.T(), companyProductIDs, fetchedProductIDs)
 	assert.Equal(s.T(), project6.ID, nextPageToken)
+}
+
+func (s *TestToProjectServiceSuite) TestToProjectFetch_StatusOK() {
+	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
+	DBCon.Create(project)
+	DBCon.Model(project).Take(project)
+
+	fetchedProduct, err := testToProjectService.Fetch(project.ID)
+	
+	// NOTE: レスポンスのprojectの値の確認
+	assert.Equal(s.T(), project.ID, fetchedProduct.ID)
+	assert.Equal(s.T(), company.ID, fetchedProduct.CompanyID)
+	assert.Equal(s.T(), project.Title, fetchedProduct.Title)
+
+	assert.Nil(s.T(), err)
+}
+
+func (s *TestToProjectServiceSuite) TestToProjectFetch_NotFound() {
+	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
+	DBCon.Create(project)
+	DBCon.Model(project).Take(project)
+
+	fetchedProduct, err := testToProjectService.Fetch(project.ID+1)
+	
+	// NOTE: レスポンスのprojectの値の確認
+	assert.Equal(s.T(), 0, fetchedProduct.ID)
+	assert.Equal(s.T(), 0, fetchedProduct.CompanyID)
+	assert.Equal(s.T(), "", fetchedProduct.Title)
+
+	assert.Equal(s.T(), errors.New("not found"), err)
 }
 
 func TestToProjectService(t *testing.T) {

@@ -435,10 +435,79 @@ func (s *TestToProjectsHandlerSuite) TestGetToProjectsFetchLists_StatusUnauthori
 	assert.Equal(s.T(), http.StatusUnauthorized, result.Code())
 }
 
-func (s *TestToProjectsHandlerSuite) TestGetToProjectsFetchLists_NotSupportersAccess_StatusForbiddenError() {
+func (s *TestToProjectsHandlerSuite) TestGetToProjectsFetchLists_NotSupportersAccess_StatusForbidden() {
 	_, cookieString := s.companySignIn()
 
 	result := testutil.NewRequest().Get("/to-projects").WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).GoWithHTTPHandler(s.T(), e)
+
+	assert.Equal(s.T(), http.StatusForbidden, result.Code())
+}
+
+func (s *TestToProjectsHandlerSuite) TestGetToProject_StatusOk() {
+	_, cookieString := s.supporterSignIn()
+	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
+	DBCon.Create(project)
+	
+	result := testutil.NewRequest().Get("/to-projects/"+strconv.Itoa(project.ID)).WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).GoWithHTTPHandler(s.T(), e)
+
+	assert.Equal(s.T(), http.StatusOK, result.Code())
+
+	var res businessapi.GetToProject200JSONResponse
+	result.UnmarshalBodyToObject(&res)
+	assert.Equal(s.T(), project.Title, res.Project.Title)
+	assert.Equal(s.T(), project.Description, res.Project.Description)
+	assert.Equal(s.T(), project.StartDate.Format("2006-01-02"), res.Project.StartDate.Format("2006-01-02"))
+	assert.Equal(s.T(), project.EndDate.Format("2006-01-02"), res.Project.EndDate.Format("2006-01-02"))
+	assert.Equal(s.T(), project.MinBudget.Int, *res.Project.MinBudget)
+	assert.NotNil(s.T(), *res.Project.MinBudget)
+	assert.Equal(s.T(), project.MaxBudget.Int, *res.Project.MaxBudget)
+	assert.NotNil(s.T(), *res.Project.MaxBudget)
+}
+
+func (s *TestToProjectsHandlerSuite) TestGetToProject_EmptyBudget_StatusOk() {
+	_, cookieString := s.supporterSignIn()
+	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID, "MinBudget": null.Int{Int: 0, Valid: false}, "MaxBudget": null.Int{Int: 0, Valid: false}}).(*models.Project)
+	DBCon.Create(project)
+	
+	result := testutil.NewRequest().Get("/to-projects/"+strconv.Itoa(project.ID)).WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).GoWithHTTPHandler(s.T(), e)
+
+	assert.Equal(s.T(), http.StatusOK, result.Code())
+
+	var res businessapi.GetToProject200JSONResponse
+	result.UnmarshalBodyToObject(&res)
+	assert.Equal(s.T(), project.Title, res.Project.Title)
+	assert.Equal(s.T(), project.Description, res.Project.Description)
+	assert.Equal(s.T(), project.StartDate.Format("2006-01-02"), res.Project.StartDate.Format("2006-01-02"))
+	assert.Equal(s.T(), project.EndDate.Format("2006-01-02"), res.Project.EndDate.Format("2006-01-02"))
+	assert.Nil(s.T(), res.Project.MinBudget)
+	assert.Nil(s.T(), res.Project.MaxBudget)
+}
+
+func (s *TestToProjectsHandlerSuite) TestGetToProject_StatusNotFound() {
+	_, cookieString := s.supporterSignIn()
+	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
+	DBCon.Create(project)
+	
+	result := testutil.NewRequest().Get("/to-projects/"+strconv.Itoa(project.ID+1)).WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).GoWithHTTPHandler(s.T(), e)
+
+	assert.Equal(s.T(), http.StatusNotFound, result.Code())
+}
+
+func (s *TestToProjectsHandlerSuite) TestGetToProject_StatusUnauthorized() {
+	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
+	DBCon.Create(project)
+	
+	result := testutil.NewRequest().Get("/to-projects/"+strconv.Itoa(project.ID)).WithHeader("Cookie", csrfTokenCookie).WithHeader(echo.HeaderXCSRFToken, csrfToken).GoWithHTTPHandler(s.T(), e)
+
+	assert.Equal(s.T(), http.StatusUnauthorized, result.Code())
+}
+
+func (s *TestToProjectsHandlerSuite) TestGetToProject_NotSupportersAccess_StatusForbidden() {
+	signedInCompany, cookieString := s.companySignIn()
+	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": signedInCompany.ID}).(*models.Project)
+	DBCon.Create(project)
+	
+	result := testutil.NewRequest().Get("/to-projects/"+strconv.Itoa(project.ID)).WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).GoWithHTTPHandler(s.T(), e)
 
 	assert.Equal(s.T(), http.StatusForbidden, result.Code())
 }

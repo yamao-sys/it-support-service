@@ -2,6 +2,7 @@ package businessservices
 
 import (
 	models "apps/models"
+	"errors"
 
 	"gorm.io/gorm"
 )
@@ -10,6 +11,7 @@ const toProjectPerPage = 5
 
 type ToProjectService interface {
 	FetchLists(pageToken int, startDate string, endDate string) (projects []models.Project, nextPageToken int)
+	Fetch(ID int) (project models.Project, error error)
 }
 
 type toProjectService struct {
@@ -44,4 +46,13 @@ func (tps *toProjectService) FetchLists(pageToken int, startDate string, endDate
 	}
 	
 	return projects, 0
+}
+
+func (tps *toProjectService) Fetch(ID int) (project models.Project, error error) {
+	tps.db.First(&project, ID)
+	if project.ID == 0 {
+		return project, errors.New("not found")
+	}
+	
+	return project, nil
 }
