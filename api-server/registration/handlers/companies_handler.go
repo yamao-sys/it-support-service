@@ -32,7 +32,7 @@ func (ch *companiesHandler) PostCompanyValidateSignUp(ctx context.Context, reque
 	// NOTE: バリデーションチェックを行う構造体
 	inputStruct, mappingErr := ch.mappingInputStruct(reader)
 	if mappingErr != nil {
-		return registrationapi.PostCompanyValidateSignUp500JSONResponse{Code: http.StatusInternalServerError, Message: mappingErr.Error()}, nil
+		return registrationapi.PostCompanyValidateSignUp500Response{}, nil
 	}
 
 	err := ch.companiesService.ValidateSignUp(&inputStruct)
@@ -50,7 +50,7 @@ func (ch *companiesHandler) PostCompanySignUp(ctx context.Context, request regis
 	// NOTE: バリデーションチェックを行う構造体
 	inputStruct, mappingErr := ch.mappingInputStruct(reader)
 	if mappingErr != nil {
-		return registrationapi.PostCompanySignUp500JSONResponse{Code: http.StatusInternalServerError, Message: mappingErr.Error()}, nil
+		return registrationapi.PostCompanySignUp500Response{}, nil
 	}
 
 	err := ch.companiesService.ValidateSignUp(&inputStruct)
@@ -66,7 +66,7 @@ func (ch *companiesHandler) PostCompanySignUp(ctx context.Context, request regis
 
 	signUpErr := ch.companiesService.SignUp(ctx, registrationapi.PostCompanySignUpMultipartRequestBody(inputStruct))
 	if signUpErr != nil {
-		return registrationapi.PostCompanySignUp500JSONResponse{Code: http.StatusInternalServerError, Message: signUpErr.Error()}, nil
+		return registrationapi.PostCompanySignUp500Response{}, nil
 	}
 
 	res := &registrationapi.CompanySignUpResponse{

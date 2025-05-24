@@ -33,7 +33,7 @@ func (sh *supportersHandler) PostSupporterValidateSignUp(ctx context.Context, re
 	// NOTE: バリデーションチェックを行う構造体
 	inputStruct, mappingErr := sh.mappingInputStruct(reader)
 	if mappingErr != nil {
-		return registrationapi.PostSupporterValidateSignUp500JSONResponse{Code: http.StatusInternalServerError, Message: mappingErr.Error()}, nil
+		return registrationapi.PostSupporterValidateSignUp500Response{}, nil
 	}
 
 	err := sh.supporterService.ValidateSignUp(&inputStruct)
@@ -46,7 +46,7 @@ func (sh *supportersHandler) PostSupporterSignUp(ctx context.Context, request re
 	// NOTE: バリデーションチェックを行う構造体
 	inputStruct, mappingErr := sh.mappingInputStruct(reader)
 	if mappingErr != nil {
-		return registrationapi.PostSupporterSignUp500JSONResponse{Code: http.StatusInternalServerError, Message: mappingErr.Error()}, nil
+		return registrationapi.PostSupporterSignUp500Response{}, nil
 	}
 
 	err := sh.supporterService.ValidateSignUp(&inputStruct)
@@ -62,7 +62,7 @@ func (sh *supportersHandler) PostSupporterSignUp(ctx context.Context, request re
 
 	signUpErr := sh.supporterService.SignUp(ctx, registrationapi.PostSupporterSignUpMultipartRequestBody(inputStruct))
 	if signUpErr != nil {
-		return registrationapi.PostSupporterSignUp500JSONResponse{Code: http.StatusInternalServerError, Message: signUpErr.Error()}, nil
+		return registrationapi.PostSupporterSignUp500Response{}, nil
 	}
 
 	return registrationapi.PostSupporterSignUp200JSONResponse(registrationapi.SupporterSignUpResponse{Code: http.StatusOK, Errors: registrationapi.SupporterSignUpValidationError{}}), nil
