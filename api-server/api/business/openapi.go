@@ -149,9 +149,35 @@ type SupporterSignInInput struct {
 // SupporterSignInOkResponse defines model for SupporterSignInOkResponse.
 type SupporterSignInOkResponse = map[string]interface{}
 
+// ToProject defines model for ToProject.
+type ToProject struct {
+	Description string             `json:"description"`
+	EndDate     openapi_types.Date `json:"endDate"`
+	Id          int                `json:"id"`
+	MaxBudget   *int               `json:"maxBudget,omitempty"`
+	MinBudget   *int               `json:"minBudget,omitempty"`
+	StartDate   openapi_types.Date `json:"startDate"`
+	Title       string             `json:"title"`
+}
+
+// ToProjectsListResponse defines model for ToProjectsListResponse.
+type ToProjectsListResponse struct {
+	NextPageToken string      `json:"nextPageToken"`
+	Projects      []ToProject `json:"projects"`
+}
+
 // GetProjectsParams defines parameters for GetProjects.
 type GetProjectsParams struct {
 	PageToken *string `form:"pageToken,omitempty" json:"pageToken,omitempty"`
+}
+
+// GetToProjectsParams defines parameters for GetToProjects.
+type GetToProjectsParams struct {
+	PageToken *string             `form:"pageToken,omitempty" json:"pageToken,omitempty"`
+	StartDate *openapi_types.Date `form:"startDate,omitempty" json:"startDate,omitempty"`
+	EndDate   *openapi_types.Date `form:"endDate,omitempty" json:"endDate,omitempty"`
+	MinBudget *int                `form:"minBudget,omitempty" json:"minBudget,omitempty"`
+	MaxBudget *int                `form:"maxBudget,omitempty" json:"maxBudget,omitempty"`
 }
 
 // PostCompanySignInJSONRequestBody defines body for PostCompanySignIn for application/json ContentType.
@@ -195,6 +221,9 @@ type ServerInterface interface {
 	// Supporter Sign In
 	// (POST /supporters/sign-in)
 	PostSupporterSignIn(ctx echo.Context) error
+	// Get Projects for Supporters
+	// (GET /to-projects)
+	GetToProjects(ctx echo.Context, params GetToProjectsParams) error
 }
 
 // ServerInterfaceWrapper converts echo contexts to parameters.
@@ -307,6 +336,54 @@ func (w *ServerInterfaceWrapper) PostSupporterSignIn(ctx echo.Context) error {
 	return err
 }
 
+// GetToProjects converts echo context to params.
+func (w *ServerInterfaceWrapper) GetToProjects(ctx echo.Context) error {
+	var err error
+
+	ctx.Set(ApiKeyAuthScopes, []string{})
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetToProjectsParams
+	// ------------- Optional query parameter "pageToken" -------------
+
+	err = runtime.BindQueryParameter("form", false, false, "pageToken", ctx.QueryParams(), &params.PageToken)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter pageToken: %s", err))
+	}
+
+	// ------------- Optional query parameter "startDate" -------------
+
+	err = runtime.BindQueryParameter("form", false, false, "startDate", ctx.QueryParams(), &params.StartDate)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter startDate: %s", err))
+	}
+
+	// ------------- Optional query parameter "endDate" -------------
+
+	err = runtime.BindQueryParameter("form", false, false, "endDate", ctx.QueryParams(), &params.EndDate)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter endDate: %s", err))
+	}
+
+	// ------------- Optional query parameter "minBudget" -------------
+
+	err = runtime.BindQueryParameter("form", false, false, "minBudget", ctx.QueryParams(), &params.MinBudget)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter minBudget: %s", err))
+	}
+
+	// ------------- Optional query parameter "maxBudget" -------------
+
+	err = runtime.BindQueryParameter("form", false, false, "maxBudget", ctx.QueryParams(), &params.MaxBudget)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter maxBudget: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetToProjects(ctx, params)
+	return err
+}
+
 // This is a simple interface which specifies echo.Route addition functions which
 // are present on both echo.Echo and echo.Group, since we want to allow using
 // either of them for path registration
@@ -343,6 +420,7 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.GET(baseURL+"/projects/:id", wrapper.GetProject)
 	router.PUT(baseURL+"/projects/:id", wrapper.PutProject)
 	router.POST(baseURL+"/supporters/sign-in", wrapper.PostSupporterSignIn)
+	router.GET(baseURL+"/to-projects", wrapper.GetToProjects)
 
 }
 
@@ -636,6 +714,35 @@ func (response PostSupporterSignIn500JSONResponse) VisitPostSupporterSignInRespo
 	return json.NewEncoder(w).Encode(response)
 }
 
+type GetToProjectsRequestObject struct {
+	Params GetToProjectsParams
+}
+
+type GetToProjectsResponseObject interface {
+	VisitGetToProjectsResponse(w http.ResponseWriter) error
+}
+
+type GetToProjects200JSONResponse ToProjectsListResponse
+
+func (response GetToProjects200JSONResponse) VisitGetToProjectsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetToProjects500JSONResponse struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+}
+
+func (response GetToProjects500JSONResponse) VisitGetToProjectsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(500)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
 	// Company Sign In
@@ -662,6 +769,9 @@ type StrictServerInterface interface {
 	// Supporter Sign In
 	// (POST /supporters/sign-in)
 	PostSupporterSignIn(ctx context.Context, request PostSupporterSignInRequestObject) (PostSupporterSignInResponseObject, error)
+	// Get Projects for Supporters
+	// (GET /to-projects)
+	GetToProjects(ctx context.Context, request GetToProjectsRequestObject) (GetToProjectsResponseObject, error)
 }
 
 type StrictHandlerFunc = strictecho.StrictEchoHandlerFunc
@@ -896,32 +1006,59 @@ func (sh *strictHandler) PostSupporterSignIn(ctx echo.Context) error {
 	return nil
 }
 
+// GetToProjects operation middleware
+func (sh *strictHandler) GetToProjects(ctx echo.Context, params GetToProjectsParams) error {
+	var request GetToProjectsRequestObject
+
+	request.Params = params
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.GetToProjects(ctx.Request().Context(), request.(GetToProjectsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetToProjects")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(GetToProjectsResponseObject); ok {
+		return validResponse.VisitGetToProjectsResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("unexpected response type: %T", response)
+	}
+	return nil
+}
+
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/+xZXW/bNhf+KwLf99KN060DCt0l2VAEG1Cj7nYT+IKRjm02EsmQR1kMw/99IClLlETZ",
-	"chOnSZM7RxIPz8dznvORNUlELgUHjprEa6KTJeTU/rwQuaR8NWULfsnPafoFbgvQ+AW0FFyD+UQqIUEh",
-	"A3sAlBLK/mIIuf2BKwkkJhoV4wuyGW0fUKXoimw2I6LgtmAKUhJfbQXMRgQZZua7UofIKRHVWvxhPo0q",
-	"XSrB4vobJGhuaqh/yWWBAY1zyrKgnpJq/a9QaeBlW2krwzvRr77TYp+un298F/eI+nyz23it5v2BSrSa",
-	"fxU3wPdbV3/qm+VLD9w+ySgP3KqAIqRnNg5zoXKKJCYpRXiHLPcE1VFIQSeKSWSCB6MEPP2dInQEhmQx",
-	"P5aMIyxA2UgrYfS+7HmtkSocfEnpoYCqBWc4USyB0DUtp7OU+HptxTb94atWe8K/aOS53IuejU5P1KYo",
-	"FPQky2MG4xk6/eH+bvk4ss7sT/rK30MY9f8K5iQm/xvXdD0uuXpsBP1DM5ZSo6hlRuvjMgv3He16wgGk",
-	"y8aeVfvSv63PPjQNrRgNmA0/1ADU8GMVsoYfaUDugDrY8HHtvci5L+Rlh9cXw7NMnyXI7vxUvBYiAwPA",
-	"Ecnp/XmRLgDDh3PGd71+HL4IsfAhTFBZ2Ee8ZcT6g9nPBLKO9s58Lj/rIbeANrsz2X3zVFXhxUEkjI7K",
-	"jIC399UEz+EPLgtOVqgyPA6YgiWiYecAbD2zQuFDcPipBjQPOOZD9vkVs003rAcUJv0X2zUscrjHCV1A",
-	"3xxSobQ5UA7C654xsxI8amnRxbGOjBU7cTwtpBQKQf3QQbnS4ntG5ZYJP2hY7pjQy5ItfcMDc0fczpHZ",
-	"pBUkhWK4mho4OZPPJPsTVmcFLm2wOIlJIsQNMwI4zY0AtMip42VPkI0RyPhcdBiMXBeacdA6OptcalKb",
-	"f759PgV158a3O1DaHXp/cmoMFxI4lYzE5NcT88g4EpdWVZsQlDPQY80W/B1zE7jQNpImjjZtzcRFJkJj",
-	"Y+VAXJRA47lIV7aJFByB27NUyowl9vT4m3Ys7FJuX0IGVjCbJiJQFWAfuLhYS345PT2OBh5OrBrNuHxd",
-	"QlQ6IVpSHekiSQBSSE/IiCyBpuBSdgr47sKBIF63TBl5arUTwdz44VimBVinx0QN6g5UlIgiSyMuMCq4",
-	"sQwpTyP0XJAWEKGIGL8zlB/pFUd6f2JA+NuBRrSmE5FCTwMHWtPFgK7Liqi/n3WTuWP51FkNrgMyyV7k",
-	"OVWr1mItsqmAdKHdPWVGkZk5Mk60mhvtyoLdzKlPgBfm/THB7K/dDkPwzxe2T4BR6fAqXuZPFyqZUa53",
-	"E2C5BjsG77U2aU/Med290ivFSlnPSXzVrORXs82swQB2WI+2e9ESTQ5CJZy8VrQv+yd1VympojmgLRhX",
-	"awL3MrMumdNMw8j1EbcFqFXdRsiqCd1VQ2bHhE2obX9DziDk1IudLXi2YJiZ9rifg6qDR6GhzvbmqZko",
-	"tM14g9SDIeVT0njN0s0AXurSkqUhMz/ULGRXnntb2vo/KE/AR9+Pmw+nH14cbvwOnXLTns9ZszGHNFKg",
-	"RaESeIXZYbq+fWxbhMi2OH4evBH4WyK+mkT8W6aDypTebuEGrqVaq70jdUbBhecT51b/EvMnWE7tX4q/",
-	"raeG7Tmaa+zmgqpOLpNtNn2NHFfWCpWRmCwRpY7H40wkNFsKjfHH04/viUnmUsp6W/TqdddmVD/Uau7/",
-	"7V3pPa2S3n9m5+fNbPNfAAAA//8p6mVtYygAAA==",
+	"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",
+	"vjadLgAA",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file
