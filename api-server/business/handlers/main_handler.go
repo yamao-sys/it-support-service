@@ -26,6 +26,7 @@ type MainHandler interface {
 
 	// handlers /to_projects
 	GetToProjects(ctx context.Context, request businessapi.GetToProjectsRequestObject) (businessapi.GetToProjectsResponseObject, error)
+	GetToProject(ctx context.Context, request businessapi.GetToProjectRequestObject) (businessapi.GetToProjectResponseObject, error)
 }
 
 type mainHandler struct {
@@ -90,5 +91,10 @@ func (mh *mainHandler) PostPlan(ctx context.Context, request businessapi.PostPla
 
 func (mh *mainHandler) GetToProjects(ctx context.Context, request businessapi.GetToProjectsRequestObject) (businessapi.GetToProjectsResponseObject, error) {
 	res, err := mh.toProjectsHandler.GetToProjects(ctx, request)
+	return res, err
+}
+
+func (mh *mainHandler) GetToProject(ctx context.Context, request businessapi.GetToProjectRequestObject) (businessapi.GetToProjectResponseObject, error) {
+	res, err := mh.toProjectsHandler.GetToProject(ctx, request)
 	return res, err
 }

@@ -5,6 +5,7 @@ import (
 	businesshelpers "apps/business/helpers"
 	businessservices "apps/business/services"
 	"context"
+	"net/http"
 	"strconv"
 
 	openapi_types "github.com/oapi-codegen/runtime/types"
@@ -12,6 +13,7 @@ import (
 
 type ToProjectsHandler interface {
 	GetToProjects(ctx context.Context, request businessapi.GetToProjectsRequestObject) (businessapi.GetToProjectsResponseObject, error)
+	GetToProject(ctx context.Context, request businessapi.GetToProjectRequestObject) (businessapi.GetToProjectResponseObject, error)
 }
 
 type toProjectsHandler struct {
@@ -27,7 +29,7 @@ func (tph *toProjectsHandler) GetToProjects(ctx context.Context, request busines
 	if supporterID == 0 {
 		return businessapi.GetToProjects403Response{}, nil
 	}
-	
+
 	var pageToken int
 	var startDate string
 	var endDate string
@@ -70,4 +72,38 @@ func (tph *toProjectsHandler) GetToProjects(ctx context.Context, request busines
 		Projects: resProjects,
 		NextPageToken: strconv.Itoa(nextPageToken),
 	}), nil
+}
+
+func (tph *toProjectsHandler) GetToProject(ctx context.Context, request businessapi.GetToProjectRequestObject) (businessapi.GetToProjectResponseObject, error) {
+	supporterID, _ := businesshelpers.ExtractSupporterID(ctx)
+	if supporterID == 0 {
+		return businessapi.GetToProject403Response{}, nil
+	}
+
+	projectID := request.Id
+	project, err := tph.toProjectService.Fetch(projectID)
+	if err != nil {
+		return businessapi.GetToProject404JSONResponse{Code: http.StatusNotFound}, nil
+	}
+
+	resProject := businessapi.ToProject{}
+	resProject.Id = project.ID
+	resProject.Title = project.Title
+	resProject.Description = project.Description
+	resProject.StartDate = openapi_types.Date{Time: project.StartDate}
+	resProject.EndDate = openapi_types.Date{Time: project.EndDate}
+	minBudget := &project.MinBudget.Int
+	if *minBudget != 0 {
+		resProject.MinBudget = minBudget
+	} else {
+		resProject.MinBudget = nil
+	}
+	maxBudget := &project.MaxBudget.Int
+	if *maxBudget != 0 {
+		resProject.MaxBudget = maxBudget
+	} else {
+		resProject.MaxBudget = nil
+	}
+
+	return businessapi.GetToProject200JSONResponse(businessapi.ToProjectResponse{Project: resProject}), nil
 }
