@@ -388,6 +388,57 @@ paths:
         - to-projects
       security:
         - ApiKeyAuth: []
+  /to-projects/{id}:
+    get:
+      operationId: get-to-project
+      summary: Get Project for Supporters
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ToProjectResponse'
+        '403':
+          description: Access is forbidden.
+        '404':
+          description: The server cannot find the requested resource.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  message:
+                    type: string
+                required:
+                  - code
+                  - message
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  message:
+                    type: string
+                required:
+                  - code
+                  - message
+      tags:
+        - to-projects
+      security:
+        - ApiKeyAuth: []
 components:
   schemas:
     CompanySignInBadRequestResponse:
@@ -685,6 +736,14 @@ components:
         maxBudget:
           type: integer
       title: Project for Supporters
+    ToProjectResponse:
+      type: object
+      required:
+        - project
+      properties:
+        project:
+          $ref: '#/components/schemas/ToProject'
+      title: Project Response for Supporters
     ToProjectsListResponse:
       type: object
       required:

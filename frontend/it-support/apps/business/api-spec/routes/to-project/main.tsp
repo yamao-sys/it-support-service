@@ -25,4 +25,17 @@ namespace BusinessService.ToProject {
       | ForBiddenErrorResponse
       | InternalServerErrorResponse;
   }
+
+  @route("/{id}")
+  interface Id {
+    @operationId("get-to-project")
+    @summary("Get Project for Supporters")
+    @get
+    get(
+      @path id: integer,
+    ): SuccessResponse<ToProjectResponse>
+      | ForBiddenErrorResponse
+      | NotFoundErrorResponse
+      | InternalServerErrorResponse;
+  }
 }

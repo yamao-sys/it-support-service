@@ -5,3 +5,8 @@ model ToProjectsListResponse{
   projects: ToProject[];
   nextPageToken: string;
 }
+
+@summary("Project Response for Supporters")
+model ToProjectResponse{
+  project: ToProject;
+}
