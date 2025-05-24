@@ -349,21 +349,18 @@ paths:
           required: false
           schema:
             type: string
-          explode: false
         - name: startDate
           in: query
           required: false
           schema:
             type: string
             format: date
-          explode: false
         - name: endDate
           in: query
           required: false
           schema:
             type: string
             format: date
-          explode: false
       responses:
         '200':
           description: The request has succeeded.
@@ -371,6 +368,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ToProjectsListResponse'
+        '403':
+          description: Access is forbidden.
         '500':
           description: Server error
           content:
