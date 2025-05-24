@@ -28,7 +28,7 @@ func (sh *supportersHandler) PostSupporterSignIn(ctx context.Context, request bu
 	statusCode, tokenString, err := sh.supporterService.SignIn(inputs)
 	switch (statusCode) {
 	case http.StatusInternalServerError:
-		return businessapi.PostSupporterSignIn500JSONResponse{Code: http.StatusInternalServerError, Message: err.Error()}, nil
+		return businessapi.PostSupporterSignIn500Response{}, nil
 	case http.StatusBadRequest:
 		return businessapi.PostSupporterSignIn400JSONResponse{Errors: []string{err.Error()}}, nil
 	}

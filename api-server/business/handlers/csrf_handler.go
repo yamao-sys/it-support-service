@@ -3,7 +3,6 @@ package businesshandlers
 import (
 	businessapi "apps/api/business"
 	"context"
-	"net/http"
 
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -21,7 +20,7 @@ func NewCsrfHandler() CsrfHandler {
 func (ch *csrfHandler) GetCsrf(ctx context.Context, request businessapi.GetCsrfRequestObject) (businessapi.GetCsrfResponseObject, error) {
 	csrfToken, ok := ctx.Value(middleware.DefaultCSRFConfig.ContextKey).(string)
 	if !ok {
-		return businessapi.GetCsrf500JSONResponse{Code: http.StatusInternalServerError, Message: "failed to retrieval token",}, nil
+		return businessapi.GetCsrf500Response{}, nil
 	}
 	
 	return businessapi.GetCsrf200JSONResponse(businessapi.CsrfResponse{ CsrfToken: csrfToken }), nil

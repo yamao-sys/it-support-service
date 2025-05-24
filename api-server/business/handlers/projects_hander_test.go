@@ -421,10 +421,6 @@ func (s *TestProjectsHandlerSuite) TestGetProject_StatusNotFound() {
 	result := testutil.NewRequest().Get("/projects/"+strconv.Itoa(project.ID+1)).WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).GoWithHTTPHandler(s.T(), e)
 
 	assert.Equal(s.T(), http.StatusNotFound, result.Code())
-
-	var res businessapi.GetProject404JSONResponse
-	result.UnmarshalBodyToObject(&res)
-	assert.Equal(s.T(), http.StatusNotFound, res.Code)
 }
 
 func (s *TestProjectsHandlerSuite) TestGetProject_StatusUnauthorized() {

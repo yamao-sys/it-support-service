@@ -28,7 +28,7 @@ func (ch *companiesHandler) PostCompanySignIn(ctx context.Context, request busin
 	statusCode, tokenString, err := ch.companyService.SignIn(inputs)
 	switch (statusCode) {
 	case http.StatusInternalServerError:
-		return businessapi.PostCompanySignIn500JSONResponse{Code: http.StatusInternalServerError, Message: err.Error(),}, nil
+		return businessapi.PostCompanySignIn500Response{}, nil
 	case http.StatusBadRequest:
 		return businessapi.PostCompanySignIn400JSONResponse{Errors: []string{err.Error()}}, nil
 	}

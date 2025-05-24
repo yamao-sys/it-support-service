@@ -5,7 +5,6 @@ import (
 	businesshelpers "apps/business/helpers"
 	businessservices "apps/business/services"
 	"context"
-	"net/http"
 	"strconv"
 
 	openapi_types "github.com/oapi-codegen/runtime/types"
@@ -35,7 +34,7 @@ func (ph *projectsHandler) GetProjects(ctx context.Context, request businessapi.
 
 	projects, nextPageToken, err := ph.projectService.FetchLists(companyID, pageToken)
 	if err != nil {
-		return businessapi.GetProjects500JSONResponse{Code: http.StatusInternalServerError}, err
+		return businessapi.GetProjects500Response{}, err
 	}
 	var resProjects []businessapi.Project
 	for _, project := range projects { 
@@ -84,7 +83,7 @@ func (ph *projectsHandler) PostProject(ctx context.Context, request businessapi.
 
 	createdProject, validationErrors, err := ph.projectService.Create(&inputs, companyID)
 	if err != nil {
-		return businessapi.PostProject500JSONResponse{Code: http.StatusInternalServerError}, err
+		return businessapi.PostProject500Response{}, err
 	}
 
 	mappedValidationErrors := ph.projectService.MappingValidationErrorStruct(validationErrors)
@@ -108,7 +107,7 @@ func (ph *projectsHandler) GetProject(ctx context.Context, request businessapi.G
 	projectID := request.Id
 	project, err := ph.projectService.Fetch(projectID)
 	if err != nil {
-		return businessapi.GetProject404JSONResponse{Code: http.StatusNotFound}, nil
+		return businessapi.GetProject404Response{}, nil
 	}
 
 	resProject := businessapi.Project{}
@@ -148,7 +147,7 @@ func (ph *projectsHandler) PutProject(ctx context.Context, request businessapi.P
 
 	updatedProject, validationErrors, err := ph.projectService.Update(&inputs, projectID)
 	if err != nil {
-		return businessapi.PutProject500JSONResponse{Code: http.StatusInternalServerError}, err
+		return businessapi.PutProject500Response{}, err
 	}
 
 	mappedValidationErrors := ph.projectService.MappingValidationErrorStruct(validationErrors)
