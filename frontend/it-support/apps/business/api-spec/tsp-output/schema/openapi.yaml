@@ -364,18 +364,6 @@ paths:
             type: string
             format: date
           explode: false
-        - name: minBudget
-          in: query
-          required: false
-          schema:
-            type: integer
-          explode: false
-        - name: maxBudget
-          in: query
-          required: false
-          schema:
-            type: integer
-          explode: false
       responses:
         '200':
           description: The request has succeeded.

@@ -21,8 +21,6 @@ namespace BusinessService.ToProject {
       @query pageToken?: string,
       @query startDate?: plainDate,
       @query endDate?: plainDate,
-      @query minBudget?: integer,
-      @query maxBudget?: integer,
     ): SuccessResponse<ToProjectsListResponse>
       | InternalServerErrorResponse;
   }
