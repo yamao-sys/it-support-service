@@ -23,6 +23,9 @@ type MainHandler interface {
 
 	// handlers /plans
 	PostPlan(ctx context.Context, request businessapi.PostPlanRequestObject) (businessapi.PostPlanResponseObject, error)
+
+	// handlers /to_projects
+	GetToProjects(ctx context.Context, request businessapi.GetToProjectsRequestObject) (businessapi.GetToProjectsResponseObject, error)
 }
 
 type mainHandler struct {
@@ -31,6 +34,7 @@ type mainHandler struct {
 	companiesHandler CompaniesHandler
 	projectsHandler ProjectsHandler
 	plansHandler PlansHandler
+	toProjectsHandler ToProjectsHandler
 }
 
 func NewMainHandler(
@@ -39,8 +43,9 @@ func NewMainHandler(
 	companiesHandler CompaniesHandler,
 	projectsHandler ProjectsHandler,
 	plansHandler PlansHandler,
+	toProjectsHandler ToProjectsHandler,
 ) MainHandler {
-	return &mainHandler{csrfHandler, supportersHandler, companiesHandler, projectsHandler, plansHandler}
+	return &mainHandler{csrfHandler, supportersHandler, companiesHandler, projectsHandler, plansHandler, toProjectsHandler}
 }
 
 func (mh *mainHandler) GetCsrf(ctx context.Context, request businessapi.GetCsrfRequestObject) (businessapi.GetCsrfResponseObject, error) {
@@ -80,5 +85,10 @@ func (mh *mainHandler) PutProject(ctx context.Context, request businessapi.PutPr
 
 func (mh *mainHandler) PostPlan(ctx context.Context, request businessapi.PostPlanRequestObject) (businessapi.PostPlanResponseObject, error) {
 	res, err := mh.plansHandler.PostPlan(ctx, request)
+	return res, err
+}
+
+func (mh *mainHandler) GetToProjects(ctx context.Context, request businessapi.GetToProjectsRequestObject) (businessapi.GetToProjectsResponseObject, error) {
+	res, err := mh.toProjectsHandler.GetToProjects(ctx, request)
 	return res, err
 }

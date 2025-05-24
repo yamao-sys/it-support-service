@@ -26,6 +26,7 @@ func main() {
 	companyService := businessservices.NewCompanyService(dbCon)
 	projectService := businessservices.NewProjectService(dbCon)
 	planService := businessservices.NewPlanService(dbCon)
+	toProjectService := businessservices.NewToProjectService(dbCon)
 
 	// NOTE: Handlerのインスタンス
 	csrfHandler := businesshandlers.NewCsrfHandler()
@@ -33,13 +34,14 @@ func main() {
 	companiesHandler := businesshandlers.NewCompaniesHandler(companyService)
 	projectsHandler := businesshandlers.NewProjectsHandler(projectService)
 	plansHandler := businesshandlers.NewPlansHandler(planService)
+	toProjectsHandler := businesshandlers.NewToProjectsHandler(toProjectService)
 
 	// NOTE: Handlerをルーティングに追加
 	e := businessmiddlewares.ApplyMiddlewares(echo.New())
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, Registration!")
 	})
-	mainHandler := businesshandlers.NewMainHandler(csrfHandler, supportersHandler, companiesHandler, projectsHandler, plansHandler)
+	mainHandler := businesshandlers.NewMainHandler(csrfHandler, supportersHandler, companiesHandler, projectsHandler, plansHandler, toProjectsHandler)
 	mainStrictHandler := businessapi.NewStrictHandler(mainHandler, []businessapi.StrictMiddlewareFunc{businessmiddlewares.AuthMiddleware})
 	businessapi.RegisterHandlers(e, mainStrictHandler)
 
