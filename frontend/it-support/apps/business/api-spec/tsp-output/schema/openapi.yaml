@@ -36,18 +36,6 @@ paths:
                 $ref: '#/components/schemas/CompanySignInBadRequestResponse'
         '500':
           description: Server error
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  code:
-                    type: integer
-                  message:
-                    type: string
-                required:
-                  - code
-                  - message
       tags:
         - companies
       requestBody:
@@ -70,18 +58,6 @@ paths:
                 $ref: '#/components/schemas/CsrfResponse'
         '500':
           description: Server error
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  code:
-                    type: integer
-                  message:
-                    type: string
-                required:
-                  - code
-                  - message
       tags:
         - csrf
   /plans:
@@ -98,18 +74,6 @@ paths:
                 $ref: '#/components/schemas/PlanStoreResponse'
         '500':
           description: Server error
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  code:
-                    type: integer
-                  message:
-                    type: string
-                required:
-                  - code
-                  - message
       tags:
         - plans
       requestBody:
@@ -140,18 +104,6 @@ paths:
                 $ref: '#/components/schemas/ProjectsListResponse'
         '500':
           description: Server error
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  code:
-                    type: integer
-                  message:
-                    type: string
-                required:
-                  - code
-                  - message
       tags:
         - projects
       security:
@@ -169,18 +121,6 @@ paths:
                 $ref: '#/components/schemas/ProjectStoreResponse'
         '500':
           description: Server error
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  code:
-                    type: integer
-                  message:
-                    type: string
-                required:
-                  - code
-                  - message
       tags:
         - projects
       requestBody:
@@ -210,32 +150,8 @@ paths:
                 $ref: '#/components/schemas/ProjectResponse'
         '404':
           description: The server cannot find the requested resource.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  code:
-                    type: integer
-                  message:
-                    type: string
-                required:
-                  - code
-                  - message
         '500':
           description: Server error
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  code:
-                    type: integer
-                  message:
-                    type: string
-                required:
-                  - code
-                  - message
       tags:
         - projects
       security:
@@ -258,32 +174,8 @@ paths:
                 $ref: '#/components/schemas/ProjectStoreResponse'
         '404':
           description: The server cannot find the requested resource.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  code:
-                    type: integer
-                  message:
-                    type: string
-                required:
-                  - code
-                  - message
         '500':
           description: Server error
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  code:
-                    type: integer
-                  message:
-                    type: string
-                required:
-                  - code
-                  - message
       tags:
         - projects
       requestBody:
@@ -319,18 +211,6 @@ paths:
                 $ref: '#/components/schemas/SupporterSignInBadRequestResponse'
         '500':
           description: Server error
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  code:
-                    type: integer
-                  message:
-                    type: string
-                required:
-                  - code
-                  - message
       tags:
         - supporters
       requestBody:
@@ -372,18 +252,6 @@ paths:
           description: Access is forbidden.
         '500':
           description: Server error
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  code:
-                    type: integer
-                  message:
-                    type: string
-                required:
-                  - code
-                  - message
       tags:
         - to-projects
       security:
@@ -409,32 +277,8 @@ paths:
           description: Access is forbidden.
         '404':
           description: The server cannot find the requested resource.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  code:
-                    type: integer
-                  message:
-                    type: string
-                required:
-                  - code
-                  - message
         '500':
           description: Server error
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  code:
-                    type: integer
-                  message:
-                    type: string
-                required:
-                  - code
-                  - message
       tags:
         - to-projects
       security:

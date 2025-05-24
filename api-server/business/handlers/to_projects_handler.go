@@ -5,7 +5,6 @@ import (
 	businesshelpers "apps/business/helpers"
 	businessservices "apps/business/services"
 	"context"
-	"net/http"
 	"strconv"
 
 	openapi_types "github.com/oapi-codegen/runtime/types"
@@ -83,7 +82,7 @@ func (tph *toProjectsHandler) GetToProject(ctx context.Context, request business
 	projectID := request.Id
 	project, err := tph.toProjectService.Fetch(projectID)
 	if err != nil {
-		return businessapi.GetToProject404JSONResponse{Code: http.StatusNotFound}, nil
+		return businessapi.GetToProject404Response{}, nil
 	}
 
 	resProject := businessapi.ToProject{}

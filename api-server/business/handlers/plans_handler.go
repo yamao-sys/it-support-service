@@ -5,7 +5,6 @@ import (
 	businesshelpers "apps/business/helpers"
 	businessservices "apps/business/services"
 	"context"
-	"net/http"
 
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
@@ -36,7 +35,7 @@ func (ph *plansHandler) PostPlan(ctx context.Context, request businessapi.PostPl
 
 	createdPlan, validationErrors, err := ph.planService.Create(&inputs, supporterID)
 	if err != nil {
-		return businessapi.PostPlan500JSONResponse{Code: http.StatusInternalServerError}, err
+		return businessapi.PostPlan500Response{}, err
 	}
 
 	mappedValidationErrors := ph.planService.MappingValidationErrorStruct(validationErrors)

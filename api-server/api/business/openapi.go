@@ -469,16 +469,12 @@ func (response PostCompanySignIn400JSONResponse) VisitPostCompanySignInResponse(
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PostCompanySignIn500JSONResponse struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
+type PostCompanySignIn500Response struct {
 }
 
-func (response PostCompanySignIn500JSONResponse) VisitPostCompanySignInResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
+func (response PostCompanySignIn500Response) VisitPostCompanySignInResponse(w http.ResponseWriter) error {
 	w.WriteHeader(500)
-
-	return json.NewEncoder(w).Encode(response)
+	return nil
 }
 
 type GetCsrfRequestObject struct {
@@ -497,16 +493,12 @@ func (response GetCsrf200JSONResponse) VisitGetCsrfResponse(w http.ResponseWrite
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetCsrf500JSONResponse struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
+type GetCsrf500Response struct {
 }
 
-func (response GetCsrf500JSONResponse) VisitGetCsrfResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
+func (response GetCsrf500Response) VisitGetCsrfResponse(w http.ResponseWriter) error {
 	w.WriteHeader(500)
-
-	return json.NewEncoder(w).Encode(response)
+	return nil
 }
 
 type PostPlanRequestObject struct {
@@ -526,16 +518,12 @@ func (response PostPlan200JSONResponse) VisitPostPlanResponse(w http.ResponseWri
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PostPlan500JSONResponse struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
+type PostPlan500Response struct {
 }
 
-func (response PostPlan500JSONResponse) VisitPostPlanResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
+func (response PostPlan500Response) VisitPostPlanResponse(w http.ResponseWriter) error {
 	w.WriteHeader(500)
-
-	return json.NewEncoder(w).Encode(response)
+	return nil
 }
 
 type GetProjectsRequestObject struct {
@@ -555,16 +543,12 @@ func (response GetProjects200JSONResponse) VisitGetProjectsResponse(w http.Respo
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetProjects500JSONResponse struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
+type GetProjects500Response struct {
 }
 
-func (response GetProjects500JSONResponse) VisitGetProjectsResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
+func (response GetProjects500Response) VisitGetProjectsResponse(w http.ResponseWriter) error {
 	w.WriteHeader(500)
-
-	return json.NewEncoder(w).Encode(response)
+	return nil
 }
 
 type PostProjectRequestObject struct {
@@ -584,16 +568,12 @@ func (response PostProject200JSONResponse) VisitPostProjectResponse(w http.Respo
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PostProject500JSONResponse struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
+type PostProject500Response struct {
 }
 
-func (response PostProject500JSONResponse) VisitPostProjectResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
+func (response PostProject500Response) VisitPostProjectResponse(w http.ResponseWriter) error {
 	w.WriteHeader(500)
-
-	return json.NewEncoder(w).Encode(response)
+	return nil
 }
 
 type GetProjectRequestObject struct {
@@ -613,28 +593,20 @@ func (response GetProject200JSONResponse) VisitGetProjectResponse(w http.Respons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetProject404JSONResponse struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
+type GetProject404Response struct {
 }
 
-func (response GetProject404JSONResponse) VisitGetProjectResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
+func (response GetProject404Response) VisitGetProjectResponse(w http.ResponseWriter) error {
 	w.WriteHeader(404)
-
-	return json.NewEncoder(w).Encode(response)
+	return nil
 }
 
-type GetProject500JSONResponse struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
+type GetProject500Response struct {
 }
 
-func (response GetProject500JSONResponse) VisitGetProjectResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
+func (response GetProject500Response) VisitGetProjectResponse(w http.ResponseWriter) error {
 	w.WriteHeader(500)
-
-	return json.NewEncoder(w).Encode(response)
+	return nil
 }
 
 type PutProjectRequestObject struct {
@@ -655,28 +627,20 @@ func (response PutProject200JSONResponse) VisitPutProjectResponse(w http.Respons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PutProject404JSONResponse struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
+type PutProject404Response struct {
 }
 
-func (response PutProject404JSONResponse) VisitPutProjectResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
+func (response PutProject404Response) VisitPutProjectResponse(w http.ResponseWriter) error {
 	w.WriteHeader(404)
-
-	return json.NewEncoder(w).Encode(response)
+	return nil
 }
 
-type PutProject500JSONResponse struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
+type PutProject500Response struct {
 }
 
-func (response PutProject500JSONResponse) VisitPutProjectResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
+func (response PutProject500Response) VisitPutProjectResponse(w http.ResponseWriter) error {
 	w.WriteHeader(500)
-
-	return json.NewEncoder(w).Encode(response)
+	return nil
 }
 
 type PostSupporterSignInRequestObject struct {
@@ -713,16 +677,12 @@ func (response PostSupporterSignIn400JSONResponse) VisitPostSupporterSignInRespo
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PostSupporterSignIn500JSONResponse struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
+type PostSupporterSignIn500Response struct {
 }
 
-func (response PostSupporterSignIn500JSONResponse) VisitPostSupporterSignInResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
+func (response PostSupporterSignIn500Response) VisitPostSupporterSignInResponse(w http.ResponseWriter) error {
 	w.WriteHeader(500)
-
-	return json.NewEncoder(w).Encode(response)
+	return nil
 }
 
 type GetToProjectsRequestObject struct {
@@ -750,16 +710,12 @@ func (response GetToProjects403Response) VisitGetToProjectsResponse(w http.Respo
 	return nil
 }
 
-type GetToProjects500JSONResponse struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
+type GetToProjects500Response struct {
 }
 
-func (response GetToProjects500JSONResponse) VisitGetToProjectsResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
+func (response GetToProjects500Response) VisitGetToProjectsResponse(w http.ResponseWriter) error {
 	w.WriteHeader(500)
-
-	return json.NewEncoder(w).Encode(response)
+	return nil
 }
 
 type GetToProjectRequestObject struct {
@@ -787,28 +743,20 @@ func (response GetToProject403Response) VisitGetToProjectResponse(w http.Respons
 	return nil
 }
 
-type GetToProject404JSONResponse struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
+type GetToProject404Response struct {
 }
 
-func (response GetToProject404JSONResponse) VisitGetToProjectResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
+func (response GetToProject404Response) VisitGetToProjectResponse(w http.ResponseWriter) error {
 	w.WriteHeader(404)
-
-	return json.NewEncoder(w).Encode(response)
+	return nil
 }
 
-type GetToProject500JSONResponse struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
+type GetToProject500Response struct {
 }
 
-func (response GetToProject500JSONResponse) VisitGetToProjectResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
+func (response GetToProject500Response) VisitGetToProjectResponse(w http.ResponseWriter) error {
 	w.WriteHeader(500)
-
-	return json.NewEncoder(w).Encode(response)
+	return nil
 }
 
 // StrictServerInterface represents all server handlers.
@@ -1130,31 +1078,31 @@ func (sh *strictHandler) GetToProject(ctx echo.Context, id int) error {
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
+	"OvYpAAA=",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file
