@@ -15,16 +15,8 @@ model BadRequestErrorResponse<T> {
 
 model NotFoundErrorResponse {
   @statusCode status: 404;
-  @body body: {
-    code: integer;
-    message: string;
-  }
 }
 
 model InternalServerErrorResponse {
   @statusCode status: 500;
-  @body body: {
-    code: integer;
-    message: string;
-  }
 }

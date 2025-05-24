@@ -3,7 +3,6 @@ package registrationhandlers
 import (
 	registrationapi "apps/api/registration"
 	"context"
-	"net/http"
 
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -19,10 +18,7 @@ func NewCsrfHandler() CsrfHandler {
 }
 
 func (ch *csrfHandler) GetCsrf(ctx context.Context, request registrationapi.GetCsrfRequestObject) (registrationapi.GetCsrfResponseObject, error) {
-	csrfToken, ok := ctx.Value(middleware.DefaultCSRFConfig.ContextKey).(string)
-	if !ok {
-		return registrationapi.GetCsrf500JSONResponse{Code: http.StatusInternalServerError, Message: "failed to retrieval token",}, nil
-	}
+	csrfToken, _ := ctx.Value(middleware.DefaultCSRFConfig.ContextKey).(string)
 	
 	return registrationapi.GetCsrf200JSONResponse(registrationapi.CsrfResponse{CsrfToken: csrfToken}), nil
 }

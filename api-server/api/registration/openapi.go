@@ -220,16 +220,12 @@ func (response PostCompanySignUp400JSONResponse) VisitPostCompanySignUpResponse(
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PostCompanySignUp500JSONResponse struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
+type PostCompanySignUp500Response struct {
 }
 
-func (response PostCompanySignUp500JSONResponse) VisitPostCompanySignUpResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
+func (response PostCompanySignUp500Response) VisitPostCompanySignUpResponse(w http.ResponseWriter) error {
 	w.WriteHeader(500)
-
-	return json.NewEncoder(w).Encode(response)
+	return nil
 }
 
 type PostCompanyValidateSignUpRequestObject struct {
@@ -258,16 +254,12 @@ func (response PostCompanyValidateSignUp400JSONResponse) VisitPostCompanyValidat
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PostCompanyValidateSignUp500JSONResponse struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
+type PostCompanyValidateSignUp500Response struct {
 }
 
-func (response PostCompanyValidateSignUp500JSONResponse) VisitPostCompanyValidateSignUpResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
+func (response PostCompanyValidateSignUp500Response) VisitPostCompanyValidateSignUpResponse(w http.ResponseWriter) error {
 	w.WriteHeader(500)
-
-	return json.NewEncoder(w).Encode(response)
+	return nil
 }
 
 type GetCsrfRequestObject struct {
@@ -286,16 +278,12 @@ func (response GetCsrf200JSONResponse) VisitGetCsrfResponse(w http.ResponseWrite
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetCsrf500JSONResponse struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
+type GetCsrf500Response struct {
 }
 
-func (response GetCsrf500JSONResponse) VisitGetCsrfResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
+func (response GetCsrf500Response) VisitGetCsrfResponse(w http.ResponseWriter) error {
 	w.WriteHeader(500)
-
-	return json.NewEncoder(w).Encode(response)
+	return nil
 }
 
 type PostSupporterSignUpRequestObject struct {
@@ -324,16 +312,12 @@ func (response PostSupporterSignUp400JSONResponse) VisitPostSupporterSignUpRespo
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PostSupporterSignUp500JSONResponse struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
+type PostSupporterSignUp500Response struct {
 }
 
-func (response PostSupporterSignUp500JSONResponse) VisitPostSupporterSignUpResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
+func (response PostSupporterSignUp500Response) VisitPostSupporterSignUpResponse(w http.ResponseWriter) error {
 	w.WriteHeader(500)
-
-	return json.NewEncoder(w).Encode(response)
+	return nil
 }
 
 type PostSupporterValidateSignUpRequestObject struct {
@@ -362,16 +346,12 @@ func (response PostSupporterValidateSignUp400JSONResponse) VisitPostSupporterVal
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PostSupporterValidateSignUp500JSONResponse struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
+type PostSupporterValidateSignUp500Response struct {
 }
 
-func (response PostSupporterValidateSignUp500JSONResponse) VisitPostSupporterValidateSignUpResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
+func (response PostSupporterValidateSignUp500Response) VisitPostSupporterValidateSignUpResponse(w http.ResponseWriter) error {
 	w.WriteHeader(500)
-
-	return json.NewEncoder(w).Encode(response)
+	return nil
 }
 
 // StrictServerInterface represents all server handlers.
@@ -547,21 +527,21 @@ func (sh *strictHandler) PostSupporterValidateSignUp(ctx echo.Context) error {
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
+	"gvv+EwAA",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file
