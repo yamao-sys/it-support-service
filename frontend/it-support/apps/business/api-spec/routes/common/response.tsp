@@ -19,6 +19,10 @@ model BadRequestErrorResponse<T> {
   @body body: T
 }
 
+model ForBiddenErrorResponse {
+  @statusCode status: 403;
+}
+
 model NotFoundErrorResponse {
   @statusCode status: 404;
   @body body: {

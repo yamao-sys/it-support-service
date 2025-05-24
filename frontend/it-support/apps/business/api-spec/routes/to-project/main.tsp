@@ -18,12 +18,11 @@ namespace BusinessService.ToProject {
     @summary("Get Projects for Supporters")
     @get
     get(
-      @query pageToken?: string,
-      @query startDate?: plainDate,
-      @query endDate?: plainDate,
-      @query minBudget?: integer,
-      @query maxBudget?: integer,
+      @query(#{ explode: true }) pageToken?: string,
+      @query(#{ explode: true }) startDate?: plainDate,
+      @query(#{ explode: true }) endDate?: plainDate,
     ): SuccessResponse<ToProjectsListResponse>
+      | ForBiddenErrorResponse
       | InternalServerErrorResponse;
   }
 }

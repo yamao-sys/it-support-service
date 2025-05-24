@@ -87,7 +87,10 @@ func (s *WithDBSuite) initializeHandlers(projectService businessservices.Project
 	
 	testPlansHandler := NewPlansHandler(planService)
 
-	mainHandler := NewMainHandler(csrfServer, testSupportersHandler, testCompaniesHandler, testProjectsHandler, testPlansHandler)
+	toProjectService := businessservices.NewToProjectService(DBCon)
+	testToProjectsHandler := NewToProjectsHandler(toProjectService)
+
+	mainHandler := NewMainHandler(csrfServer, testSupportersHandler, testCompaniesHandler, testProjectsHandler, testPlansHandler, testToProjectsHandler)
 
 	strictHandler := businessapi.NewStrictHandler(mainHandler, []businessapi.StrictMiddlewareFunc{businessmiddlewares.AuthMiddleware})
 	businessapi.RegisterHandlers(e, strictHandler)
