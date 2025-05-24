@@ -28,18 +28,6 @@ paths:
                 $ref: '#/components/schemas/CompanySignUpResponse'
         '500':
           description: Server error
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  code:
-                    type: integer
-                  message:
-                    type: string
-                required:
-                  - code
-                  - message
       tags:
         - companies
       requestBody:
@@ -68,18 +56,6 @@ paths:
                 $ref: '#/components/schemas/CompanySignUpResponse'
         '500':
           description: Server error
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  code:
-                    type: integer
-                  message:
-                    type: string
-                required:
-                  - code
-                  - message
       tags:
         - companies
       requestBody:
@@ -102,18 +78,6 @@ paths:
                 $ref: '#/components/schemas/CsrfResponse'
         '500':
           description: Server error
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  code:
-                    type: integer
-                  message:
-                    type: string
-                required:
-                  - code
-                  - message
       tags:
         - csrf
   /supporters/sign-up:
@@ -136,18 +100,6 @@ paths:
                 $ref: '#/components/schemas/SupporterSignUpResponse'
         '500':
           description: Server error
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  code:
-                    type: integer
-                  message:
-                    type: string
-                required:
-                  - code
-                  - message
       tags:
         - supporters
       requestBody:
@@ -176,18 +128,6 @@ paths:
                 $ref: '#/components/schemas/SupporterSignUpResponse'
         '500':
           description: Server error
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  code:
-                    type: integer
-                  message:
-                    type: string
-                required:
-                  - code
-                  - message
       tags:
         - supporters
       requestBody:
