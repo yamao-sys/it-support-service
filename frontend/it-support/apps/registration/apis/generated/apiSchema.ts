@@ -183,12 +183,7 @@ export interface operations {
         headers: {
           [name: string]: unknown;
         };
-        content: {
-          "application/json": {
-            code: number;
-            message: string;
-          };
-        };
+        content?: never;
       };
     };
   };
@@ -228,12 +223,7 @@ export interface operations {
         headers: {
           [name: string]: unknown;
         };
-        content: {
-          "application/json": {
-            code: number;
-            message: string;
-          };
-        };
+        content?: never;
       };
     };
   };
@@ -260,12 +250,7 @@ export interface operations {
         headers: {
           [name: string]: unknown;
         };
-        content: {
-          "application/json": {
-            code: number;
-            message: string;
-          };
-        };
+        content?: never;
       };
     };
   };
@@ -305,12 +290,7 @@ export interface operations {
         headers: {
           [name: string]: unknown;
         };
-        content: {
-          "application/json": {
-            code: number;
-            message: string;
-          };
-        };
+        content?: never;
       };
     };
   };
@@ -350,12 +330,7 @@ export interface operations {
         headers: {
           [name: string]: unknown;
         };
-        content: {
-          "application/json": {
-            code: number;
-            message: string;
-          };
-        };
+        content?: never;
       };
     };
   };
