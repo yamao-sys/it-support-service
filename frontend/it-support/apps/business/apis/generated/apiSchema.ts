@@ -103,6 +103,40 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/to-projects": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get Projects for Supporters */
+    get: operations["get-to-projects"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/to-projects/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get Project for Supporters */
+    get: operations["get-to-project"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -222,6 +256,27 @@ export interface components {
     };
     /** Supporter SignIn Ok Response */
     SupporterSignInOkResponse: Record<string, never>;
+    /** Project for Supporters */
+    ToProject: {
+      id: number;
+      title: string;
+      description: string;
+      /** Format: date */
+      startDate: Date;
+      /** Format: date */
+      endDate: Date;
+      minBudget?: number;
+      maxBudget?: number;
+    };
+    /** Project Response for Supporters */
+    ToProjectResponse: {
+      project: components["schemas"]["ToProject"];
+    };
+    /** Projects List Response for Supporters */
+    ToProjectsListResponse: {
+      projects: components["schemas"]["ToProject"][];
+      nextPageToken: string;
+    };
   };
   responses: never;
   parameters: never;
@@ -268,12 +323,7 @@ export interface operations {
         headers: {
           [name: string]: unknown;
         };
-        content: {
-          "application/json": {
-            code: number;
-            message: string;
-          };
-        };
+        content?: never;
       };
     };
   };
@@ -300,12 +350,7 @@ export interface operations {
         headers: {
           [name: string]: unknown;
         };
-        content: {
-          "application/json": {
-            code: number;
-            message: string;
-          };
-        };
+        content?: never;
       };
     };
   };
@@ -336,12 +381,7 @@ export interface operations {
         headers: {
           [name: string]: unknown;
         };
-        content: {
-          "application/json": {
-            code: number;
-            message: string;
-          };
-        };
+        content?: never;
       };
     };
   };
@@ -370,12 +410,7 @@ export interface operations {
         headers: {
           [name: string]: unknown;
         };
-        content: {
-          "application/json": {
-            code: number;
-            message: string;
-          };
-        };
+        content?: never;
       };
     };
   };
@@ -406,12 +441,7 @@ export interface operations {
         headers: {
           [name: string]: unknown;
         };
-        content: {
-          "application/json": {
-            code: number;
-            message: string;
-          };
-        };
+        content?: never;
       };
     };
   };
@@ -440,24 +470,14 @@ export interface operations {
         headers: {
           [name: string]: unknown;
         };
-        content: {
-          "application/json": {
-            code: number;
-            message: string;
-          };
-        };
+        content?: never;
       };
       /** @description Server error */
       500: {
         headers: {
           [name: string]: unknown;
         };
-        content: {
-          "application/json": {
-            code: number;
-            message: string;
-          };
-        };
+        content?: never;
       };
     };
   };
@@ -490,24 +510,14 @@ export interface operations {
         headers: {
           [name: string]: unknown;
         };
-        content: {
-          "application/json": {
-            code: number;
-            message: string;
-          };
-        };
+        content?: never;
       };
       /** @description Server error */
       500: {
         headers: {
           [name: string]: unknown;
         };
-        content: {
-          "application/json": {
-            code: number;
-            message: string;
-          };
-        };
+        content?: never;
       };
     };
   };
@@ -548,12 +558,88 @@ export interface operations {
         headers: {
           [name: string]: unknown;
         };
-        content: {
-          "application/json": {
-            code: number;
-            message: string;
-          };
+        content?: never;
+      };
+    };
+  };
+  "get-to-projects": {
+    parameters: {
+      query?: {
+        pageToken?: string;
+        startDate?: Date;
+        endDate?: Date;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The request has succeeded. */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
+        content: {
+          "application/json": components["schemas"]["ToProjectsListResponse"];
+        };
+      };
+      /** @description Access is forbidden. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  "get-to-project": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The request has succeeded. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ToProjectResponse"];
+        };
+      };
+      /** @description Access is forbidden. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The server cannot find the requested resource. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };

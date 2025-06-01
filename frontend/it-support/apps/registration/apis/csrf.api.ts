@@ -10,8 +10,8 @@ const client = createClient<paths>({
 });
 
 export async function setCsrfToken() {
-  const { data, error, response } = await client.GET("/csrf", {});
-  if (error?.code === 500 || data === undefined) {
+  const { data, response } = await client.GET("/csrf", {});
+  if (response.status === 500 || data === undefined) {
     throw Error();
   }
 
