@@ -13,3 +13,7 @@ export type ProjectValidationError = components["schemas"]["ProjectValidationErr
 export type ProjectResponse = components["schemas"]["ProjectResponse"];
 
 export type Project = components["schemas"]["Project"];
+
+export type ToProjectsListResponse = components["schemas"]["ToProjectsListResponse"];
+
+export type ToProject = components["schemas"]["ToProject"];
