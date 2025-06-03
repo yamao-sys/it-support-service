@@ -1,13 +1,13 @@
 import { createContext, FC, useCallback, useContext, useState } from "react";
-import { CompanySignUpInput } from "../_types";
+import { PostCompanySignUpRequest } from "@/apis";
 
 type CompanySignUpSetContextType = {
-  updateSignUpInput: (params: Partial<CompanySignUpInput>) => void;
+  updateSignUpInput: (params: Partial<PostCompanySignUpRequest>) => void;
   clearIdentificationKey: (keyToRemove: "finalTaxReturn") => void;
 };
 
 type CompanySignUpContextType = {
-  companySignUpInputs: CompanySignUpInput;
+  companySignUpInputs: PostCompanySignUpRequest;
 };
 
 export const CompanySignUpContext = createContext<CompanySignUpContextType>(
@@ -25,18 +25,18 @@ export const useCompanySignUpSetContext = () =>
   useContext<CompanySignUpSetContextType>(CompanySignUpSetContext);
 
 export const CompanySignUpProvider: FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [companySignUpInputs, setCompanySignUpInputs] = useState<CompanySignUpInput>({
+  const [companySignUpInputs, setCompanySignUpInputs] = useState<PostCompanySignUpRequest>({
     name: "",
     email: "",
     password: "",
   });
 
-  const updateSignUpInput = useCallback((params: Partial<CompanySignUpInput>) => {
-    setCompanySignUpInputs((prev: CompanySignUpInput) => ({ ...prev, ...params }));
+  const updateSignUpInput = useCallback((params: Partial<PostCompanySignUpRequest>) => {
+    setCompanySignUpInputs((prev: PostCompanySignUpRequest) => ({ ...prev, ...params }));
   }, []);
 
   const clearIdentificationKey = (keyToRemove: "finalTaxReturn") => {
-    setCompanySignUpInputs((prev: CompanySignUpInput) => {
+    setCompanySignUpInputs((prev: PostCompanySignUpRequest) => {
       const { [keyToRemove]: _, ...rest } = prev; // eslint-disable-line @typescript-eslint/no-unused-vars
       return rest;
     });

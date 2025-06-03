@@ -1,7 +1,7 @@
 "use client";
 
 import { FC, useCallback, useState } from "react";
-import { FormType, PhaseType, CompanySignUpValidationError } from "../../_types";
+import { FormType, PhaseType } from "../../_types";
 import FormTypeSelector from "../FormTypeSelector";
 import BaseImageInputForm from "@/components/BaseImageInputForm";
 import {
@@ -10,7 +10,8 @@ import {
 } from "../../_contexts/useCompanySignUpContext";
 import BaseFormInput from "@repo/ui/BaseFormInput";
 import BaseButton from "@repo/ui/BaseButton";
-import { postCompanyValidateSignUp } from "@/apis/companies.api";
+import { postCompanyValidateSignUp } from "@/services/company";
+import { CompanySignUpValidationError } from "@/apis";
 
 type Props = {
   formType: FormType;
@@ -51,16 +52,16 @@ const CompanySignUpInput: FC<Props> = ({ formType, togglePhase, switchFormType }
   const handleValidateSignUp = useCallback(async () => {
     setValidationErrors(INITIAL_VALIDATION_ERRORS);
 
-    const response = await postCompanyValidateSignUp(companySignUpInputs);
+    const errors = await postCompanyValidateSignUp(companySignUpInputs);
 
     // バリデーションエラーがなければ、確認画面へ遷移
-    if (Object.keys(response.errors).length === 0) {
+    if (Object.keys(errors).length === 0) {
       togglePhase("confirm");
       return;
     }
 
     // NOTE: バリデーションエラーの格納と入力パスワードのリセット
-    setValidationErrors(response.errors);
+    setValidationErrors(errors);
     updateSignUpInput({ password: "" });
   }, [setValidationErrors, companySignUpInputs, togglePhase, updateSignUpInput]);
 
