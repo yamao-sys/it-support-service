@@ -1,13 +1,13 @@
 import { createContext, FC, useCallback, useContext, useState } from "react";
-import { SupporterSignUpInput } from "../_types";
+import { PostSupporterSignUpRequest } from "@/apis";
 
 type SupporterSignUpSetContextType = {
-  updateSignUpInput: (params: Partial<SupporterSignUpInput>) => void;
+  updateSignUpInput: (params: Partial<PostSupporterSignUpRequest>) => void;
   clearIdentificationKey: (keyToRemove: "frontIdentification" | "backIdentification") => void;
 };
 
 type SupporterSignUpContextType = {
-  supporterSignUpInputs: SupporterSignUpInput;
+  supporterSignUpInputs: PostSupporterSignUpRequest;
 };
 
 export const SupporterSignUpContext = createContext<SupporterSignUpContextType>(
@@ -25,19 +25,19 @@ export const useSupporterSignUpSetContext = () =>
   useContext<SupporterSignUpSetContextType>(SupporterSignUpSetContext);
 
 export const SupporterSignUpProvider: FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [supporterSignUpInputs, setSupporterSignUpInputs] = useState<SupporterSignUpInput>({
+  const [supporterSignUpInputs, setSupporterSignUpInputs] = useState<PostSupporterSignUpRequest>({
     firstName: "",
     lastName: "",
     email: "",
     password: "",
   });
 
-  const updateSignUpInput = useCallback((params: Partial<SupporterSignUpInput>) => {
-    setSupporterSignUpInputs((prev: SupporterSignUpInput) => ({ ...prev, ...params }));
+  const updateSignUpInput = useCallback((params: Partial<PostSupporterSignUpRequest>) => {
+    setSupporterSignUpInputs((prev: PostSupporterSignUpRequest) => ({ ...prev, ...params }));
   }, []);
 
   const clearIdentificationKey = (keyToRemove: "frontIdentification" | "backIdentification") => {
-    setSupporterSignUpInputs((prev: SupporterSignUpInput) => {
+    setSupporterSignUpInputs((prev: PostSupporterSignUpRequest) => {
       const { [keyToRemove]: _, ...rest } = prev; // eslint-disable-line @typescript-eslint/no-unused-vars
       return rest;
     });

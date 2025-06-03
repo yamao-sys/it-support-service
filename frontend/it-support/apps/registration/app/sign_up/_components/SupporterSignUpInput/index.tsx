@@ -1,7 +1,7 @@
 "use client";
 
 import { FC, useCallback, useState } from "react";
-import { FormType, PhaseType, SupporterSignUpValidationError } from "../../_types";
+import { FormType, PhaseType } from "../../_types";
 import FormTypeSelector from "../FormTypeSelector";
 import {
   useSupporterSignUpContext,
@@ -10,7 +10,8 @@ import {
 import BaseImageInputForm from "@/components/BaseImageInputForm";
 import BaseFormInput from "@repo/ui/BaseFormInput";
 import BaseButton from "@repo/ui/BaseButton";
-import { postSupporterValidateSignUp } from "@/apis/supporters.api";
+import { postSupporterValidateSignUp } from "@/services/supporter";
+import { SupporterSignUpValidationError } from "@/apis";
 
 type Props = {
   formType: FormType;
@@ -61,16 +62,16 @@ const SupporterSignUpInput: FC<Props> = ({ formType, togglePhase, switchFormType
   const handleValidateSignUp = useCallback(async () => {
     setValidationErrors(INITIAL_VALIDATION_ERRORS);
 
-    const response = await postSupporterValidateSignUp(supporterSignUpInputs);
+    const errors = await postSupporterValidateSignUp(supporterSignUpInputs);
 
     // バリデーションエラーがなければ、確認画面へ遷移
-    if (Object.keys(response.errors).length === 0) {
+    if (Object.keys(errors).length === 0) {
       togglePhase("confirm");
       return;
     }
 
     // NOTE: バリデーションエラーの格納と入力パスワードのリセット
-    setValidationErrors(response.errors);
+    setValidationErrors(errors);
     updateSignUpInput({ password: "" });
   }, [setValidationErrors, supporterSignUpInputs, togglePhase, updateSignUpInput]);
 
