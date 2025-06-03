@@ -35,6 +35,9 @@
     },
     "diff:api-spec:check": {
       "dependsOn": ["^diff:api-spec:check"]
+    },
+    "gen:schema:oapi": {
+      "dependsOn": ["^gen:schema:oapi"]
     }
   }
 }

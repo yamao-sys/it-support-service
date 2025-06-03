@@ -1,0 +1,13 @@
+.openapi-generator-ignore
+apis/CompaniesApi.ts
+apis/CsrfApi.ts
+apis/SupportersApi.ts
+apis/index.ts
+index.ts
+models/CompanySignUpResponse.ts
+models/CompanySignUpValidationError.ts
+models/CsrfResponse.ts
+models/SupporterSignUpResponse.ts
+models/SupporterSignUpValidationError.ts
+models/index.ts
+runtime.ts
