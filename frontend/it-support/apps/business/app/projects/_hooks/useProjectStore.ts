@@ -1,4 +1,4 @@
-import { ProjectStoreInput, ProjectValidationError } from "@/types";
+import { ProjectStoreInput, ProjectValidationError } from "@/apis";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 

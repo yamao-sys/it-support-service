@@ -1,13 +1,20 @@
-import { getProjects } from "@/apis/projects.api";
 import { FC } from "react";
 import ProjectLists from "../ProjectLists";
+import { getProjects } from "@/services/project";
 
 const ProjectListsContainer: FC = async () => {
-  const { projects, nextPageToken } = await getProjects();
+  // const { projects, nextPageToken } = await getProjects();
+  const res = await getProjects();
+  if (res === undefined) {
+    throw new Error("Failed to fetch projects");
+  }
 
   return (
     <>
-      <ProjectLists initialProjects={projects} initialNextPageToken={Number(nextPageToken)} />
+      <ProjectLists
+        initialProjects={res.projects}
+        initialNextPageToken={Number(res.nextPageToken)}
+      />
     </>
   );
 };

@@ -1,7 +1,7 @@
 "use client";
 
-import { getProjects } from "@/apis/projects.api";
-import { Project } from "@/types";
+import { Project } from "@/apis";
+import { getProjects } from "@/services/project";
 import Link from "next/link";
 import { FC, useCallback, useEffect, useRef, useState } from "react";
 
@@ -21,15 +21,19 @@ const ProjectLists: FC<Props> = ({ initialProjects, initialNextPageToken }: Prop
   const fetchItems = useCallback(async () => {
     setLoading(true);
 
-    const { nextPageToken: npt, projects } = await getProjects(String(nextPageToken));
-    setDisplayProjects((prev) => [...prev, ...projects]);
+    const res = await getProjects(String(nextPageToken));
+    if (res === undefined) {
+      setLoading(false);
+      throw new Error("Failed to fetch projects");
+    }
+    setDisplayProjects((prev) => [...prev, ...res.projects]);
 
     // 最後まで取得したか確認
-    if (Number(npt) === 0) {
+    if (Number(res.nextPageToken) === 0) {
       setHasMore(false);
     }
 
-    setNextPageToken(Number(npt));
+    setNextPageToken(Number(res.nextPageToken));
     setLoading(false);
   }, [nextPageToken]);
 
