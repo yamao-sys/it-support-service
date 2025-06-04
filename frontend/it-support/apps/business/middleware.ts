@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { setCsrfToken } from "./apis/csrf.api";
+import { setCsrfToken } from "./services/auth";
 
 // const needsAuthPath = ['/reading_records'];
 
