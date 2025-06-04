@@ -17,8 +17,7 @@
     "gen:schema": "turbo run gen:schema && pnpm format",
     "gen:api-spec": "turbo run gen:api-spec",
     "gen:api-spec:watch": "turbo run gen:api-spec:watch",
-    "diff:api-spec:check": "turbo run diff:api-spec:check",
-    "gen:schema:oapi": "turbo run gen:schema:oapi && pnpm format"
+    "diff:api-spec:check": "turbo run diff:api-spec:check"
   },
   "devDependencies": {
     "@openapitools/openapi-generator-cli": "^2.20.2",

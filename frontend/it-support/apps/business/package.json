@@ -10,11 +10,10 @@
     "check-types": "tsc --noEmit",
     "dev:test": "NODE_ENV=test next dev --turbopack --port 3102",
     "test:e2e": "playwright test",
-    "gen:schema": "pnpx tsx /app/it-support/generate_api_types.ts /app/it-support/apps/business/api-spec/tsp-output/schema/openapi.yaml /app/it-support/apps/business/apis/generated/",
     "gen:api-spec": "cd api-spec && npx tsp compile . && node patch.mjs && cd ..",
     "gen:api-spec:watch": "SHELL=/usr/bin/sh chokidar 'api-spec/**/*.tsp' -c 'pnpm gen:api-spec'",
     "diff:api-spec:check": "pnpm gen:api-spec && git add api-spec/tsp-output/schema/openapi.yaml && git diff --staged --quiet || (echo 'tspとyamlの変更が同期されていません' && exit 1)",
-    "gen:schema:oapi": "openapi-generator-cli generate -g typescript-fetch -i ./api-spec/tsp-output/schema/openapi.yaml -o ./apis"
+    "gen:schema": "openapi-generator-cli generate -g typescript-fetch -i ./api-spec/tsp-output/schema/openapi.yaml -o ./apis"
   },
   "dependencies": {
     "react": "^19.0.0",
