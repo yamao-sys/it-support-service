@@ -2,8 +2,6 @@ import { components } from "../apis/generated/apiSchema";
 
 export type SignInFormType = "supporter" | "company";
 
-export type CompanySignInInput = components["schemas"]["CompanySignInInput"];
-
 export type ProjectStoreInput = components["schemas"]["ProjectStoreInput"];
 
 export type ProjectValidationError = components["schemas"]["ProjectValidationError"];
