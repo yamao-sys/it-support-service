@@ -15,6 +15,7 @@ export * from "./ProjectValidationError";
 export * from "./ProjectsListResponse";
 export * from "./SupporterSignInBadRequestResponse";
 export * from "./SupporterSignInInput";
+export * from "./SupporterSignInOkResponse";
 export * from "./ToProject";
 export * from "./ToProjectResponse";
 export * from "./ToProjectsListResponse";

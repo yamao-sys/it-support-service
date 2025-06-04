@@ -43,6 +43,11 @@ func (s *TestSupportersHandlerSuite) TestPostSupportersSignIn_StatusOk() {
 	result := testutil.NewRequest().Post("/supporters/sign-in").WithHeader("Cookie", csrfTokenCookie).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithJsonBody(reqBody).GoWithHTTPHandler(s.T(), e)
 	assert.Equal(s.T(), http.StatusOK, result.Code())
 
+	var res businessapi.SupporterSignInOkResponse
+	err := result.UnmarshalBodyToObject(&res)
+	assert.NoError(s.T(), err, "error unmarshaling response")
+	assert.NotEmpty(s.T(), res.Token)
+
 	cookieString := result.Recorder.Result().Header.Values("Set-Cookie")[0]
 	assert.NotEmpty(s.T(), cookieString)
 }

@@ -44,7 +44,9 @@ func (sh *supportersHandler) PostSupporterSignIn(ctx context.Context, request bu
 		HttpOnly: true,
 	}
 	return businessapi.PostSupporterSignIn200JSONResponse{
-		Body: businessapi.SupporterSignInOkResponse{},
+		Body: businessapi.SupporterSignInOkResponse{
+			Token: tokenString,
+		},
 		Headers: businessapi.PostSupporterSignIn200ResponseHeaders{SetCookie: cookie.String()},
 	}, nil
 }

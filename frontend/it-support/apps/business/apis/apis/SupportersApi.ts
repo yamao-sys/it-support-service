@@ -13,12 +13,18 @@
  */
 
 import * as runtime from "../runtime";
-import type { SupporterSignInBadRequestResponse, SupporterSignInInput } from "../models/index";
+import type {
+  SupporterSignInBadRequestResponse,
+  SupporterSignInInput,
+  SupporterSignInOkResponse,
+} from "../models/index";
 import {
   SupporterSignInBadRequestResponseFromJSON,
   SupporterSignInBadRequestResponseToJSON,
   SupporterSignInInputFromJSON,
   SupporterSignInInputToJSON,
+  SupporterSignInOkResponseFromJSON,
+  SupporterSignInOkResponseToJSON,
 } from "../models/index";
 
 export interface PostSupporterSignInRequest {
@@ -35,7 +41,7 @@ export class SupportersApi extends runtime.BaseAPI {
   async postSupporterSignInRaw(
     requestParameters: PostSupporterSignInRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction,
-  ): Promise<runtime.ApiResponse<object>> {
+  ): Promise<runtime.ApiResponse<SupporterSignInOkResponse>> {
     if (requestParameters["supporterSignInInput"] == null) {
       throw new runtime.RequiredError(
         "supporterSignInInput",
@@ -60,7 +66,9 @@ export class SupportersApi extends runtime.BaseAPI {
       initOverrides,
     );
 
-    return new runtime.JSONApiResponse<any>(response);
+    return new runtime.JSONApiResponse(response, (jsonValue) =>
+      SupporterSignInOkResponseFromJSON(jsonValue),
+    );
   }
 
   /**
@@ -69,7 +77,7 @@ export class SupportersApi extends runtime.BaseAPI {
   async postSupporterSignIn(
     requestParameters: PostSupporterSignInRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction,
-  ): Promise<object> {
+  ): Promise<SupporterSignInOkResponse> {
     const response = await this.postSupporterSignInRaw(requestParameters, initOverrides);
     return await response.value();
   }
