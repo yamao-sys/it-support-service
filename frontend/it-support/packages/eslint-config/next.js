@@ -46,4 +46,10 @@ export const nextJsConfig = [
       "react/react-in-jsx-scope": "off",
     },
   },
+  {
+    files: ["apis/**/index.ts"],
+    linterOptions: {
+      reportUnusedDisableDirectives: false,
+    },
+  },
 ];

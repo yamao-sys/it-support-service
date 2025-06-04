@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+/* eslint-disable */
 export * from "./CompanySignInBadRequestResponse";
 export * from "./CompanySignInInput";
 export * from "./CompanySignInOkResponse";

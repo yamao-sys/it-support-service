@@ -1,4 +1,3 @@
-.openapi-generator-ignore
 apis/CompaniesApi.ts
 apis/CsrfApi.ts
 apis/SupportersApi.ts
