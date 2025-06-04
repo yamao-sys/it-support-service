@@ -1,9 +1,9 @@
 "use client";
 
-import { postProjectCreate } from "@/apis/projects.api";
+import { ProjectStoreInput } from "@/apis";
 import ProjectStoreForm from "@/app/projects/_components/ProjectStoreForm";
 import { useProjectStore } from "@/app/projects/_hooks/useProjectStore";
-import { ProjectStoreInput } from "@/types";
+import { postProjectCreate } from "@/services/project";
 import { useRouter } from "next/navigation";
 import { FC } from "react";
 
@@ -20,9 +20,9 @@ const ProjectNewContainer: FC = () => {
   const router = useRouter();
 
   const onSubmit = handleSubmit(async (data) => {
-    const errors = await postProjectCreate(data);
-    if (Object.keys(errors).length > 0) {
-      setValidationErrors(errors);
+    const resValidationErrors = await postProjectCreate({ projectStoreInput: data });
+    if (resValidationErrors !== undefined && Object.keys(resValidationErrors).length > 0) {
+      setValidationErrors(resValidationErrors);
       return;
     }
 

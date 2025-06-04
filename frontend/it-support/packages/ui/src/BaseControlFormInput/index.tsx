@@ -23,16 +23,26 @@ function BaseControlFormInputInner<T extends FieldValues>({
     <Controller
       control={control}
       name={name}
-      render={({ field }) => (
-        <BaseFormInput
-          id={id}
-          label={label}
-          type={type}
-          {...field}
-          value={field.value ?? ""}
-          validationErrorMessages={validationErrors}
-        />
-      )}
+      render={({ field }) => {
+        const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+          const value = e.target.value;
+          const parsedValue =
+            type === "number" ? (value === "" ? undefined : Number(value)) : value;
+          field.onChange(parsedValue);
+        };
+
+        return (
+          <BaseFormInput
+            id={id}
+            label={label}
+            type={type}
+            {...field}
+            value={field.value ?? ""}
+            onChange={handleChange}
+            validationErrorMessages={validationErrors}
+          />
+        );
+      }}
     />
   );
 }

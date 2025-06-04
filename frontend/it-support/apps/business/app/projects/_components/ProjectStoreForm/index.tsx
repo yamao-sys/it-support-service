@@ -1,6 +1,5 @@
 "use client";
 
-import { ProjectStoreInput, ProjectValidationError } from "@/types";
 import { FC } from "react";
 import { Control } from "react-hook-form";
 import BaseButton from "@repo/ui/BaseButton";
@@ -8,6 +7,7 @@ import BaseFormDatePicker from "@repo/ui/BaseFormDatePicker";
 import BaseFormSlider from "@repo/ui/BaseFormSlider";
 import BaseControlFormInput from "@repo/ui/BaseControlFormInput";
 import BaseControlFormTextarea from "@repo/ui/BaseControlFormTextarea";
+import { ProjectStoreInput, ProjectValidationError } from "@/apis";
 
 type Props = {
   control: Control<ProjectStoreInput>;

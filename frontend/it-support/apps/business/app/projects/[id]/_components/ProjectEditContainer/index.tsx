@@ -1,11 +1,11 @@
 "use client";
 
 import { useProjectStore } from "@/app/projects/_hooks/useProjectStore";
-import { Project, ProjectStoreInput } from "@/types";
 import { FC } from "react";
 import ProjectStoreForm from "../../../_components/ProjectStoreForm";
 import { useRouter } from "next/navigation";
-import { putUpdateProject } from "@/apis/projects.api";
+import { Project, ProjectStoreInput } from "@/apis";
+import { putUpdateProject } from "@/services/project";
 
 type Props = {
   project: Project;
@@ -27,9 +27,9 @@ const ProjectEditContainer: FC<Props> = ({ project }: Props) => {
   const router = useRouter();
 
   const onSubmit = handleSubmit(async (data) => {
-    const errors = await putUpdateProject(Number(project.id), data);
-    if (Object.keys(errors).length > 0) {
-      setValidationErrors(errors);
+    const resValidationErrors = await putUpdateProject(Number(project.id), data);
+    if (resValidationErrors !== undefined && Object.keys(resValidationErrors).length > 0) {
+      setValidationErrors(resValidationErrors);
       return;
     }
 
