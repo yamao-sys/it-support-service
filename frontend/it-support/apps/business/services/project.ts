@@ -15,16 +15,17 @@ export async function postProjectCreate(input: PostProjectRequest) {
 
   try {
     const res = await client.postProject(input);
-
     return res.errors;
   } catch (error) {
     if (error instanceof ResponseError) {
-      switch (error.response.status) {
-        // TODO: 400でバリデーションエラーを返すようにする
-        // case 400:
-        case 500:
-          throw new Error(`Internal Server Error: ${error}`);
-      }
+      console.error("Error response:", error.response);
+      // switch (error.response.status) {
+      //   // TODO: 400でバリデーションエラーを返すようにする
+      //   case 400:
+      //     error.response.
+      //   case 500:
+      // }
+      throw new Error(`Internal Server Error: ${error}`);
     } else {
       // NOTE: ネットワークエラーなどの一般的なエラー
       throw new Error(`Unexpected error: ${error}`);
