@@ -26,9 +26,9 @@ const SupporterSignInForm: FC<Props> = ({ formType, switchFormType }: Props) => 
   const router = useRouter();
 
   const onSubmit = handleSubmit(async (data) => {
-    const response = await postSupporterSignIn({ supporterSignInInput: data });
-    if (response !== "" && response !== undefined) {
-      setValidationError(response);
+    const resValidationError = await postSupporterSignIn({ supporterSignInInput: data });
+    if (resValidationError !== "" && resValidationError !== undefined) {
+      setValidationError(resValidationError);
       return;
     }
 
