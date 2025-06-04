@@ -553,6 +553,11 @@ components:
       title: Supporter SignIn Input
     SupporterSignInOkResponse:
       type: object
+      required:
+        - token
+      properties:
+        token:
+          type: string
       title: Supporter SignIn Ok Response
     ToProject:
       type: object

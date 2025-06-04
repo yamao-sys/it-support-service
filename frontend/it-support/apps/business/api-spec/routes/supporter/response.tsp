@@ -1,5 +1,7 @@
 @summary("Supporter SignIn Ok Response")
-model SupporterSignInOkResponse {}
+model SupporterSignInOkResponse {
+  token: string;
+}
 
 @summary("Supporter SignIn Error Response")
 model SupporterSignInOkResponseHeader {
