@@ -2,6 +2,7 @@
 
 export * from "./CompanySignInBadRequestResponse";
 export * from "./CompanySignInInput";
+export * from "./CompanySignInOkResponse";
 export * from "./CsrfResponse";
 export * from "./Plan";
 export * from "./PlanStoreInput";

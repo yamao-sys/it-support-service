@@ -13,12 +13,18 @@
  */
 
 import * as runtime from "../runtime";
-import type { CompanySignInBadRequestResponse, CompanySignInInput } from "../models/index";
+import type {
+  CompanySignInBadRequestResponse,
+  CompanySignInInput,
+  CompanySignInOkResponse,
+} from "../models/index";
 import {
   CompanySignInBadRequestResponseFromJSON,
   CompanySignInBadRequestResponseToJSON,
   CompanySignInInputFromJSON,
   CompanySignInInputToJSON,
+  CompanySignInOkResponseFromJSON,
+  CompanySignInOkResponseToJSON,
 } from "../models/index";
 
 export interface PostCompanySignInRequest {
@@ -35,7 +41,7 @@ export class CompaniesApi extends runtime.BaseAPI {
   async postCompanySignInRaw(
     requestParameters: PostCompanySignInRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction,
-  ): Promise<runtime.ApiResponse<object>> {
+  ): Promise<runtime.ApiResponse<CompanySignInOkResponse>> {
     if (requestParameters["companySignInInput"] == null) {
       throw new runtime.RequiredError(
         "companySignInInput",
@@ -60,7 +66,9 @@ export class CompaniesApi extends runtime.BaseAPI {
       initOverrides,
     );
 
-    return new runtime.JSONApiResponse<any>(response);
+    return new runtime.JSONApiResponse(response, (jsonValue) =>
+      CompanySignInOkResponseFromJSON(jsonValue),
+    );
   }
 
   /**
@@ -69,7 +77,7 @@ export class CompaniesApi extends runtime.BaseAPI {
   async postCompanySignIn(
     requestParameters: PostCompanySignInRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction,
-  ): Promise<object> {
+  ): Promise<CompanySignInOkResponse> {
     const response = await this.postCompanySignInRaw(requestParameters, initOverrides);
     return await response.value();
   }

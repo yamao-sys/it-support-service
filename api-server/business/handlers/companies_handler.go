@@ -44,7 +44,9 @@ func (ch *companiesHandler) PostCompanySignIn(ctx context.Context, request busin
 		HttpOnly: true,
 	}
 	return businessapi.PostCompanySignIn200JSONResponse{
-		Body: businessapi.CompanySignInOkResponse{},
+		Body: businessapi.CompanySignInOkResponse{
+			Token: tokenString,
+		},
 		Headers: businessapi.PostCompanySignIn200ResponseHeaders{SetCookie: cookie.String()},
 	}, nil
 }

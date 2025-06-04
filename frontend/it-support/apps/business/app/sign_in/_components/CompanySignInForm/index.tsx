@@ -1,13 +1,14 @@
 "use client";
 
-import { postCompanySignIn } from "@/apis/companies.api";
-import { SignInFormType, CompanySignInInput } from "@/types";
+import { SignInFormType } from "@/types";
 import { FC, useState } from "react";
 import { useForm } from "react-hook-form";
 import FormTypeSelector from "../FormTypeSelector";
 import BaseFormInput from "@repo/ui/BaseFormInput";
 import { useRouter } from "next/navigation";
 import BaseButton from "@repo/ui/BaseButton";
+import { CompanySignInInput } from "@/apis";
+import { postCompanySignIn } from "@/services/company";
 
 type Props = {
   formType: SignInFormType;
@@ -25,9 +26,9 @@ const CompanySignInForm: FC<Props> = ({ formType, switchFormType }: Props) => {
   const router = useRouter();
 
   const onSubmit = handleSubmit(async (data) => {
-    const response = await postCompanySignIn(data);
-    if (response !== "") {
-      setValidationError(response);
+    const resValidationError = await postCompanySignIn({ companySignInInput: data });
+    if (resValidationError !== "" && resValidationError !== undefined) {
+      setValidationError(resValidationError);
       return;
     }
 

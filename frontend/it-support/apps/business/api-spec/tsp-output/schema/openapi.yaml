@@ -308,6 +308,11 @@ components:
       title: Company SignIn Input
     CompanySignInOkResponse:
       type: object
+      required:
+        - token
+      properties:
+        token:
+          type: string
       title: Company SignIn Ok Response
     CsrfResponse:
       type: object

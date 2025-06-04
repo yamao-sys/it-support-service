@@ -1,5 +1,7 @@
 @summary("Company SignIn Ok Response")
-model CompanySignInOkResponse {}
+model CompanySignInOkResponse {
+  token: string;
+}
 
 @summary("Company SignIn Error Response")
 model CompanySignInOkResponseHeader {
