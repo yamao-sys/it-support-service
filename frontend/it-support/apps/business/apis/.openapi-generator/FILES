@@ -8,6 +8,7 @@ apis/index.ts
 index.ts
 models/CompanySignInBadRequestResponse.ts
 models/CompanySignInInput.ts
+models/CompanySignInOkResponse.ts
 models/CsrfResponse.ts
 models/Plan.ts
 models/PlanStoreInput.ts
