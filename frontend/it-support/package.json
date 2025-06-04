@@ -14,7 +14,7 @@
     "test:e2e": "turbo run test:e2e",
     "test:e2e:registration": "turbo test:e2e --filter=registration",
     "test:e2e:business": "turbo test:e2e --filter=business",
-    "gen:schema": "turbo run gen:schema && pnpm format",
+    "gen:schema": "turbo run gen:schema && prettier --write \"apps/**/apis/**/*.{ts,tsx,md}\"",
     "gen:api-spec": "turbo run gen:api-spec",
     "gen:api-spec:watch": "turbo run gen:api-spec:watch",
     "diff:api-spec:check": "turbo run diff:api-spec:check"
