@@ -17,8 +17,7 @@
     "gen:schema": "turbo run gen:schema && pnpm format",
     "gen:api-spec": "turbo run gen:api-spec",
     "gen:api-spec:watch": "turbo run gen:api-spec:watch",
-    "diff:api-spec:check": "turbo run diff:api-spec:check",
-    "gen:schema:oapi": "turbo run gen:schema:oapi && pnpm format"
+    "diff:api-spec:check": "turbo run diff:api-spec:check"
   },
   "devDependencies": {
     "@openapitools/openapi-generator-cli": "^2.20.2",
@@ -36,7 +35,6 @@
     "husky": "^9.1.7",
     "js-yaml": "^4.1.0",
     "lint-staged": "^15.4.3",
-    "openapi-typescript": "^7.6.1",
     "postcss": "^8.5.3",
     "prettier": "^3.5.0",
     "prettier-plugin-tailwindcss": "^0.6.11",
@@ -57,7 +55,6 @@
     "node": ">=18"
   },
   "dependencies": {
-    "openapi-fetch": "^0.13.4",
     "react-datepicker": "^8.2.1",
     "react-hook-form": "^7.54.2"
   }
