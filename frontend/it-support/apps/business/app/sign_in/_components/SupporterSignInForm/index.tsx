@@ -1,13 +1,14 @@
 "use client";
 
-import { postSupporterSignIn } from "@/apis/supporters.api";
-import { SignInFormType, SupporterSignInInput } from "@/types";
+import { SignInFormType } from "@/types";
 import { FC, useState } from "react";
 import { useForm } from "react-hook-form";
 import FormTypeSelector from "../FormTypeSelector";
 import BaseFormInput from "@repo/ui/BaseFormInput";
 import { useRouter } from "next/navigation";
 import BaseButton from "@repo/ui/BaseButton";
+import { SupporterSignInInput } from "@/apis";
+import { postSupporterSignIn } from "@/services/supporter";
 
 type Props = {
   formType: SignInFormType;
@@ -25,8 +26,8 @@ const SupporterSignInForm: FC<Props> = ({ formType, switchFormType }: Props) => 
   const router = useRouter();
 
   const onSubmit = handleSubmit(async (data) => {
-    const response = await postSupporterSignIn(data);
-    if (response !== "") {
+    const response = await postSupporterSignIn({ supporterSignInInput: data });
+    if (response !== "" && response !== undefined) {
       setValidationError(response);
       return;
     }
