@@ -1,6 +1,6 @@
 "use server";
 
-import { PostSupporterSignInRequest, SupportersApi } from "@/apis";
+import { PostSupporterSignInRequest, ResponseError, SupportersApi } from "@/apis";
 import { getApiConfig } from "@/apis/client";
 import { cookies } from "next/headers";
 
@@ -22,18 +22,16 @@ export async function postSupporterSignIn(input: PostSupporterSignInRequest) {
 
     return "";
   } catch (error) {
-    if (error instanceof Response) {
-      switch (error.status) {
+    if (error instanceof ResponseError) {
+      switch (error.response.status) {
         case 400:
           return "メールアドレスまたはパスワードが正しくありません";
         case 500:
-          throw new Error("Internal Server Error");
-        default:
-          throw new Error(`Unexpected error: ${error.status}`);
+          throw new Error(`Internal Server Error: ${error}`);
       }
     } else {
       // NOTE: ネットワークエラーなどの一般的なエラー
-      console.error("Unexpected error:", error);
+      throw new Error(`Unexpected error: ${error}`);
     }
   }
 }
