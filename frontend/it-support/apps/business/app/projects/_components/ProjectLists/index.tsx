@@ -1,6 +1,7 @@
 "use client";
 
 import { Project } from "@/apis";
+import { ListRow } from "@/components/ui/ListRow";
 import { getProjects } from "@/services/project";
 import Link from "next/link";
 import { FC, useCallback, useEffect, useRef, useState } from "react";
@@ -65,10 +66,7 @@ const ProjectLists: FC<Props> = ({ initialProjects, initialNextPageToken }: Prop
           <p className='text-center'>まだ案件が未登録です</p>
         ) : (
           displayProjects.map((project) => (
-            <div
-              key={project.id}
-              className='bg-white shadow-md rounded-2xl p-4 mb-4 flex items-center justify-between'
-            >
+            <ListRow key={project.id}>
               <div className='flex flex-col gap-1'>
                 <div className='text-lg font-semibold text-gray-800 break-words'>
                   {project.title}
@@ -89,7 +87,7 @@ const ProjectLists: FC<Props> = ({ initialProjects, initialNextPageToken }: Prop
               >
                 編集
               </Link>
-            </div>
+            </ListRow>
           ))
         )}
 
