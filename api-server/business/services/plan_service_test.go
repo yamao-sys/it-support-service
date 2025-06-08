@@ -30,7 +30,7 @@ func (s *TestPlanServiceSuite) TearDownTest() {
 	s.CloseDB()
 }
 
-func (s *TestPlanServiceSuite) TestPlanCreate_RequiredOnly() {
+func (s *TestPlanServiceSuite) TestPlanCreate_RequiredOnly_Success() {
 	// NOTE: テスト用Company, Project, Supporterの作成
 	company := factories.CompanyFactory.MustCreate().(*models.Company)
 	DBCon.Create(company)
@@ -61,7 +61,7 @@ func (s *TestPlanServiceSuite) TestPlanCreate_RequiredOnly() {
 	assert.Nil(s.T(), err)
 }
 
-func (s *TestPlanServiceSuite) TestPlanCreate_WithOptional() {
+func (s *TestPlanServiceSuite) TestPlanCreate_WithOptional_Success() {
 	// NOTE: テスト用Company, Project, Supporterの作成
 	company := factories.CompanyFactory.MustCreate().(*models.Company)
 	DBCon.Create(company)
