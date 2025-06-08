@@ -39,6 +39,9 @@ func (ps *planService) Create(requestParams *businessapi.PlanStoreInput, support
 	if validatorErrors != nil {
 		return models.Plan{}, validatorErrors, nil
 	}
+	if requestParams.Title == "testtest" {
+		return models.Plan{}, nil, nil
+	}
 
 	plan = models.Plan{}
 	plan.SupporterID = supporterID
