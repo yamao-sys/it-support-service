@@ -20,13 +20,9 @@ func ValidatePlan(input *businessapi.PlanStoreInput) error {
 			validation.Required.Error("支援概要は必須入力です。"),
 		),
 		validation.Field(
-			&input.StartDate,
-			validation.By(validatePlanDateRequired( "支援開始日")),
-		),
-		validation.Field(
 			&input.EndDate,
-			validation.By(validatePlanDateRequired( "支援終了日")),
-			validation.By(validatePlanDateGreater("支援終了日", "支援開始日", input.StartDate)),
+			validation.When(input.StartDate != nil, validation.By(validatePlanDateRequired( "支援終了日"))),
+			validation.When(input.StartDate != nil && input.EndDate != nil, validation.By(validatePlanDateGreater("支援終了日", "支援開始日", input.StartDate))),
 		),
 		validation.Field(
 			&input.UnitPrice,
@@ -37,16 +33,16 @@ func ValidatePlan(input *businessapi.PlanStoreInput) error {
 
 func validatePlanDateRequired(field string) validation.RuleFunc {
 	return func(value interface{}) error {
-		if value.(openapi_types.Date).Time.IsZero() {
+		if value == nil || value.(*openapi_types.Date).Time.IsZero() {
 			return fmt.Errorf("%sは必須入力です。", field)
 		}
 		return nil
 	}
 }
 
-func validatePlanDateGreater(field string, doCompareField string, doCompareDate openapi_types.Date) validation.RuleFunc {
+func validatePlanDateGreater(field string, doCompareField string, doCompareDate *openapi_types.Date) validation.RuleFunc {
 	return func(value interface{}) error {
-		dateValue, _ := value.(openapi_types.Date)
+		dateValue, _ := value.(*openapi_types.Date)
 		if doCompareDate.After(dateValue.Time) {
 			return fmt.Errorf("%sと%sの前後関係が不適です。", field, doCompareField)
 		}
