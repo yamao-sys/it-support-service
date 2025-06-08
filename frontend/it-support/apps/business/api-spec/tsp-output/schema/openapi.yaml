@@ -329,8 +329,6 @@ components:
         - projectId
         - title
         - description
-        - startDate
-        - endDate
         - unitPrice
         - createdAt
       properties:
@@ -360,8 +358,6 @@ components:
         - projectId
         - title
         - description
-        - startDate
-        - endDate
         - unitPrice
       properties:
         projectId:

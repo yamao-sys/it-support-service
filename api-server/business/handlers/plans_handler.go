@@ -39,17 +39,19 @@ func (ph *plansHandler) PostPlan(ctx context.Context, request businessapi.PostPl
 	}
 
 	mappedValidationErrors := ph.planService.MappingValidationErrorStruct(validationErrors)
-	startDate := openapi_types.Date{Time: createdPlan.StartDate}
-	endDate := openapi_types.Date{Time: createdPlan.EndDate}
 	resPlan := businessapi.Plan{
 		Id: createdPlan.ID,
 		ProjectId: createdPlan.ProjectID,
 		Title: createdPlan.Title,
 		Description: createdPlan.Description,
-		StartDate: startDate,
-		EndDate: endDate,
-		UnitPrice: createdPlan.UnitPrice.Int,
+		UnitPrice: createdPlan.UnitPrice,
 		CreatedAt: createdPlan.CreatedAt,
+	}
+	if createdPlan.StartDate.Valid {
+		resPlan.StartDate = &openapi_types.Date{Time: createdPlan.StartDate.Time}
+	}
+	if createdPlan.EndDate.Valid {
+		resPlan.EndDate = &openapi_types.Date{Time: createdPlan.EndDate.Time}
 	}
 
 	return businessapi.PostPlan200JSONResponse(businessapi.PlanStoreResponse{Errors: mappedValidationErrors, Plan: resPlan}), nil

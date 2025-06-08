@@ -45,9 +45,13 @@ func (ps *planService) Create(requestParams *businessapi.PlanStoreInput, support
 	plan.ProjectID = requestParams.ProjectId
 	plan.Title = requestParams.Title
 	plan.Description = requestParams.Description
-	plan.StartDate = requestParams.StartDate.Time
-	plan.EndDate = requestParams.EndDate.Time
-	plan.UnitPrice = null.Int{Int: requestParams.UnitPrice, Valid: true}
+	if requestParams.StartDate != nil {
+		plan.StartDate = null.Time{Time: requestParams.StartDate.Time, Valid: true}
+	}
+	if requestParams.EndDate != nil {
+		plan.EndDate = null.Time{Time: requestParams.EndDate.Time, Valid: true}
+	}
+	plan.UnitPrice = requestParams.UnitPrice
 
 	ps.db.Create(&plan)
 	return plan, nil, nil
