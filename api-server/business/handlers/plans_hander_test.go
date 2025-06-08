@@ -50,7 +50,7 @@ func (s *TestPlansHandlerSuite) TearDownTest() {
 	s.CloseDB()
 }
 
-func (s *TestPlansHandlerSuite) TestPostPlanCreate_StatusOk() {
+func (s *TestPlansHandlerSuite) TestPostPlanCreate_RequiredOnly_StatusOk() {
 	company := factories.CompanyFactory.MustCreate().(*models.Company)
 	DBCon.Create(company)
 	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
@@ -60,12 +60,8 @@ func (s *TestPlansHandlerSuite) TestPostPlanCreate_StatusOk() {
 	projectID := project.ID
 	title := randomdata.RandStringRunes(70)
 	description := "test description"
-	parsedStartDate := time.Date(2025, 4, 1, 0, 0, 0, 0, time.UTC)
-	startDate := openapi_types.Date{Time: parsedStartDate}
-	parsedEndDate := time.Date(2025, 4, 10, 0, 0, 0, 0, time.UTC)
-	endDate := openapi_types.Date{Time: parsedEndDate}
 	unitPrice := 10000
-	reqBody := businessapi.PostPlanJSONRequestBody{ProjectId: projectID, Title: title, Description: description, StartDate: startDate, EndDate: endDate, UnitPrice: unitPrice}
+	reqBody := businessapi.PostPlanJSONRequestBody{ProjectId: projectID, Title: title, Description: description, StartDate: nil, EndDate: nil, UnitPrice: unitPrice}
 	result := testutil.NewRequest().Post("/plans").WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithJsonBody(reqBody).GoWithHTTPHandler(s.T(), e)
 
 	assert.Equal(s.T(), http.StatusOK, result.Code())
@@ -75,8 +71,46 @@ func (s *TestPlansHandlerSuite) TestPostPlanCreate_StatusOk() {
 	assert.Equal(s.T(), projectID, res.Plan.ProjectId)
 	assert.Equal(s.T(), title, res.Plan.Title)
 	assert.Equal(s.T(), description, res.Plan.Description)
-	assert.Equal(s.T(), startDate, res.Plan.StartDate)
-	assert.Equal(s.T(), endDate, res.Plan.EndDate)
+	assert.Nil(s.T(), res.Plan.StartDate)
+	assert.Nil(s.T(), res.Plan.EndDate)
+	assert.Equal(s.T(), unitPrice, res.Plan.UnitPrice)
+
+	expectedValidationErrors := businessapi.PlanValidationError{}
+	assert.Equal(s.T(), expectedValidationErrors, res.Errors)
+
+	// NOTE: DBの値を確認
+	var createdPlan models.Plan
+	count := DBCon.Where("supporter_id = ? AND title = ?", supporter.ID, title).First(&createdPlan).RowsAffected
+	assert.Equal(s.T(), int64(1), count)
+}
+
+func (s *TestPlansHandlerSuite) TestPostPlanCreate_WithOptional_StatusOk() {
+	company := factories.CompanyFactory.MustCreate().(*models.Company)
+	DBCon.Create(company)
+	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
+	DBCon.Create(project)
+	supporter, cookieString := s.supporterSignIn()
+
+	projectID := project.ID
+	title := randomdata.RandStringRunes(70)
+	description := "test description"
+	parsedStartDate := time.Date(2025, 4, 9, 0, 0, 0, 0, time.UTC)
+	startDate := openapi_types.Date{Time: parsedStartDate}
+	parsedEndDate := time.Date(2025, 4, 10, 0, 0, 0, 0, time.UTC)
+	endDate := openapi_types.Date{Time: parsedEndDate}
+	unitPrice := 10000
+	reqBody := businessapi.PostPlanJSONRequestBody{ProjectId: projectID, Title: title, Description: description, StartDate: &startDate, EndDate: &endDate, UnitPrice: unitPrice}
+	result := testutil.NewRequest().Post("/plans").WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithJsonBody(reqBody).GoWithHTTPHandler(s.T(), e)
+
+	assert.Equal(s.T(), http.StatusOK, result.Code())
+
+	var res businessapi.PostPlan200JSONResponse
+	result.UnmarshalBodyToObject(&res)
+	assert.Equal(s.T(), projectID, res.Plan.ProjectId)
+	assert.Equal(s.T(), title, res.Plan.Title)
+	assert.Equal(s.T(), description, res.Plan.Description)
+	assert.Equal(s.T(), &startDate, res.Plan.StartDate)
+	assert.Equal(s.T(), &endDate, res.Plan.EndDate)
 	assert.Equal(s.T(), unitPrice, res.Plan.UnitPrice)
 
 	expectedValidationErrors := businessapi.PlanValidationError{}
@@ -98,12 +132,12 @@ func (s *TestPlansHandlerSuite) TestPostPlanCreate_StatusForbidden() {
 	projectID := project.ID
 	title := randomdata.RandStringRunes(70)
 	description := "test description"
-	parsedStartDate := time.Date(2025, 4, 1, 0, 0, 0, 0, time.UTC)
+	parsedStartDate := time.Date(2025, 4, 9, 0, 0, 0, 0, time.UTC)
 	startDate := openapi_types.Date{Time: parsedStartDate}
 	parsedEndDate := time.Date(2025, 4, 10, 0, 0, 0, 0, time.UTC)
 	endDate := openapi_types.Date{Time: parsedEndDate}
 	unitPrice := 10000
-	reqBody := businessapi.PostPlanJSONRequestBody{ProjectId: projectID, Title: title, Description: description, StartDate: startDate, EndDate: endDate, UnitPrice: unitPrice}
+	reqBody := businessapi.PostPlanJSONRequestBody{ProjectId: projectID, Title: title, Description: description, StartDate: &startDate, EndDate: &endDate, UnitPrice: unitPrice}
 	result := testutil.NewRequest().Post("/plans").WithHeader("Cookie", cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithJsonBody(reqBody).GoWithHTTPHandler(s.T(), e)
 
 	assert.Equal(s.T(), http.StatusForbidden, result.Code())
@@ -123,12 +157,12 @@ func (s *TestPlansHandlerSuite) TestPostPlanCreate_StatusUnauthorized() {
 	projectID := project.ID
 	title := randomdata.RandStringRunes(70)
 	description := "test description"
-	parsedStartDate := time.Date(2025, 4, 1, 0, 0, 0, 0, time.UTC)
+	parsedStartDate := time.Date(2025, 4, 9, 0, 0, 0, 0, time.UTC)
 	startDate := openapi_types.Date{Time: parsedStartDate}
 	parsedEndDate := time.Date(2025, 4, 10, 0, 0, 0, 0, time.UTC)
 	endDate := openapi_types.Date{Time: parsedEndDate}
 	unitPrice := 10000
-	reqBody := businessapi.PostPlanJSONRequestBody{ProjectId: projectID, Title: title, Description: description, StartDate: startDate, EndDate: endDate, UnitPrice: unitPrice}
+	reqBody := businessapi.PostPlanJSONRequestBody{ProjectId: projectID, Title: title, Description: description, StartDate: &startDate, EndDate: &endDate, UnitPrice: unitPrice}
 	result := testutil.NewRequest().Post("/plans").WithHeader("Cookie", csrfTokenCookie).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithJsonBody(reqBody).GoWithHTTPHandler(s.T(), e)
 
 	assert.Equal(s.T(), http.StatusUnauthorized, result.Code())
@@ -149,12 +183,12 @@ func (s *TestPlansHandlerSuite) TestPostPlanCreate_StatusInternalServerError() {
 	projectID := project.ID
 	title := randomdata.RandStringRunes(70)
 	description := "test description"
-	parsedStartDate := time.Date(2025, 4, 1, 0, 0, 0, 0, time.UTC)
+	parsedStartDate := time.Date(2025, 4, 9, 0, 0, 0, 0, time.UTC)
 	startDate := openapi_types.Date{Time: parsedStartDate}
 	parsedEndDate := time.Date(2025, 4, 10, 0, 0, 0, 0, time.UTC)
 	endDate := openapi_types.Date{Time: parsedEndDate}
 	unitPrice := 10000
-	reqBody := businessapi.PostPlanJSONRequestBody{ProjectId: projectID, Title: title, Description: description, StartDate: startDate, EndDate: endDate, UnitPrice: unitPrice}
+	reqBody := businessapi.PostPlanJSONRequestBody{ProjectId: projectID, Title: title, Description: description, StartDate: &startDate, EndDate: &endDate, UnitPrice: unitPrice}
 
 	mockPlanService := new(MockPlanService)
 	mockPlanService.On("Create", mock.AnythingOfType("*businessapi.PlanStoreInput"), mock.AnythingOfType("int")).Return(models.Plan{}, nil, errors.New("internal server error"))
@@ -191,13 +225,9 @@ func (s *TestPlansHandlerSuite) TestPostPlanCreate_BadRequest_Required() {
 
 	titleErrorMessages := []string{"支援タイトルは必須入力です。"}
 	descriptionErrorMessages := []string{"支援概要は必須入力です。"}
-	startDateErrorMessages := []string{"支援開始日は必須入力です。"}
-	endDateErrorMessages := []string{"支援終了日は必須入力です。"}
 	unitPriceErrorMessages := []string{"支援単価(税抜)は必須入力です。"}
 	assert.Equal(s.T(), titleErrorMessages, *res.Errors.Title)
 	assert.Equal(s.T(), descriptionErrorMessages, *res.Errors.Description)
-	assert.Equal(s.T(), startDateErrorMessages, *res.Errors.StartDate)
-	assert.Equal(s.T(), endDateErrorMessages, *res.Errors.EndDate)
 	assert.Equal(s.T(), unitPriceErrorMessages, *res.Errors.UnitPrice)
 
 	// NOTE: DBの値を確認
