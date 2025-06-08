@@ -12,9 +12,9 @@ type Plan struct {
 	ProjectID          int    `gorm:"not null" json:"project_id"`
 	Title              string    `gorm:"not null" validate:"required"`
 	Description        string    `gorm:"not null" validate:"required"`
-	StartDate          time.Time `gorm:"type:date;column:start_date" validate:"omitempty"`
-	EndDate            time.Time `gorm:"type:date;column:end_date" validate:"omitempty"`
-	UnitPrice		   null.Int  `gorm:"column:unit_price" validate:"omitempty"`
+	StartDate          null.Time `gorm:"type:date;column:start_date" validate:"omitempty"`
+	EndDate            null.Time `gorm:"type:date;column:end_date" validate:"omitempty"`
+	UnitPrice		   int  `gorm:"column:unit_price" validate:"required"`
 	Status			   int       `gorm:"not null" validate:"required"`
 	AgreedAt           null.Time `gorm:"type:date;column:agreed_at" validate:"omitempty"`
 	CreatedAt          time.Time
