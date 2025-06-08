@@ -21,5 +21,5 @@ type Plan struct {
 	UpdatedAt          time.Time
 
 	Supporter          Supporter   `gorm:"foreignKey:SupporterID" validate:"omitempty"`
-	Project            Supporter   `gorm:"foreignKey:ProjectID" validate:"omitempty"`
+	Project            Project   `gorm:"foreignKey:ProjectID" validate:"omitempty"`
 }
