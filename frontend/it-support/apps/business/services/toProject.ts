@@ -1,3 +1,5 @@
+"use server";
+
 import { GetToProjectsRequest, ResponseError, ToProjectsApi } from "@/apis";
 import { getApiConfig } from "@/apis/client";
 
