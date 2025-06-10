@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import ToProjectOverviewContainer from "./_components/ToProjectOverviewContainer";
 
 type ToProjectDetailPageProps = {
   params: Promise<{
@@ -12,7 +13,7 @@ export default async function ToProjectDetailPage({ params }: ToProjectDetailPag
   return (
     <>
       <Suspense fallback={<>loading...</>}>
-        <>{id}</>
+        <ToProjectOverviewContainer id={Number(id)} />
       </Suspense>
     </>
   );
