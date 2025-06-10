@@ -42,13 +42,13 @@ export interface PlanStoreInput {
    * @type {Date}
    * @memberof PlanStoreInput
    */
-  startDate: Date;
+  startDate?: Date;
   /**
    *
    * @type {Date}
    * @memberof PlanStoreInput
    */
-  endDate: Date;
+  endDate?: Date;
   /**
    *
    * @type {number}
@@ -64,8 +64,6 @@ export function instanceOfPlanStoreInput(value: object): value is PlanStoreInput
   if (!("projectId" in value) || value["projectId"] === undefined) return false;
   if (!("title" in value) || value["title"] === undefined) return false;
   if (!("description" in value) || value["description"] === undefined) return false;
-  if (!("startDate" in value) || value["startDate"] === undefined) return false;
-  if (!("endDate" in value) || value["endDate"] === undefined) return false;
   if (!("unitPrice" in value) || value["unitPrice"] === undefined) return false;
   return true;
 }
@@ -85,8 +83,8 @@ export function PlanStoreInputFromJSONTyped(
     projectId: json["projectId"],
     title: json["title"],
     description: json["description"],
-    startDate: new Date(json["startDate"]),
-    endDate: new Date(json["endDate"]),
+    startDate: json["startDate"] == null ? undefined : new Date(json["startDate"]),
+    endDate: json["endDate"] == null ? undefined : new Date(json["endDate"]),
     unitPrice: json["unitPrice"],
   };
 }
@@ -107,8 +105,9 @@ export function PlanStoreInputToJSONTyped(
     projectId: value["projectId"],
     title: value["title"],
     description: value["description"],
-    startDate: value["startDate"].toISOString().substring(0, 10),
-    endDate: value["endDate"].toISOString().substring(0, 10),
+    startDate:
+      value["startDate"] == null ? undefined : value["startDate"].toISOString().substring(0, 10),
+    endDate: value["endDate"] == null ? undefined : value["endDate"].toISOString().substring(0, 10),
     unitPrice: value["unitPrice"],
   };
 }
