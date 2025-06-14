@@ -14,7 +14,7 @@ const toProjectPerPage = 5
 
 type ToProjectService interface {
 	FetchLists(pageToken int, startDate string, endDate string, supporterID int) (toProjects []ToProjectFields, nextPageToken int)
-	Fetch(ID int) (project models.Project, error error)
+	Fetch(ID int, supporterID int) (toProject ToProjectFields, error error)
 }
 
 type toProjectService struct {
@@ -69,13 +69,20 @@ func (tps *toProjectService) FetchLists(pageToken int, startDate string, endDate
 	return toProjects, 0
 }
 
-func (tps *toProjectService) Fetch(ID int) (project models.Project, error error) {
-	tps.db.First(&project, ID)
-	if project.ID == 0 {
-		return project, errors.New("not found")
+func (tps *toProjectService) Fetch(ID int, supporterID int) (toProject ToProjectFields, error error) {
+	query := tps.db.Model(&models.Project{})
+	query = query.Joins(
+		"LEFT JOIN plans ON plans.project_id = projects.id AND plans.supporter_id = ?",
+		supporterID,
+	)
+	query = query.Select(strings.Join(tps.toProjectFields(), ","))
+
+	query.First(&toProject, ID)
+	if toProject.ID == 0 {
+		return toProject, errors.New("not found")
 	}
 	
-	return project, nil
+	return toProject, nil
 }
 
 func (tps *toProjectService) toProjectFields() []string {

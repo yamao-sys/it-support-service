@@ -487,17 +487,71 @@ func (s *TestToProjectServiceSuite) TestToProjectFetchLists_WithPageTokenAndStar
 	assert.Equal(s.T(), project6.ID, nextPageToken)
 }
 
-func (s *TestToProjectServiceSuite) TestToProjectFetch_StatusOK() {
+func (s *TestToProjectServiceSuite) TestToProjectFetch_NotProposedPlan() {
 	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
 	DBCon.Create(project)
 	DBCon.Model(project).Take(project)
 
-	fetchedProduct, err := testToProjectService.Fetch(project.ID)
+	fetchedProduct, err := testToProjectService.Fetch(project.ID, supporter.ID)
 	
 	// NOTE: レスポンスのprojectの値の確認
 	assert.Equal(s.T(), project.ID, fetchedProduct.ID)
-	assert.Equal(s.T(), company.ID, fetchedProduct.CompanyID)
 	assert.Equal(s.T(), project.Title, fetchedProduct.Title)
+	assert.Equal(s.T(), businessapi.NOTPROPOSED, fetchedProduct.ProposalStatus)
+
+	assert.Nil(s.T(), err)
+}
+
+func (s *TestToProjectServiceSuite) TestToProjectFetch_TemporaryCreatingPlan() {
+	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
+	DBCon.Create(project)
+	DBCon.Model(project).Take(project)
+
+	temporaryCreatingPlan := factories.PlanFactory.MustCreateWithOption(map[string]interface{}{"SupporterID": supporter.ID, "ProjectID": project.ID, "Status": models.PlanStatusTempraryCreating}).(*models.Plan)
+	DBCon.Create(temporaryCreatingPlan)
+
+	fetchedProduct, err := testToProjectService.Fetch(project.ID, supporter.ID)
+	
+	// NOTE: レスポンスのprojectの値の確認
+	assert.Equal(s.T(), project.ID, fetchedProduct.ID)
+	assert.Equal(s.T(), project.Title, fetchedProduct.Title)
+	assert.Equal(s.T(), businessapi.TEMPORARYCREATING, fetchedProduct.ProposalStatus)
+
+	assert.Nil(s.T(), err)
+}
+
+func (s *TestToProjectServiceSuite) TestToProjectFetch_SubmittedPlan() {
+	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
+	DBCon.Create(project)
+	DBCon.Model(project).Take(project)
+	
+	submittedPlan := factories.PlanFactory.MustCreateWithOption(map[string]interface{}{"SupporterID": supporter.ID, "ProjectID": project.ID, "Status": models.PlanStatusSubmitted}).(*models.Plan)
+	DBCon.Create(submittedPlan)
+
+	fetchedProduct, err := testToProjectService.Fetch(project.ID, supporter.ID)
+	
+	// NOTE: レスポンスのprojectの値の確認
+	assert.Equal(s.T(), project.ID, fetchedProduct.ID)
+	assert.Equal(s.T(), project.Title, fetchedProduct.Title)
+	assert.Equal(s.T(), businessapi.PROPOSED, fetchedProduct.ProposalStatus)
+
+	assert.Nil(s.T(), err)
+}
+
+func (s *TestToProjectServiceSuite) TestToProjectFetch_AboveSubmittedPlan() {
+	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
+	DBCon.Create(project)
+	DBCon.Model(project).Take(project)
+	
+	agreedPlan := factories.PlanFactory.MustCreateWithOption(map[string]interface{}{"SupporterID": supporter.ID, "ProjectID": project.ID, "Status": models.PlanStatusAgreed}).(*models.Plan)
+	DBCon.Create(agreedPlan)
+
+	fetchedProduct, err := testToProjectService.Fetch(project.ID, supporter.ID)
+	
+	// NOTE: レスポンスのprojectの値の確認
+	assert.Equal(s.T(), project.ID, fetchedProduct.ID)
+	assert.Equal(s.T(), project.Title, fetchedProduct.Title)
+	assert.Equal(s.T(), businessapi.PROPOSED, fetchedProduct.ProposalStatus)
 
 	assert.Nil(s.T(), err)
 }
@@ -507,11 +561,10 @@ func (s *TestToProjectServiceSuite) TestToProjectFetch_NotFound() {
 	DBCon.Create(project)
 	DBCon.Model(project).Take(project)
 
-	fetchedProduct, err := testToProjectService.Fetch(project.ID+1)
+	fetchedProduct, err := testToProjectService.Fetch(project.ID+1, supporter.ID)
 	
 	// NOTE: レスポンスのprojectの値の確認
 	assert.Equal(s.T(), 0, fetchedProduct.ID)
-	assert.Equal(s.T(), 0, fetchedProduct.CompanyID)
 	assert.Equal(s.T(), "", fetchedProduct.Title)
 
 	assert.Equal(s.T(), errors.New("not found"), err)
