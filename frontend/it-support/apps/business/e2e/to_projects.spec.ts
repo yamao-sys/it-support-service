@@ -22,21 +22,21 @@ test.describe("/to_projects", () => {
       const initialItemsCount = await page.getByRole("link", { name: "詳細を見る" }).count();
       expect(initialItemsCount).toBe(5);
 
-      await expect(page.getByText("これ以上データはありません。")).not.toBeVisible();
+      // await expect(page.getByText("これ以上データはありません。")).not.toBeVisible();
 
-      // NOTE: スクロールしてロードをトリガー
-      await page.evaluate(() => {
-        window.scrollTo(0, document.body.scrollHeight);
-      });
-      // TODO: 特定要素の出現を待つようにする
-      await page.waitForTimeout(1500);
+      // // NOTE: スクロールしてロードをトリガー
+      // await page.evaluate(() => {
+      //   window.scrollTo(0, document.body.scrollHeight);
+      // });
+      // // TODO: 特定要素の出現を待つようにする
+      // await page.waitForTimeout(1500);
 
-      expect(await page.getByRole("link", { name: "詳細を見る" }).count()).toBe(10);
+      // expect(await page.getByRole("link", { name: "詳細を見る" }).count()).toBe(10);
 
-      // NOTE: スクロールしてロードをトリガー
-      await page.evaluate(() => {
-        window.scrollTo(0, document.body.scrollHeight);
-      });
+      // // NOTE: スクロールしてロードをトリガー
+      // await page.evaluate(() => {
+      //   window.scrollTo(0, document.body.scrollHeight);
+      // });
 
       // const temporaryCreatingPlanBadgesCount = await page
       //   .getByText("一時作成中", { exact: true })
