@@ -6,6 +6,17 @@ import (
 	"github.com/volatiletech/null/v8"
 )
 
+type PlanStatusNum int
+const (
+	PlanStatusTempraryCreating PlanStatusNum = iota
+	PlanStatusSubmitted
+	PlanStatusAgreed
+	PlanStatusRejected
+	PlanStatusInProgress
+	PlanStatusRequestingReward
+	PlanStatusRewarded
+)
+
 type Plan struct {
 	ID                 int       `gorm:"primary_key" json:"id"`
 	SupporterID        int    `gorm:"not null" json:"supporter_id"`
@@ -15,7 +26,7 @@ type Plan struct {
 	StartDate          null.Time `gorm:"type:date;column:start_date" validate:"omitempty"`
 	EndDate            null.Time `gorm:"type:date;column:end_date" validate:"omitempty"`
 	UnitPrice		   int  `gorm:"column:unit_price" validate:"required"`
-	Status			   int       `gorm:"not null" validate:"required"`
+	Status			   PlanStatusNum `gorm:"not null" validate:"required"`
 	AgreedAt           null.Time `gorm:"type:date;column:agreed_at" validate:"omitempty"`
 	CreatedAt          time.Time
 	UpdatedAt          time.Time
