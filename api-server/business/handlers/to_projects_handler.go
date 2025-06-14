@@ -42,7 +42,7 @@ func (tph *toProjectsHandler) GetToProjects(ctx context.Context, request busines
 		endDate = (*request.Params.EndDate).Format("2006-01-02")
 	}
 
-	projects, nextPageToken := tph.toProjectService.FetchLists(pageToken, startDate, endDate)
+	projects, nextPageToken := tph.toProjectService.FetchLists(pageToken, startDate, endDate, supporterID)
 	var resProjects []businessapi.ToProject
 	for _, project := range projects { 
 		resProject := businessapi.ToProject{}
@@ -52,18 +52,19 @@ func (tph *toProjectsHandler) GetToProjects(ctx context.Context, request busines
 		resProject.Description = project.Description
 		resProject.StartDate = openapi_types.Date{Time: project.StartDate}
 		resProject.EndDate = openapi_types.Date{Time: project.EndDate}
-		minBudget := &project.MinBudget.Int
+		minBudget := &project.MinBudget
 		if *minBudget != 0 {
 			resProject.MinBudget = minBudget
 		} else {
 			resProject.MinBudget = nil
 		}
-		maxBudget := &project.MaxBudget.Int
+		maxBudget := &project.MaxBudget
 		if *maxBudget != 0 {
 			resProject.MaxBudget = maxBudget
 		} else {
 			resProject.MaxBudget = nil
 		}
+		resProject.ProposalStatus = project.ProposalStatus
 
 		resProjects = append(resProjects, resProject)
 	}
