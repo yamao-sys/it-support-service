@@ -22,16 +22,16 @@ var PlanFactory = factory.NewFactory(
 }).Attr("Description", func(args factory.Args) (interface{}, error) {
 	return randomdata.RandStringRunes(50), nil
 }).Attr("StartDate", func(args factory.Args) (interface{}, error) {
-	date := time.Date(2025, 4, 1, 0, 0, 0, 0, time.UTC)
+	date := null.Time{Time: time.Date(2025, 4, 1, 0, 0, 0, 0, time.UTC), Valid: true}
 	return date, nil
 }).Attr("EndDate", func(args factory.Args) (interface{}, error) {
-	date := time.Date(2025, 4, 10, 0, 0, 0, 0, time.UTC)
+	date := null.Time{Time: time.Date(2025, 4, 10, 0, 0, 0, 0, time.UTC), Valid: true}
 	return date, nil
 }).Attr("UnitPrice", func(args factory.Args) (interface{}, error) {
-	return null.Int{Int: 10000, Valid: true}, nil
+	return 10000, nil
 }).Attr("Status", func(args factory.Args) (interface{}, error) {
-	return 0, nil
+	return models.PlanStatusNum(models.PlanStatusTempraryCreating), nil
 }).Attr("AgreedAt", func(args factory.Args) (interface{}, error) {
-	date := time.Date(2025, 4, 1, 0, 0, 0, 0, time.UTC)
+	date := null.Time{Time: time.Date(2025, 4, 1, 0, 0, 0, 0, time.UTC), Valid: true}
 	return date, nil
 })

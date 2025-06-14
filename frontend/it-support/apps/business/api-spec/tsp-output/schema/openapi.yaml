@@ -568,6 +568,7 @@ components:
         - description
         - startDate
         - endDate
+        - proposalStatus
       properties:
         id:
           type: integer
@@ -585,6 +586,12 @@ components:
           type: integer
         maxBudget:
           type: integer
+        proposalStatus:
+          type: string
+          enum:
+            - NOT PROPOSED
+            - TEMPORARY CREATING
+            - PROPOSED
       title: Project for Supporters
     ToProjectResponse:
       type: object

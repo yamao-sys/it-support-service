@@ -19,16 +19,6 @@ type planService struct {
 	db *gorm.DB
 }
 
-type StatusNum int
-const (
-	NotStarted StatusNum = iota
-	Agreed
-	Rejected
-	InProgress
-	RequestingReward
-	Rewarded
-)
-
 func NewPlanService(db *gorm.DB) PlanService {
 	return &planService{db}
 }

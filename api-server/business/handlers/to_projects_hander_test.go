@@ -99,10 +99,17 @@ func (s *TestToProjectsHandlerSuite) TestGetToProjectsFetchLists_StatusOk() {
 }
 
 func (s *TestToProjectsHandlerSuite) TestGetToProjectsFetchLists_EmptyArgs_NotHavingNextPage_StatusOK() {
-	_, cookieString := s.supporterSignIn()
+	supporter, cookieString := s.supporterSignIn()
 
 	var companyProductIDs []int
 	DBCon.Model(&models.Project{}).Pluck("id", &companyProductIDs)
+
+	temporaryCreatingPlan := factories.PlanFactory.MustCreateWithOption(map[string]interface{}{"SupporterID": supporter.ID, "ProjectID": project1.ID, "Status": models.PlanStatusTempraryCreating}).(*models.Plan)
+	DBCon.Create(temporaryCreatingPlan)
+	submittedPlan := factories.PlanFactory.MustCreateWithOption(map[string]interface{}{"SupporterID": supporter.ID, "ProjectID": project2.ID, "Status": models.PlanStatusSubmitted}).(*models.Plan)
+	DBCon.Create(submittedPlan)
+	agreedPlan := factories.PlanFactory.MustCreateWithOption(map[string]interface{}{"SupporterID": supporter.ID, "ProjectID": project3.ID, "Status": models.PlanStatusAgreed}).(*models.Plan)
+	DBCon.Create(agreedPlan)
 
 	result := testutil.NewRequest().Get("/to-projects").WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).GoWithHTTPHandler(s.T(), e)
 
@@ -115,17 +122,29 @@ func (s *TestToProjectsHandlerSuite) TestGetToProjectsFetchLists_EmptyArgs_NotHa
 		projectIDs = append(projectIDs, project.Id)
 	}
 	assert.Equal(s.T(), companyProductIDs, projectIDs)
+	assert.Equal(s.T(), businessapi.TEMPORARYCREATING, res.Projects[0].ProposalStatus)
+	assert.Equal(s.T(), businessapi.PROPOSED, res.Projects[1].ProposalStatus)
+	assert.Equal(s.T(), businessapi.PROPOSED, res.Projects[2].ProposalStatus)
+	assert.Equal(s.T(), businessapi.NOTPROPOSED, res.Projects[3].ProposalStatus)
+	assert.Equal(s.T(), businessapi.NOTPROPOSED, res.Projects[4].ProposalStatus)
 	assert.Equal(s.T(), "0", res.NextPageToken)
 }
 
 func (s *TestToProjectsHandlerSuite) TestGetToProjectsFetchLists_WithOnlyPageToken_NotHavingNextPage_StatusOK() {
-	_, cookieString := s.supporterSignIn()
+	supporter, cookieString := s.supporterSignIn()
 
 	project6 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
 	DBCon.Create(project6)
 
 	var companyProductIDs []int
 	DBCon.Model(&models.Project{}).Where("id != ?", project1.ID).Pluck("id", &companyProductIDs)
+
+	temporaryCreatingPlan := factories.PlanFactory.MustCreateWithOption(map[string]interface{}{"SupporterID": supporter.ID, "ProjectID": project2.ID, "Status": models.PlanStatusTempraryCreating}).(*models.Plan)
+	DBCon.Create(temporaryCreatingPlan)
+	submittedPlan := factories.PlanFactory.MustCreateWithOption(map[string]interface{}{"SupporterID": supporter.ID, "ProjectID": project3.ID, "Status": models.PlanStatusSubmitted}).(*models.Plan)
+	DBCon.Create(submittedPlan)
+	agreedPlan := factories.PlanFactory.MustCreateWithOption(map[string]interface{}{"SupporterID": supporter.ID, "ProjectID": project4.ID, "Status": models.PlanStatusAgreed}).(*models.Plan)
+	DBCon.Create(agreedPlan)
 
 	result := testutil.NewRequest().Get("/to-projects?pageToken="+strconv.Itoa(project2.ID)).WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).GoWithHTTPHandler(s.T(), e)
 
@@ -138,11 +157,16 @@ func (s *TestToProjectsHandlerSuite) TestGetToProjectsFetchLists_WithOnlyPageTok
 		projectIDs = append(projectIDs, project.Id)
 	}
 	assert.Equal(s.T(), companyProductIDs, projectIDs)
+	assert.Equal(s.T(), businessapi.TEMPORARYCREATING, res.Projects[0].ProposalStatus)
+	assert.Equal(s.T(), businessapi.PROPOSED, res.Projects[1].ProposalStatus)
+	assert.Equal(s.T(), businessapi.PROPOSED, res.Projects[2].ProposalStatus)
+	assert.Equal(s.T(), businessapi.NOTPROPOSED, res.Projects[3].ProposalStatus)
+	assert.Equal(s.T(), businessapi.NOTPROPOSED, res.Projects[4].ProposalStatus)
 	assert.Equal(s.T(), "0", res.NextPageToken)
 }
 
 func (s *TestToProjectsHandlerSuite) TestGetToProjectsFetchLists_WithOnlyPageToken_HavingNextPage_StatusOK() {
-	_, cookieString := s.supporterSignIn()
+	supporter, cookieString := s.supporterSignIn()
 
 	project6 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)
 	DBCon.Create(project6)
@@ -151,6 +175,13 @@ func (s *TestToProjectsHandlerSuite) TestGetToProjectsFetchLists_WithOnlyPageTok
 	var companyProductIDs []int
 	DBCon.Model(&models.Project{}).Where("id >= ?", project2.ID).Where("id < ?", project7.ID).Pluck("id", &companyProductIDs)
 
+	temporaryCreatingPlan := factories.PlanFactory.MustCreateWithOption(map[string]interface{}{"SupporterID": supporter.ID, "ProjectID": project2.ID, "Status": models.PlanStatusTempraryCreating}).(*models.Plan)
+	DBCon.Create(temporaryCreatingPlan)
+	submittedPlan := factories.PlanFactory.MustCreateWithOption(map[string]interface{}{"SupporterID": supporter.ID, "ProjectID": project3.ID, "Status": models.PlanStatusSubmitted}).(*models.Plan)
+	DBCon.Create(submittedPlan)
+	agreedPlan := factories.PlanFactory.MustCreateWithOption(map[string]interface{}{"SupporterID": supporter.ID, "ProjectID": project4.ID, "Status": models.PlanStatusAgreed}).(*models.Plan)
+	DBCon.Create(agreedPlan)
+
 	result := testutil.NewRequest().Get("/to-projects?pageToken="+strconv.Itoa(project2.ID)).WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).GoWithHTTPHandler(s.T(), e)
 
 	assert.Equal(s.T(), http.StatusOK, result.Code())
@@ -162,16 +193,28 @@ func (s *TestToProjectsHandlerSuite) TestGetToProjectsFetchLists_WithOnlyPageTok
 		projectIDs = append(projectIDs, project.Id)
 	}
 	assert.Equal(s.T(), companyProductIDs, projectIDs)
+	assert.Equal(s.T(), businessapi.TEMPORARYCREATING, res.Projects[0].ProposalStatus)
+	assert.Equal(s.T(), businessapi.PROPOSED, res.Projects[1].ProposalStatus)
+	assert.Equal(s.T(), businessapi.PROPOSED, res.Projects[2].ProposalStatus)
+	assert.Equal(s.T(), businessapi.NOTPROPOSED, res.Projects[3].ProposalStatus)
+	assert.Equal(s.T(), businessapi.NOTPROPOSED, res.Projects[4].ProposalStatus)
 	assert.Equal(s.T(), strconv.Itoa(project7.ID), res.NextPageToken)
 }
 
 func (s *TestToProjectsHandlerSuite) TestGetToProjectsFetchLists_WithOnlyStartDate_NotHavingNextPage_StatusOK() {
-	_, cookieString := s.supporterSignIn()
+	supporter, cookieString := s.supporterSignIn()
 
 	project6 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID, "StartDate": time.Date(2025, 5, 29, 0, 0, 0, 0, time.Local)}).(*models.Project)
 	DBCon.Create(project6)
 	var companyProductIDs []int
 	DBCon.Model(&models.Project{}).Where("id >= ?", project2.ID).Pluck("id", &companyProductIDs)
+
+	temporaryCreatingPlan := factories.PlanFactory.MustCreateWithOption(map[string]interface{}{"SupporterID": supporter.ID, "ProjectID": project2.ID, "Status": models.PlanStatusTempraryCreating}).(*models.Plan)
+	DBCon.Create(temporaryCreatingPlan)
+	submittedPlan := factories.PlanFactory.MustCreateWithOption(map[string]interface{}{"SupporterID": supporter.ID, "ProjectID": project3.ID, "Status": models.PlanStatusSubmitted}).(*models.Plan)
+	DBCon.Create(submittedPlan)
+	agreedPlan := factories.PlanFactory.MustCreateWithOption(map[string]interface{}{"SupporterID": supporter.ID, "ProjectID": project4.ID, "Status": models.PlanStatusAgreed}).(*models.Plan)
+	DBCon.Create(agreedPlan)
 
 	result := testutil.NewRequest().Get("/to-projects?startDate=2025-05-25").WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).GoWithHTTPHandler(s.T(), e)
 
@@ -184,16 +227,28 @@ func (s *TestToProjectsHandlerSuite) TestGetToProjectsFetchLists_WithOnlyStartDa
 		projectIDs = append(projectIDs, project.Id)
 	}
 	assert.Equal(s.T(), companyProductIDs, projectIDs)
+	assert.Equal(s.T(), businessapi.TEMPORARYCREATING, res.Projects[0].ProposalStatus)
+	assert.Equal(s.T(), businessapi.PROPOSED, res.Projects[1].ProposalStatus)
+	assert.Equal(s.T(), businessapi.PROPOSED, res.Projects[2].ProposalStatus)
+	assert.Equal(s.T(), businessapi.NOTPROPOSED, res.Projects[3].ProposalStatus)
+	assert.Equal(s.T(), businessapi.NOTPROPOSED, res.Projects[4].ProposalStatus)
 	assert.Equal(s.T(), "0", res.NextPageToken)
 }
 
 func (s *TestToProjectsHandlerSuite) TestGetToProjectsFetchLists_WithOnlyStartDate_HavingNextPage_StatusOK() {
-	_, cookieString := s.supporterSignIn()
+	supporter, cookieString := s.supporterSignIn()
 
 	project6 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID, "StartDate": time.Date(2025, 5, 29, 0, 0, 0, 0, time.Local)}).(*models.Project)
 	DBCon.Create(project6)
 	var companyProductIDs []int
 	DBCon.Model(&models.Project{}).Where("id >= ? AND id <= ?", project1.ID, project5.ID).Pluck("id", &companyProductIDs)
+
+	temporaryCreatingPlan := factories.PlanFactory.MustCreateWithOption(map[string]interface{}{"SupporterID": supporter.ID, "ProjectID": project1.ID, "Status": models.PlanStatusTempraryCreating}).(*models.Plan)
+	DBCon.Create(temporaryCreatingPlan)
+	submittedPlan := factories.PlanFactory.MustCreateWithOption(map[string]interface{}{"SupporterID": supporter.ID, "ProjectID": project2.ID, "Status": models.PlanStatusSubmitted}).(*models.Plan)
+	DBCon.Create(submittedPlan)
+	agreedPlan := factories.PlanFactory.MustCreateWithOption(map[string]interface{}{"SupporterID": supporter.ID, "ProjectID": project3.ID, "Status": models.PlanStatusAgreed}).(*models.Plan)
+	DBCon.Create(agreedPlan)
 
 	result := testutil.NewRequest().Get("/to-projects?startDate=2025-05-24").WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).GoWithHTTPHandler(s.T(), e)
 
@@ -206,16 +261,28 @@ func (s *TestToProjectsHandlerSuite) TestGetToProjectsFetchLists_WithOnlyStartDa
 		projectIDs = append(projectIDs, project.Id)
 	}
 	assert.Equal(s.T(), companyProductIDs, projectIDs)
+	assert.Equal(s.T(), businessapi.TEMPORARYCREATING, res.Projects[0].ProposalStatus)
+	assert.Equal(s.T(), businessapi.PROPOSED, res.Projects[1].ProposalStatus)
+	assert.Equal(s.T(), businessapi.PROPOSED, res.Projects[2].ProposalStatus)
+	assert.Equal(s.T(), businessapi.NOTPROPOSED, res.Projects[3].ProposalStatus)
+	assert.Equal(s.T(), businessapi.NOTPROPOSED, res.Projects[4].ProposalStatus)
 	assert.Equal(s.T(), strconv.Itoa(project6.ID), res.NextPageToken)
 }
 
 func (s *TestToProjectsHandlerSuite) TestGetToProjectsFetchLists_WithOnlyEndDate_NotHavingNextPage_StatusOK() {
-	_, cookieString := s.supporterSignIn()
+	supporter, cookieString := s.supporterSignIn()
 
 	project6 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID, "EndDate": time.Date(2025, 5, 29, 0, 0, 0, 0, time.Local)}).(*models.Project)
 	DBCon.Create(project6)
 	var companyProductIDs []int
 	DBCon.Model(&models.Project{}).Where("id >= ? AND id <= ?", project1.ID, project5.ID).Pluck("id", &companyProductIDs)
+
+	temporaryCreatingPlan := factories.PlanFactory.MustCreateWithOption(map[string]interface{}{"SupporterID": supporter.ID, "ProjectID": project1.ID, "Status": models.PlanStatusTempraryCreating}).(*models.Plan)
+	DBCon.Create(temporaryCreatingPlan)
+	submittedPlan := factories.PlanFactory.MustCreateWithOption(map[string]interface{}{"SupporterID": supporter.ID, "ProjectID": project2.ID, "Status": models.PlanStatusSubmitted}).(*models.Plan)
+	DBCon.Create(submittedPlan)
+	agreedPlan := factories.PlanFactory.MustCreateWithOption(map[string]interface{}{"SupporterID": supporter.ID, "ProjectID": project3.ID, "Status": models.PlanStatusAgreed}).(*models.Plan)
+	DBCon.Create(agreedPlan)
 
 	result := testutil.NewRequest().Get("/to-projects?endDate=2025-05-28").WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).GoWithHTTPHandler(s.T(), e)
 
@@ -228,16 +295,28 @@ func (s *TestToProjectsHandlerSuite) TestGetToProjectsFetchLists_WithOnlyEndDate
 		projectIDs = append(projectIDs, project.Id)
 	}
 	assert.Equal(s.T(), companyProductIDs, projectIDs)
+	assert.Equal(s.T(), businessapi.TEMPORARYCREATING, res.Projects[0].ProposalStatus)
+	assert.Equal(s.T(), businessapi.PROPOSED, res.Projects[1].ProposalStatus)
+	assert.Equal(s.T(), businessapi.PROPOSED, res.Projects[2].ProposalStatus)
+	assert.Equal(s.T(), businessapi.NOTPROPOSED, res.Projects[3].ProposalStatus)
+	assert.Equal(s.T(), businessapi.NOTPROPOSED, res.Projects[4].ProposalStatus)
 	assert.Equal(s.T(), "0", res.NextPageToken)
 }
 
 func (s *TestToProjectsHandlerSuite) TestGetToProjectsFetchLists_WithOnlyEndDate_HavingNextPage_StatusOK() {
-	_, cookieString := s.supporterSignIn()
+	supporter, cookieString := s.supporterSignIn()
 
 	project6 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID, "EndDate": time.Date(2025, 5, 29, 0, 0, 0, 0, time.Local)}).(*models.Project)
 	DBCon.Create(project6)
 	var companyProductIDs []int
 	DBCon.Model(&models.Project{}).Where("id >= ? AND id <= ?", project1.ID, project5.ID).Pluck("id", &companyProductIDs)
+
+	temporaryCreatingPlan := factories.PlanFactory.MustCreateWithOption(map[string]interface{}{"SupporterID": supporter.ID, "ProjectID": project1.ID, "Status": models.PlanStatusTempraryCreating}).(*models.Plan)
+	DBCon.Create(temporaryCreatingPlan)
+	submittedPlan := factories.PlanFactory.MustCreateWithOption(map[string]interface{}{"SupporterID": supporter.ID, "ProjectID": project2.ID, "Status": models.PlanStatusSubmitted}).(*models.Plan)
+	DBCon.Create(submittedPlan)
+	agreedPlan := factories.PlanFactory.MustCreateWithOption(map[string]interface{}{"SupporterID": supporter.ID, "ProjectID": project3.ID, "Status": models.PlanStatusAgreed}).(*models.Plan)
+	DBCon.Create(agreedPlan)
 
 	result := testutil.NewRequest().Get("/to-projects?endDate=2025-05-29").WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).GoWithHTTPHandler(s.T(), e)
 
@@ -250,16 +329,28 @@ func (s *TestToProjectsHandlerSuite) TestGetToProjectsFetchLists_WithOnlyEndDate
 		projectIDs = append(projectIDs, project.Id)
 	}
 	assert.Equal(s.T(), companyProductIDs, projectIDs)
+	assert.Equal(s.T(), businessapi.TEMPORARYCREATING, res.Projects[0].ProposalStatus)
+	assert.Equal(s.T(), businessapi.PROPOSED, res.Projects[1].ProposalStatus)
+	assert.Equal(s.T(), businessapi.PROPOSED, res.Projects[2].ProposalStatus)
+	assert.Equal(s.T(), businessapi.NOTPROPOSED, res.Projects[3].ProposalStatus)
+	assert.Equal(s.T(), businessapi.NOTPROPOSED, res.Projects[4].ProposalStatus)
 	assert.Equal(s.T(), strconv.Itoa(project6.ID), res.NextPageToken)
 }
 
 func (s *TestToProjectsHandlerSuite) TestGetToProjectsFetchLists_WithPageTokenAndStartDate_NotHavingNextPage_StatusOK() {
-	_, cookieString := s.supporterSignIn()
+	supporter, cookieString := s.supporterSignIn()
 
 	project6 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID, "StartDate": time.Date(2025, 5, 29, 0, 0, 0, 0, time.Local)}).(*models.Project)
 	DBCon.Create(project6)
 	var companyProductIDs []int
 	DBCon.Model(&models.Project{}).Where("id >= ? AND id <= ?", project2.ID, project6.ID).Pluck("id", &companyProductIDs)
+
+	temporaryCreatingPlan := factories.PlanFactory.MustCreateWithOption(map[string]interface{}{"SupporterID": supporter.ID, "ProjectID": project2.ID, "Status": models.PlanStatusTempraryCreating}).(*models.Plan)
+	DBCon.Create(temporaryCreatingPlan)
+	submittedPlan := factories.PlanFactory.MustCreateWithOption(map[string]interface{}{"SupporterID": supporter.ID, "ProjectID": project3.ID, "Status": models.PlanStatusSubmitted}).(*models.Plan)
+	DBCon.Create(submittedPlan)
+	agreedPlan := factories.PlanFactory.MustCreateWithOption(map[string]interface{}{"SupporterID": supporter.ID, "ProjectID": project4.ID, "Status": models.PlanStatusAgreed}).(*models.Plan)
+	DBCon.Create(agreedPlan)
 
 	result := testutil.NewRequest().Get("/to-projects?pageToken="+strconv.Itoa(project2.ID)+"&startDate=2025-05-25").WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).GoWithHTTPHandler(s.T(), e)
 
@@ -272,16 +363,28 @@ func (s *TestToProjectsHandlerSuite) TestGetToProjectsFetchLists_WithPageTokenAn
 		projectIDs = append(projectIDs, project.Id)
 	}
 	assert.Equal(s.T(), companyProductIDs, projectIDs)
+	assert.Equal(s.T(), businessapi.TEMPORARYCREATING, res.Projects[0].ProposalStatus)
+	assert.Equal(s.T(), businessapi.PROPOSED, res.Projects[1].ProposalStatus)
+	assert.Equal(s.T(), businessapi.PROPOSED, res.Projects[2].ProposalStatus)
+	assert.Equal(s.T(), businessapi.NOTPROPOSED, res.Projects[3].ProposalStatus)
+	assert.Equal(s.T(), businessapi.NOTPROPOSED, res.Projects[4].ProposalStatus)
 	assert.Equal(s.T(), "0", res.NextPageToken)
 }
 
 func (s *TestToProjectsHandlerSuite) TestGetToProjectsFetchLists_WithPageTokenAndStartDate_HavingNextPage_StatusOK() {
-	_, cookieString := s.supporterSignIn()
+	supporter, cookieString := s.supporterSignIn()
 
 	project6 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID, "StartDate": time.Date(2025, 5, 29, 0, 0, 0, 0, time.Local)}).(*models.Project)
 	DBCon.Create(project6)
 	var companyProductIDs []int
 	DBCon.Model(&models.Project{}).Where("id >= ? AND id <= ?", project1.ID, project5.ID).Pluck("id", &companyProductIDs)
+
+	temporaryCreatingPlan := factories.PlanFactory.MustCreateWithOption(map[string]interface{}{"SupporterID": supporter.ID, "ProjectID": project1.ID, "Status": models.PlanStatusTempraryCreating}).(*models.Plan)
+	DBCon.Create(temporaryCreatingPlan)
+	submittedPlan := factories.PlanFactory.MustCreateWithOption(map[string]interface{}{"SupporterID": supporter.ID, "ProjectID": project2.ID, "Status": models.PlanStatusSubmitted}).(*models.Plan)
+	DBCon.Create(submittedPlan)
+	agreedPlan := factories.PlanFactory.MustCreateWithOption(map[string]interface{}{"SupporterID": supporter.ID, "ProjectID": project3.ID, "Status": models.PlanStatusAgreed}).(*models.Plan)
+	DBCon.Create(agreedPlan)
 
 	result := testutil.NewRequest().Get("/to-projects?pageToken="+strconv.Itoa(project1.ID)+"&startDate=2025-05-24").WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).GoWithHTTPHandler(s.T(), e)
 
@@ -294,16 +397,28 @@ func (s *TestToProjectsHandlerSuite) TestGetToProjectsFetchLists_WithPageTokenAn
 		projectIDs = append(projectIDs, project.Id)
 	}
 	assert.Equal(s.T(), companyProductIDs, projectIDs)
+	assert.Equal(s.T(), businessapi.TEMPORARYCREATING, res.Projects[0].ProposalStatus)
+	assert.Equal(s.T(), businessapi.PROPOSED, res.Projects[1].ProposalStatus)
+	assert.Equal(s.T(), businessapi.PROPOSED, res.Projects[2].ProposalStatus)
+	assert.Equal(s.T(), businessapi.NOTPROPOSED, res.Projects[3].ProposalStatus)
+	assert.Equal(s.T(), businessapi.NOTPROPOSED, res.Projects[4].ProposalStatus)
 	assert.Equal(s.T(), strconv.Itoa(project6.ID), res.NextPageToken)
 }
 
 func (s *TestToProjectsHandlerSuite) TestGetToProjectsFetchLists_WithPageTokenAndEndDate_NotHavingNextPage_StatusOK() {
-	_, cookieString := s.supporterSignIn()
+	supporter, cookieString := s.supporterSignIn()
 
 	project6 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID, "EndDate": time.Date(2025, 5, 29, 0, 0, 0, 0, time.Local)}).(*models.Project)
 	DBCon.Create(project6)
 	var companyProductIDs []int
 	DBCon.Model(&models.Project{}).Where("id >= ? AND id <= ?", project2.ID, project6.ID).Pluck("id", &companyProductIDs)
+
+	temporaryCreatingPlan := factories.PlanFactory.MustCreateWithOption(map[string]interface{}{"SupporterID": supporter.ID, "ProjectID": project2.ID, "Status": models.PlanStatusTempraryCreating}).(*models.Plan)
+	DBCon.Create(temporaryCreatingPlan)
+	submittedPlan := factories.PlanFactory.MustCreateWithOption(map[string]interface{}{"SupporterID": supporter.ID, "ProjectID": project3.ID, "Status": models.PlanStatusSubmitted}).(*models.Plan)
+	DBCon.Create(submittedPlan)
+	agreedPlan := factories.PlanFactory.MustCreateWithOption(map[string]interface{}{"SupporterID": supporter.ID, "ProjectID": project4.ID, "Status": models.PlanStatusAgreed}).(*models.Plan)
+	DBCon.Create(agreedPlan)
 
 	result := testutil.NewRequest().Get("/to-projects?pageToken="+strconv.Itoa(project2.ID)+"&endDate=2025-05-29").WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).GoWithHTTPHandler(s.T(), e)
 
@@ -316,16 +431,28 @@ func (s *TestToProjectsHandlerSuite) TestGetToProjectsFetchLists_WithPageTokenAn
 		projectIDs = append(projectIDs, project.Id)
 	}
 	assert.Equal(s.T(), companyProductIDs, projectIDs)
+	assert.Equal(s.T(), businessapi.TEMPORARYCREATING, res.Projects[0].ProposalStatus)
+	assert.Equal(s.T(), businessapi.PROPOSED, res.Projects[1].ProposalStatus)
+	assert.Equal(s.T(), businessapi.PROPOSED, res.Projects[2].ProposalStatus)
+	assert.Equal(s.T(), businessapi.NOTPROPOSED, res.Projects[3].ProposalStatus)
+	assert.Equal(s.T(), businessapi.NOTPROPOSED, res.Projects[4].ProposalStatus)
 	assert.Equal(s.T(), "0", res.NextPageToken)
 }
 
 func (s *TestToProjectsHandlerSuite) TestGetToProjectsFetchLists_WithPageTokenAndEndDate_HavingNextPage_StatusOK() {
-	_, cookieString := s.supporterSignIn()
+	supporter, cookieString := s.supporterSignIn()
 
 	project6 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID, "EndDate": time.Date(2025, 5, 29, 0, 0, 0, 0, time.Local)}).(*models.Project)
 	DBCon.Create(project6)
 	var companyProductIDs []int
 	DBCon.Model(&models.Project{}).Where("id >= ? AND id <= ?", project1.ID, project5.ID).Pluck("id", &companyProductIDs)
+
+	temporaryCreatingPlan := factories.PlanFactory.MustCreateWithOption(map[string]interface{}{"SupporterID": supporter.ID, "ProjectID": project1.ID, "Status": models.PlanStatusTempraryCreating}).(*models.Plan)
+	DBCon.Create(temporaryCreatingPlan)
+	submittedPlan := factories.PlanFactory.MustCreateWithOption(map[string]interface{}{"SupporterID": supporter.ID, "ProjectID": project2.ID, "Status": models.PlanStatusSubmitted}).(*models.Plan)
+	DBCon.Create(submittedPlan)
+	agreedPlan := factories.PlanFactory.MustCreateWithOption(map[string]interface{}{"SupporterID": supporter.ID, "ProjectID": project3.ID, "Status": models.PlanStatusAgreed}).(*models.Plan)
+	DBCon.Create(agreedPlan)
 
 	result := testutil.NewRequest().Get("/to-projects?pageToken="+strconv.Itoa(project1.ID)+"&endDate=2025-05-29").WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).GoWithHTTPHandler(s.T(), e)
 
@@ -338,16 +465,28 @@ func (s *TestToProjectsHandlerSuite) TestGetToProjectsFetchLists_WithPageTokenAn
 		projectIDs = append(projectIDs, project.Id)
 	}
 	assert.Equal(s.T(), companyProductIDs, projectIDs)
+	assert.Equal(s.T(), businessapi.TEMPORARYCREATING, res.Projects[0].ProposalStatus)
+	assert.Equal(s.T(), businessapi.PROPOSED, res.Projects[1].ProposalStatus)
+	assert.Equal(s.T(), businessapi.PROPOSED, res.Projects[2].ProposalStatus)
+	assert.Equal(s.T(), businessapi.NOTPROPOSED, res.Projects[3].ProposalStatus)
+	assert.Equal(s.T(), businessapi.NOTPROPOSED, res.Projects[4].ProposalStatus)
 	assert.Equal(s.T(), strconv.Itoa(project6.ID), res.NextPageToken)
 }
 
 func (s *TestToProjectsHandlerSuite) TestGetToProjectsFetchLists_WithStartDateAndEndDate_NotHavingNextPage_StatusOK() {
-	_, cookieString := s.supporterSignIn()
+	supporter, cookieString := s.supporterSignIn()
 
 	project6 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID, "StartDate": time.Date(2025, 5, 29, 0, 0, 0, 0, time.Local), "EndDate": time.Date(2025, 5, 29, 0, 0, 0, 0, time.Local)}).(*models.Project)
 	DBCon.Create(project6)
 	var companyProductIDs []int
 	DBCon.Model(&models.Project{}).Where("id >= ? AND id <= ?", project2.ID, project6.ID).Pluck("id", &companyProductIDs)
+
+	temporaryCreatingPlan := factories.PlanFactory.MustCreateWithOption(map[string]interface{}{"SupporterID": supporter.ID, "ProjectID": project2.ID, "Status": models.PlanStatusTempraryCreating}).(*models.Plan)
+	DBCon.Create(temporaryCreatingPlan)
+	submittedPlan := factories.PlanFactory.MustCreateWithOption(map[string]interface{}{"SupporterID": supporter.ID, "ProjectID": project3.ID, "Status": models.PlanStatusSubmitted}).(*models.Plan)
+	DBCon.Create(submittedPlan)
+	agreedPlan := factories.PlanFactory.MustCreateWithOption(map[string]interface{}{"SupporterID": supporter.ID, "ProjectID": project4.ID, "Status": models.PlanStatusAgreed}).(*models.Plan)
+	DBCon.Create(agreedPlan)
 
 	result := testutil.NewRequest().Get("/to-projects?startDate=2025-05-25&endDate=2025-05-29").WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).GoWithHTTPHandler(s.T(), e)
 
@@ -360,16 +499,28 @@ func (s *TestToProjectsHandlerSuite) TestGetToProjectsFetchLists_WithStartDateAn
 		projectIDs = append(projectIDs, project.Id)
 	}
 	assert.Equal(s.T(), companyProductIDs, projectIDs)
+	assert.Equal(s.T(), businessapi.TEMPORARYCREATING, res.Projects[0].ProposalStatus)
+	assert.Equal(s.T(), businessapi.PROPOSED, res.Projects[1].ProposalStatus)
+	assert.Equal(s.T(), businessapi.PROPOSED, res.Projects[2].ProposalStatus)
+	assert.Equal(s.T(), businessapi.NOTPROPOSED, res.Projects[3].ProposalStatus)
+	assert.Equal(s.T(), businessapi.NOTPROPOSED, res.Projects[4].ProposalStatus)
 	assert.Equal(s.T(), "0", res.NextPageToken)
 }
 
 func (s *TestToProjectsHandlerSuite) TestGetToProjectsFetchLists_WithStartDateAndEndDate_HavingNextPage_StatusOK() {
-	_, cookieString := s.supporterSignIn()
+	supporter, cookieString := s.supporterSignIn()
 
 	project6 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID, "StartDate": time.Date(2025, 5, 29, 0, 0, 0, 0, time.Local), "EndDate": time.Date(2025, 5, 29, 0, 0, 0, 0, time.Local)}).(*models.Project)
 	DBCon.Create(project6)
 	var companyProductIDs []int
 	DBCon.Model(&models.Project{}).Where("id >= ? AND id <= ?", project1.ID, project5.ID).Pluck("id", &companyProductIDs)
+
+	temporaryCreatingPlan := factories.PlanFactory.MustCreateWithOption(map[string]interface{}{"SupporterID": supporter.ID, "ProjectID": project1.ID, "Status": models.PlanStatusTempraryCreating}).(*models.Plan)
+	DBCon.Create(temporaryCreatingPlan)
+	submittedPlan := factories.PlanFactory.MustCreateWithOption(map[string]interface{}{"SupporterID": supporter.ID, "ProjectID": project2.ID, "Status": models.PlanStatusSubmitted}).(*models.Plan)
+	DBCon.Create(submittedPlan)
+	agreedPlan := factories.PlanFactory.MustCreateWithOption(map[string]interface{}{"SupporterID": supporter.ID, "ProjectID": project3.ID, "Status": models.PlanStatusAgreed}).(*models.Plan)
+	DBCon.Create(agreedPlan)
 
 	result := testutil.NewRequest().Get("/to-projects?startDate=2025-05-24&endDate=2025-05-29").WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).GoWithHTTPHandler(s.T(), e)
 
@@ -382,16 +533,28 @@ func (s *TestToProjectsHandlerSuite) TestGetToProjectsFetchLists_WithStartDateAn
 		projectIDs = append(projectIDs, project.Id)
 	}
 	assert.Equal(s.T(), companyProductIDs, projectIDs)
+	assert.Equal(s.T(), businessapi.TEMPORARYCREATING, res.Projects[0].ProposalStatus)
+	assert.Equal(s.T(), businessapi.PROPOSED, res.Projects[1].ProposalStatus)
+	assert.Equal(s.T(), businessapi.PROPOSED, res.Projects[2].ProposalStatus)
+	assert.Equal(s.T(), businessapi.NOTPROPOSED, res.Projects[3].ProposalStatus)
+	assert.Equal(s.T(), businessapi.NOTPROPOSED, res.Projects[4].ProposalStatus)
 	assert.Equal(s.T(), strconv.Itoa(project6.ID), res.NextPageToken)
 }
 
 func (s *TestToProjectsHandlerSuite) TestGetToProjectsFetchLists_WithPageTokenAndStartDateAndEndDate_NotHavingNextPage_StatusOK() {
-	_, cookieString := s.supporterSignIn()
+	supporter, cookieString := s.supporterSignIn()
 
 	project6 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID, "StartDate": time.Date(2025, 5, 29, 0, 0, 0, 0, time.Local), "EndDate": time.Date(2025, 5, 29, 0, 0, 0, 0, time.Local)}).(*models.Project)
 	DBCon.Create(project6)
 	var companyProductIDs []int
 	DBCon.Model(&models.Project{}).Where("id >= ? AND id <= ?", project2.ID, project6.ID).Pluck("id", &companyProductIDs)
+
+	temporaryCreatingPlan := factories.PlanFactory.MustCreateWithOption(map[string]interface{}{"SupporterID": supporter.ID, "ProjectID": project2.ID, "Status": models.PlanStatusTempraryCreating}).(*models.Plan)
+	DBCon.Create(temporaryCreatingPlan)
+	submittedPlan := factories.PlanFactory.MustCreateWithOption(map[string]interface{}{"SupporterID": supporter.ID, "ProjectID": project3.ID, "Status": models.PlanStatusSubmitted}).(*models.Plan)
+	DBCon.Create(submittedPlan)
+	agreedPlan := factories.PlanFactory.MustCreateWithOption(map[string]interface{}{"SupporterID": supporter.ID, "ProjectID": project4.ID, "Status": models.PlanStatusAgreed}).(*models.Plan)
+	DBCon.Create(agreedPlan)
 
 	result := testutil.NewRequest().Get("/to-projects?pageToken="+strconv.Itoa(project2.ID)+"&startDate=2025-05-25&endDate=2025-05-29").WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).GoWithHTTPHandler(s.T(), e)
 
@@ -404,16 +567,28 @@ func (s *TestToProjectsHandlerSuite) TestGetToProjectsFetchLists_WithPageTokenAn
 		projectIDs = append(projectIDs, project.Id)
 	}
 	assert.Equal(s.T(), companyProductIDs, projectIDs)
+	assert.Equal(s.T(), businessapi.TEMPORARYCREATING, res.Projects[0].ProposalStatus)
+	assert.Equal(s.T(), businessapi.PROPOSED, res.Projects[1].ProposalStatus)
+	assert.Equal(s.T(), businessapi.PROPOSED, res.Projects[2].ProposalStatus)
+	assert.Equal(s.T(), businessapi.NOTPROPOSED, res.Projects[3].ProposalStatus)
+	assert.Equal(s.T(), businessapi.NOTPROPOSED, res.Projects[4].ProposalStatus)
 	assert.Equal(s.T(), "0", res.NextPageToken)
 }
 
 func (s *TestToProjectsHandlerSuite) TestGetToProjectsFetchLists_WithPageTokenAndStartDateAndEndDate_HavingNextPage_StatusOK() {
-	_, cookieString := s.supporterSignIn()
+	supporter, cookieString := s.supporterSignIn()
 
 	project6 := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID, "StartDate": time.Date(2025, 5, 29, 0, 0, 0, 0, time.Local), "EndDate": time.Date(2025, 5, 29, 0, 0, 0, 0, time.Local)}).(*models.Project)
 	DBCon.Create(project6)
 	var companyProductIDs []int
 	DBCon.Model(&models.Project{}).Where("id >= ? AND id <= ?", project1.ID, project5.ID).Pluck("id", &companyProductIDs)
+
+	temporaryCreatingPlan := factories.PlanFactory.MustCreateWithOption(map[string]interface{}{"SupporterID": supporter.ID, "ProjectID": project1.ID, "Status": models.PlanStatusTempraryCreating}).(*models.Plan)
+	DBCon.Create(temporaryCreatingPlan)
+	submittedPlan := factories.PlanFactory.MustCreateWithOption(map[string]interface{}{"SupporterID": supporter.ID, "ProjectID": project2.ID, "Status": models.PlanStatusSubmitted}).(*models.Plan)
+	DBCon.Create(submittedPlan)
+	agreedPlan := factories.PlanFactory.MustCreateWithOption(map[string]interface{}{"SupporterID": supporter.ID, "ProjectID": project3.ID, "Status": models.PlanStatusAgreed}).(*models.Plan)
+	DBCon.Create(agreedPlan)
 
 	result := testutil.NewRequest().Get("/to-projects?pageToken="+strconv.Itoa(project1.ID)+"&startDate=2025-05-24&endDate=2025-05-29").WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).GoWithHTTPHandler(s.T(), e)
 
@@ -426,6 +601,11 @@ func (s *TestToProjectsHandlerSuite) TestGetToProjectsFetchLists_WithPageTokenAn
 		projectIDs = append(projectIDs, project.Id)
 	}
 	assert.Equal(s.T(), companyProductIDs, projectIDs)
+	assert.Equal(s.T(), businessapi.TEMPORARYCREATING, res.Projects[0].ProposalStatus)
+	assert.Equal(s.T(), businessapi.PROPOSED, res.Projects[1].ProposalStatus)
+	assert.Equal(s.T(), businessapi.PROPOSED, res.Projects[2].ProposalStatus)
+	assert.Equal(s.T(), businessapi.NOTPROPOSED, res.Projects[3].ProposalStatus)
+	assert.Equal(s.T(), businessapi.NOTPROPOSED, res.Projects[4].ProposalStatus)
 	assert.Equal(s.T(), strconv.Itoa(project6.ID), res.NextPageToken)
 }
 
@@ -481,6 +661,75 @@ func (s *TestToProjectsHandlerSuite) TestGetToProject_EmptyBudget_StatusOk() {
 	assert.Equal(s.T(), project.EndDate.Format("2006-01-02"), res.Project.EndDate.Format("2006-01-02"))
 	assert.Nil(s.T(), res.Project.MinBudget)
 	assert.Nil(s.T(), res.Project.MaxBudget)
+}
+
+func (s *TestToProjectsHandlerSuite) TestGetToProject_NotProposedPlan_StatusOk() {
+	_, cookieString := s.supporterSignIn()
+	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID, "MinBudget": null.Int{Int: 0, Valid: false}, "MaxBudget": null.Int{Int: 0, Valid: false}}).(*models.Project)
+	DBCon.Create(project)
+	
+	result := testutil.NewRequest().Get("/to-projects/"+strconv.Itoa(project.ID)).WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).GoWithHTTPHandler(s.T(), e)
+
+	assert.Equal(s.T(), http.StatusOK, result.Code())
+
+	var res businessapi.GetToProject200JSONResponse
+	result.UnmarshalBodyToObject(&res)
+	assert.Equal(s.T(), project.Title, res.Project.Title)
+	assert.Equal(s.T(), businessapi.NOTPROPOSED, res.Project.ProposalStatus)
+}
+
+func (s *TestToProjectsHandlerSuite) TestGetToProject_TemporaryCreatingPlan_StatusOk() {
+	supporter, cookieString := s.supporterSignIn()
+	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID, "MinBudget": null.Int{Int: 0, Valid: false}, "MaxBudget": null.Int{Int: 0, Valid: false}}).(*models.Project)
+	DBCon.Create(project)
+
+	temporaryCreatingPlan := factories.PlanFactory.MustCreateWithOption(map[string]interface{}{"SupporterID": supporter.ID, "ProjectID": project.ID, "Status": models.PlanStatusTempraryCreating}).(*models.Plan)
+	DBCon.Create(temporaryCreatingPlan)
+	
+	result := testutil.NewRequest().Get("/to-projects/"+strconv.Itoa(project.ID)).WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).GoWithHTTPHandler(s.T(), e)
+
+	assert.Equal(s.T(), http.StatusOK, result.Code())
+
+	var res businessapi.GetToProject200JSONResponse
+	result.UnmarshalBodyToObject(&res)
+	assert.Equal(s.T(), project.Title, res.Project.Title)
+	assert.Equal(s.T(), businessapi.TEMPORARYCREATING, res.Project.ProposalStatus)
+}
+
+func (s *TestToProjectsHandlerSuite) TestGetToProject_SubmittedPlan_StatusOk() {
+	supporter, cookieString := s.supporterSignIn()
+	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID, "MinBudget": null.Int{Int: 0, Valid: false}, "MaxBudget": null.Int{Int: 0, Valid: false}}).(*models.Project)
+	DBCon.Create(project)
+
+	submittedPlan := factories.PlanFactory.MustCreateWithOption(map[string]interface{}{"SupporterID": supporter.ID, "ProjectID": project.ID, "Status": models.PlanStatusSubmitted}).(*models.Plan)
+	DBCon.Create(submittedPlan)
+	
+	result := testutil.NewRequest().Get("/to-projects/"+strconv.Itoa(project.ID)).WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).GoWithHTTPHandler(s.T(), e)
+
+	assert.Equal(s.T(), http.StatusOK, result.Code())
+
+	var res businessapi.GetToProject200JSONResponse
+	result.UnmarshalBodyToObject(&res)
+	assert.Equal(s.T(), project.Title, res.Project.Title)
+	assert.Equal(s.T(), businessapi.PROPOSED, res.Project.ProposalStatus)
+}
+
+func (s *TestToProjectsHandlerSuite) TestGetToProject_AboveSubmittedPlan_StatusOk() {
+	supporter, cookieString := s.supporterSignIn()
+	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID, "MinBudget": null.Int{Int: 0, Valid: false}, "MaxBudget": null.Int{Int: 0, Valid: false}}).(*models.Project)
+	DBCon.Create(project)
+
+	agreedPlan := factories.PlanFactory.MustCreateWithOption(map[string]interface{}{"SupporterID": supporter.ID, "ProjectID": project.ID, "Status": models.PlanStatusAgreed}).(*models.Plan)
+	DBCon.Create(agreedPlan)
+	
+	result := testutil.NewRequest().Get("/to-projects/"+strconv.Itoa(project.ID)).WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).GoWithHTTPHandler(s.T(), e)
+
+	assert.Equal(s.T(), http.StatusOK, result.Code())
+
+	var res businessapi.GetToProject200JSONResponse
+	result.UnmarshalBodyToObject(&res)
+	assert.Equal(s.T(), project.Title, res.Project.Title)
+	assert.Equal(s.T(), businessapi.PROPOSED, res.Project.ProposalStatus)
 }
 
 func (s *TestToProjectsHandlerSuite) TestGetToProject_StatusNotFound() {

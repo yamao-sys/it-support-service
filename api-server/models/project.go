@@ -20,4 +20,5 @@ type Project struct {
 	UpdatedAt          time.Time
 
 	Company            Company   `gorm:"foreignKey:CompanyID" validate:"omitempty"`
+	Plans              []Plan    `gorm:"foreignKey:ProjectID" validate:"omitempty"`
 }
