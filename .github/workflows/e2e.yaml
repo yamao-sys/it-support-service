@@ -89,6 +89,21 @@ jobs:
           godotenv -f .env.test go run cmd/registration/main.go &
           godotenv -f .env.test go run cmd/business/main.go &
 
+      - uses: awalsh128/cache-apt-pkgs-action@latest
+        with:
+          packages: language-pack-ja fontconfig fonts-ipafont
+          version: 1.0
+
+      - name: Verify Japanese fonts
+        run: |
+          fc-list :lang=ja
+
+      - name: Set Japanese locale
+        run: |
+          sudo locale-gen ja_JP.UTF-8
+          sudo update-locale LANG=ja_JP.UTF-8
+          export LANG=ja_JP.UTF-8
+
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
