@@ -24,6 +24,8 @@ model ProjectValidationError {
   isActive?: string[];
 }
 
+alias ProposalStatus = "NOT PROPOSED" | "TEMPORARY CREATING" | "PROPOSED";
+
 @summary("Project for Supporters")
 model ToProject {
   id: integer;
@@ -33,4 +35,5 @@ model ToProject {
   endDate: plainDate;
   minBudget?: integer;
   maxBudget?: integer;
+  proposalStatus: ProposalStatus;
 }

@@ -61,7 +61,24 @@ export interface ToProject {
    * @memberof ToProject
    */
   maxBudget?: number;
+  /**
+   *
+   * @type {string}
+   * @memberof ToProject
+   */
+  proposalStatus: ToProjectProposalStatusEnum;
 }
+
+/**
+ * @export
+ */
+export const ToProjectProposalStatusEnum = {
+  NotProposed: "NOT PROPOSED",
+  TemporaryCreating: "TEMPORARY CREATING",
+  Proposed: "PROPOSED",
+} as const;
+export type ToProjectProposalStatusEnum =
+  (typeof ToProjectProposalStatusEnum)[keyof typeof ToProjectProposalStatusEnum];
 
 /**
  * Check if a given object implements the ToProject interface.
@@ -72,6 +89,7 @@ export function instanceOfToProject(value: object): value is ToProject {
   if (!("description" in value) || value["description"] === undefined) return false;
   if (!("startDate" in value) || value["startDate"] === undefined) return false;
   if (!("endDate" in value) || value["endDate"] === undefined) return false;
+  if (!("proposalStatus" in value) || value["proposalStatus"] === undefined) return false;
   return true;
 }
 
@@ -91,6 +109,7 @@ export function ToProjectFromJSONTyped(json: any, ignoreDiscriminator: boolean):
     endDate: new Date(json["endDate"]),
     minBudget: json["minBudget"] == null ? undefined : json["minBudget"],
     maxBudget: json["maxBudget"] == null ? undefined : json["maxBudget"],
+    proposalStatus: json["proposalStatus"],
   };
 }
 
@@ -114,5 +133,6 @@ export function ToProjectToJSONTyped(
     endDate: value["endDate"].toISOString().substring(0, 10),
     minBudget: value["minBudget"],
     maxBudget: value["maxBudget"],
+    proposalStatus: value["proposalStatus"],
   };
 }
