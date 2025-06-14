@@ -89,6 +89,20 @@ jobs:
           godotenv -f .env.test go run cmd/registration/main.go &
           godotenv -f .env.test go run cmd/business/main.go &
 
+      - name: Install Japanese language pack and fonts
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y language-pack-ja fontconfig fonts-ipafont
+
+      - name: Verify Japanese fonts
+        run: |
+          fc-list :lang=ja
+
+      - name: Set Japanese locale
+        run: |
+          sudo update-locale LANG=ja_JP.UTF-8
+          export LANG=ja_JP.UTF-8
+
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
