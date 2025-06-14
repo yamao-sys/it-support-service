@@ -42,6 +42,14 @@ func main() {
         projects = append(projects, *project)
 	}
 	dbCon.CreateInBatches(projects, len(projects))
+
+	// NOTE: 案件に紐づく支援計画の追加
+	temporaryCreatingPlan := factories.PlanFactory.MustCreateWithOption(map[string]interface{}{"SupporterID": supporter.ID, "ProjectID": emptyBudgetProject1.ID, "Status": models.PlanStatusTempraryCreating}).(*models.Plan)
+	dbCon.Create(temporaryCreatingPlan)
+	submittedPlan := factories.PlanFactory.MustCreateWithOption(map[string]interface{}{"SupporterID": supporter.ID, "ProjectID": havingBudgetProject1.ID, "Status": models.PlanStatusSubmitted}).(*models.Plan)
+	dbCon.Create(submittedPlan)
+	agreedPlan := factories.PlanFactory.MustCreateWithOption(map[string]interface{}{"SupporterID": supporter.ID, "ProjectID": emptyBudgetProject2.ID, "Status": models.PlanStatusAgreed}).(*models.Plan)
+	dbCon.Create(agreedPlan)
 }
 
 func loadEnv() {

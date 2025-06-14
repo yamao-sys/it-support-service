@@ -21,6 +21,7 @@ test.describe("/to_projects", () => {
       // NOTE: 初期表示が5件であることを確認
       const initialItemsCount = await page.getByRole("link", { name: "詳細を見る" }).count();
       expect(initialItemsCount).toBe(5);
+
       await expect(page.getByText("これ以上データはありません。")).not.toBeVisible();
 
       // NOTE: スクロールしてロードをトリガー
@@ -37,6 +38,17 @@ test.describe("/to_projects", () => {
         window.scrollTo(0, document.body.scrollHeight);
       });
       await expect(page.getByText("これ以上データはありません。")).toBeVisible();
+
+      const temporaryCreatingPlanBadgesCount = await page
+        .getByText("一時作成中", { exact: true })
+        .count();
+      expect(temporaryCreatingPlanBadgesCount).toBe(1);
+
+      const submittedPlanBadgesCount = await page.getByText("提案済み", { exact: true }).count();
+      expect(submittedPlanBadgesCount).toBe(2);
+
+      const notProposedPlanBadgesCount = await page.getByText("未提案", { exact: true }).count();
+      expect(notProposedPlanBadgesCount).toBe(12);
     });
   });
 });
