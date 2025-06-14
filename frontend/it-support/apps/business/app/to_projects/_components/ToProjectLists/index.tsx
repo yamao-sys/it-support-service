@@ -72,7 +72,7 @@ const ToProjectLists: FC<Props> = ({ initialProjects, initialNextPageToken }: Pr
                 <div className='text-lg font-semibold text-gray-800 break-words'>
                   {project.title}
                 </div>
-                <ProposalStatusBadge status={project.proposalStatus} />
+                {/* <ProposalStatusBadge status={project.proposalStatus} /> */}
               </div>
               <Link
                 className='py-2 px-8 border-green-500 bg-green-500 rounded-xl text-white hover:bg-green-700 transition'
