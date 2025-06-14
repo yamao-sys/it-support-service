@@ -37,7 +37,8 @@ test.describe("/to_projects", () => {
       await page.evaluate(() => {
         window.scrollTo(0, document.body.scrollHeight);
       });
-      await expect(page.getByText("これ以上データはありません。")).toBeVisible();
+      // TODO: 特定要素の出現を待つようにする
+      await page.waitForTimeout(1500);
 
       const temporaryCreatingPlanBadgesCount = await page
         .getByText("一時作成中", { exact: true })
@@ -49,6 +50,8 @@ test.describe("/to_projects", () => {
 
       const notProposedPlanBadgesCount = await page.getByText("未提案", { exact: true }).count();
       expect(notProposedPlanBadgesCount).toBe(12);
+
+      await expect(page.getByText("これ以上データはありません。")).toBeVisible();
     });
   });
 });
