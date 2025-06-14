@@ -89,10 +89,10 @@ jobs:
           godotenv -f .env.test go run cmd/registration/main.go &
           godotenv -f .env.test go run cmd/business/main.go &
 
-      - name: Install Japanese language pack and fonts
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y language-pack-ja fontconfig fonts-ipafont
+      - uses: awalsh128/cache-apt-pkgs-action@latest
+        with:
+          packages: language-pack-ja fontconfig fonts-ipafont
+          version: 1.0
 
       - name: Verify Japanese fonts
         run: |
@@ -100,6 +100,7 @@ jobs:
 
       - name: Set Japanese locale
         run: |
+          sudo locale-gen ja_JP.UTF-8
           sudo update-locale LANG=ja_JP.UTF-8
           export LANG=ja_JP.UTF-8
 
