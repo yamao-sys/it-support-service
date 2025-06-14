@@ -663,6 +663,75 @@ func (s *TestToProjectsHandlerSuite) TestGetToProject_EmptyBudget_StatusOk() {
 	assert.Nil(s.T(), res.Project.MaxBudget)
 }
 
+func (s *TestToProjectsHandlerSuite) TestGetToProject_NotProposedPlan_StatusOk() {
+	_, cookieString := s.supporterSignIn()
+	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID, "MinBudget": null.Int{Int: 0, Valid: false}, "MaxBudget": null.Int{Int: 0, Valid: false}}).(*models.Project)
+	DBCon.Create(project)
+	
+	result := testutil.NewRequest().Get("/to-projects/"+strconv.Itoa(project.ID)).WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).GoWithHTTPHandler(s.T(), e)
+
+	assert.Equal(s.T(), http.StatusOK, result.Code())
+
+	var res businessapi.GetToProject200JSONResponse
+	result.UnmarshalBodyToObject(&res)
+	assert.Equal(s.T(), project.Title, res.Project.Title)
+	assert.Equal(s.T(), businessapi.NOTPROPOSED, res.Project.ProposalStatus)
+}
+
+func (s *TestToProjectsHandlerSuite) TestGetToProject_TemporaryCreatingPlan_StatusOk() {
+	supporter, cookieString := s.supporterSignIn()
+	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID, "MinBudget": null.Int{Int: 0, Valid: false}, "MaxBudget": null.Int{Int: 0, Valid: false}}).(*models.Project)
+	DBCon.Create(project)
+
+	temporaryCreatingPlan := factories.PlanFactory.MustCreateWithOption(map[string]interface{}{"SupporterID": supporter.ID, "ProjectID": project.ID, "Status": models.PlanStatusTempraryCreating}).(*models.Plan)
+	DBCon.Create(temporaryCreatingPlan)
+	
+	result := testutil.NewRequest().Get("/to-projects/"+strconv.Itoa(project.ID)).WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).GoWithHTTPHandler(s.T(), e)
+
+	assert.Equal(s.T(), http.StatusOK, result.Code())
+
+	var res businessapi.GetToProject200JSONResponse
+	result.UnmarshalBodyToObject(&res)
+	assert.Equal(s.T(), project.Title, res.Project.Title)
+	assert.Equal(s.T(), businessapi.TEMPORARYCREATING, res.Project.ProposalStatus)
+}
+
+func (s *TestToProjectsHandlerSuite) TestGetToProject_SubmittedPlan_StatusOk() {
+	supporter, cookieString := s.supporterSignIn()
+	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID, "MinBudget": null.Int{Int: 0, Valid: false}, "MaxBudget": null.Int{Int: 0, Valid: false}}).(*models.Project)
+	DBCon.Create(project)
+
+	submittedPlan := factories.PlanFactory.MustCreateWithOption(map[string]interface{}{"SupporterID": supporter.ID, "ProjectID": project.ID, "Status": models.PlanStatusSubmitted}).(*models.Plan)
+	DBCon.Create(submittedPlan)
+	
+	result := testutil.NewRequest().Get("/to-projects/"+strconv.Itoa(project.ID)).WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).GoWithHTTPHandler(s.T(), e)
+
+	assert.Equal(s.T(), http.StatusOK, result.Code())
+
+	var res businessapi.GetToProject200JSONResponse
+	result.UnmarshalBodyToObject(&res)
+	assert.Equal(s.T(), project.Title, res.Project.Title)
+	assert.Equal(s.T(), businessapi.PROPOSED, res.Project.ProposalStatus)
+}
+
+func (s *TestToProjectsHandlerSuite) TestGetToProject_AboveSubmittedPlan_StatusOk() {
+	supporter, cookieString := s.supporterSignIn()
+	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID, "MinBudget": null.Int{Int: 0, Valid: false}, "MaxBudget": null.Int{Int: 0, Valid: false}}).(*models.Project)
+	DBCon.Create(project)
+
+	agreedPlan := factories.PlanFactory.MustCreateWithOption(map[string]interface{}{"SupporterID": supporter.ID, "ProjectID": project.ID, "Status": models.PlanStatusAgreed}).(*models.Plan)
+	DBCon.Create(agreedPlan)
+	
+	result := testutil.NewRequest().Get("/to-projects/"+strconv.Itoa(project.ID)).WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).GoWithHTTPHandler(s.T(), e)
+
+	assert.Equal(s.T(), http.StatusOK, result.Code())
+
+	var res businessapi.GetToProject200JSONResponse
+	result.UnmarshalBodyToObject(&res)
+	assert.Equal(s.T(), project.Title, res.Project.Title)
+	assert.Equal(s.T(), businessapi.PROPOSED, res.Project.ProposalStatus)
+}
+
 func (s *TestToProjectsHandlerSuite) TestGetToProject_StatusNotFound() {
 	_, cookieString := s.supporterSignIn()
 	project := factories.ProjectFactory.MustCreateWithOption(map[string]interface{}{"CompanyID": company.ID}).(*models.Project)

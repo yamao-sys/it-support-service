@@ -81,7 +81,7 @@ func (tph *toProjectsHandler) GetToProject(ctx context.Context, request business
 	}
 
 	projectID := request.Id
-	project, err := tph.toProjectService.Fetch(projectID)
+	project, err := tph.toProjectService.Fetch(projectID, supporterID)
 	if err != nil {
 		return businessapi.GetToProject404Response{}, nil
 	}
@@ -92,18 +92,19 @@ func (tph *toProjectsHandler) GetToProject(ctx context.Context, request business
 	resProject.Description = project.Description
 	resProject.StartDate = openapi_types.Date{Time: project.StartDate}
 	resProject.EndDate = openapi_types.Date{Time: project.EndDate}
-	minBudget := &project.MinBudget.Int
+	minBudget := &project.MinBudget
 	if *minBudget != 0 {
 		resProject.MinBudget = minBudget
 	} else {
 		resProject.MinBudget = nil
 	}
-	maxBudget := &project.MaxBudget.Int
+	maxBudget := &project.MaxBudget
 	if *maxBudget != 0 {
 		resProject.MaxBudget = maxBudget
 	} else {
 		resProject.MaxBudget = nil
 	}
+	resProject.ProposalStatus = project.ProposalStatus
 
 	return businessapi.GetToProject200JSONResponse(businessapi.ToProjectResponse{Project: resProject}), nil
 }
