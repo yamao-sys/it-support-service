@@ -1,9 +1,9 @@
 import { FC, useState } from "react";
-import { FormType, PhaseType } from "../../_types";
 import SignUpLayout from "../SignUpLayout";
 import SignUpInput from "../SignUpInput";
 import SignUpConfirm from "../SignUpConfirm";
 import SignUpThanks from "../SignUpThanks";
+import { FormType, PhaseType } from "../../types";
 
 const SignUpForm: FC = () => {
   const [phase, setPhase] = useState<PhaseType>("input");

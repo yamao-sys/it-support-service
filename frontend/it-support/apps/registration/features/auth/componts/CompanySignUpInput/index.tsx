@@ -1,13 +1,13 @@
 "use client";
 
 import { FC, useCallback, useState } from "react";
-import { FormType, PhaseType } from "../../_types";
+import { FormType, PhaseType } from "../../types";
 import FormTypeSelector from "../FormTypeSelector";
 import BaseImageInputForm from "@/components/BaseImageInputForm";
 import {
   useCompanySignUpContext,
   useCompanySignUpSetContext,
-} from "../../_contexts/useCompanySignUpContext";
+} from "../../contexts/useCompanySignUpContext";
 import BaseFormInput from "@repo/ui/BaseFormInput";
 import BaseButton from "@repo/ui/BaseButton";
 import { postCompanyValidateSignUp } from "@/services/company";

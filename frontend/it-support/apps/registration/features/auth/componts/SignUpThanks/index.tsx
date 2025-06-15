@@ -1,9 +1,9 @@
 "use client";
 
 import { FC } from "react";
-import { FormType } from "../../_types";
 import SupporterSignUpThanks from "../SupporterSignUpThanks";
 import CompanySignUpThanks from "../CompanySignUpThanks";
+import { FormType } from "../../types";
 
 type Props = {
   formType: FormType;

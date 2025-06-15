@@ -1,9 +1,9 @@
 "use client";
 
 import { FC, useCallback } from "react";
-import { useSupporterSignUpContext } from "../../_contexts/useSupporterSignUpContext";
+import { useSupporterSignUpContext } from "../../contexts/useSupporterSignUpContext";
 import BaseImage from "@/components/BaseImage";
-import { PhaseType } from "../../_types";
+import { PhaseType } from "../../types";
 import BaseButton from "@repo/ui/BaseButton";
 import { postSupporterSignUp } from "@/services/supporter";
 

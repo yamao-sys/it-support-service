@@ -1,7 +1,7 @@
 import { FC } from "react";
-import { FormType, PhaseType } from "../../_types";
 import SupporterSignUpInput from "../SupporterSignUpInput";
 import CompanySignUpInput from "../CompanySignUpInput";
+import { FormType, PhaseType } from "../../types";
 
 type Props = {
   formType: FormType;
