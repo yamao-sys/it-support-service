@@ -1,5 +1,5 @@
 import { FC } from "react";
-import { FormType, PhaseType } from "../../_types";
+import { FormType, PhaseType } from "../../types";
 import SupporterSignUpConfirm from "../SupporterSignUpConfirm";
 import CompanySignUpConfirm from "../CompanySignUpConfirm";
 

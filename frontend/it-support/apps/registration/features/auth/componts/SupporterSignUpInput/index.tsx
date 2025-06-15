@@ -1,17 +1,17 @@
 "use client";
 
 import { FC, useCallback, useState } from "react";
-import { FormType, PhaseType } from "../../_types";
 import FormTypeSelector from "../FormTypeSelector";
-import {
-  useSupporterSignUpContext,
-  useSupporterSignUpSetContext,
-} from "../../_contexts/useSupporterSignUpContext";
 import BaseImageInputForm from "@/components/BaseImageInputForm";
 import BaseFormInput from "@repo/ui/BaseFormInput";
 import BaseButton from "@repo/ui/BaseButton";
 import { postSupporterValidateSignUp } from "@/services/supporter";
 import { SupporterSignUpValidationError } from "@/apis";
+import { FormType, PhaseType } from "../../types";
+import {
+  useSupporterSignUpContext,
+  useSupporterSignUpSetContext,
+} from "../../contexts/useSupporterSignUpContext";
 
 type Props = {
   formType: FormType;

@@ -2,8 +2,8 @@
 
 import { FC, useCallback } from "react";
 import BaseImage from "@/components/BaseImage";
-import { PhaseType } from "../../_types";
-import { useCompanySignUpContext } from "../../_contexts/useCompanySignUpContext";
+import { PhaseType } from "../../types";
+import { useCompanySignUpContext } from "../../contexts/useCompanySignUpContext";
 import BaseButton from "@repo/ui/BaseButton";
 import { postCompanySignUp } from "@/services/company";
 

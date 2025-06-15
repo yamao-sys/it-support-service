@@ -1,7 +1,7 @@
 "useClient";
 
 import { FC, useCallback } from "react";
-import { FormType } from "../../_types";
+import { FormType } from "../../types";
 
 type Props = {
   formType: FormType;

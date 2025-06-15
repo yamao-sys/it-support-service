@@ -1,10 +1,10 @@
 "use client";
 
 import { FC, useEffect } from "react";
-import { SupporterSignUpProvider } from "@/app/sign_up/_contexts/useSupporterSignUpContext";
 import SignUpForm from "../../SignUpForm";
-import { CompanySignUpProvider } from "@/app/sign_up/_contexts/useCompanySignUpContext";
 import { setCsrfToken } from "@/services/auth";
+import { CompanySignUpProvider } from "@/features/auth/contexts/useCompanySignUpContext";
+import { SupporterSignUpProvider } from "@/features/auth/contexts/useSupporterSignUpContext";
 
 const SignUpTemplate: FC = () => {
   useEffect(() => {
