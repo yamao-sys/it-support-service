@@ -1,5 +1,5 @@
 import { FC } from "react";
-import ProjectNewContainer from "../../ProjectNewContainer";
+import ProjectNewContainer from "../../Container/ProjectNewContainer";
 
 const ProjectNewTemplate: FC = () => {
   return (
