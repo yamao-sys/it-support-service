@@ -1,6 +1,6 @@
 import { FC } from "react";
 
-import ProjectEditContainer from "../../ProjectEditContainer";
+import ProjectEditContainer from "../../Container/ProjectEditContainer";
 import { getProject } from "@/services/project";
 
 type Props = {
