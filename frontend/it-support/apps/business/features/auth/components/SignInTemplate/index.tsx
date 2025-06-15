@@ -1,3 +1,5 @@
+"use client";
+
 import { SignInFormType } from "@/types";
 import { FC, useState } from "react";
 import SupporterSignInForm from "../SupporterSignInForm";
