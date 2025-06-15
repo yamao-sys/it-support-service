@@ -1,11 +1,11 @@
 "use client";
 
 import { ProjectStoreInput } from "@/apis";
-import ProjectStoreForm from "@/app/projects/_components/ProjectStoreForm";
-import { useProjectStore } from "@/app/projects/_hooks/useProjectStore";
 import { postProjectCreate } from "@/services/project";
 import { useRouter } from "next/navigation";
 import { FC } from "react";
+import { useProjectStore } from "../../hooks/useProjectStore";
+import ProjectStoreForm from "../ProjectStoreForm";
 
 const ProjectNewContainer: FC = () => {
   // NOTE: requiredに設定したfieldはControlで制御する上で初期値が要るので設定

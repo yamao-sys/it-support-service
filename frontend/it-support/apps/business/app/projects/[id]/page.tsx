@@ -1,4 +1,4 @@
-import ProjectEditTemplate from "./_components/ProjectEditTemplate";
+import ProjectEditTemplate from "@/features/projects/components/Template/ProjectEditTemplate";
 import { Suspense } from "react";
 
 type ProjectEditPageProps = {

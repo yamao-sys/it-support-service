@@ -1,11 +1,11 @@
 "use client";
 
-import { useProjectStore } from "@/app/projects/_hooks/useProjectStore";
 import { FC } from "react";
-import ProjectStoreForm from "../../../_components/ProjectStoreForm";
 import { useRouter } from "next/navigation";
 import { Project, ProjectStoreInput } from "@/apis";
 import { putUpdateProject } from "@/services/project";
+import { useProjectStore } from "../../hooks/useProjectStore";
+import ProjectStoreForm from "../ProjectStoreForm";
 
 type Props = {
   project: Project;
