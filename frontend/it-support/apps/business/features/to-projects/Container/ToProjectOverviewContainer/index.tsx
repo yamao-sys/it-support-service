@@ -1,6 +1,6 @@
 import { getToProject } from "@/services/toProject";
 import { FC } from "react";
-import ToProjectOverview from "../ToProjectOverview";
+import ToProjectOverview from "../../ToProjectOverview";
 
 type Props = {
   id: number;

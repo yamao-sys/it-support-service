@@ -1,5 +1,5 @@
+import ToProjectOverviewContainer from "@/features/to-projects/Container/ToProjectOverviewContainer";
 import { Suspense } from "react";
-import ToProjectOverviewContainer from "./_components/ToProjectOverviewContainer";
 
 type ToProjectDetailPageProps = {
   params: Promise<{
