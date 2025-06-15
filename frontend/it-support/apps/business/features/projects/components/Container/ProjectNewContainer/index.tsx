@@ -4,8 +4,8 @@ import { ProjectStoreInput } from "@/apis";
 import { postProjectCreate } from "@/services/project";
 import { useRouter } from "next/navigation";
 import { FC } from "react";
-import { useProjectStore } from "../../hooks/useProjectStore";
-import ProjectStoreForm from "../ProjectStoreForm";
+import { useProjectStore } from "../../../hooks/useProjectStore";
+import ProjectStoreForm from "../../ProjectStoreForm";
 
 const ProjectNewContainer: FC = () => {
   // NOTE: requiredに設定したfieldはControlで制御する上で初期値が要るので設定
