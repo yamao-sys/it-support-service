@@ -1,5 +1,5 @@
 import { FC } from "react";
-import ToProjectLists from "../ToProjectLists";
+import ToProjectLists from "../../ToProjectLists";
 import { getToProjects } from "@/services/toProject";
 
 const ToProjectListsContainer: FC = async () => {
