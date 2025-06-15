@@ -5,7 +5,7 @@ import { FC, useState } from "react";
 import SupporterSignInForm from "../SupporterSignInForm";
 import CompanySignInForm from "../CompanySignInForm";
 
-const SignInForm: FC = () => {
+const SignInTemplate: FC = () => {
   const [formType, setFormType] = useState<SignInFormType>("supporter");
 
   const formComponents = () => {
@@ -28,4 +28,4 @@ const SignInForm: FC = () => {
   return <>{formComponents()}</>;
 };
 
-export default SignInForm;
+export default SignInTemplate;

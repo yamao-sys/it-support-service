@@ -1,49 +1,40 @@
 "use client";
 
 import { SignInFormType } from "@/types";
-import { FC, useState } from "react";
-import { useForm } from "react-hook-form";
+import { FC } from "react";
 import FormTypeSelector from "../FormTypeSelector";
 import BaseFormInput from "@repo/ui/BaseFormInput";
-import { useRouter } from "next/navigation";
 import BaseButton from "@repo/ui/BaseButton";
-import { CompanySignInInput } from "@/apis";
-import { postCompanySignIn } from "@/services/company";
+import { UseFormRegister } from "react-hook-form";
+import { CompanySignInInput, SupporterSignInInput } from "@/apis";
 
 type Props = {
   formType: SignInFormType;
   switchFormType: (newFormType: SignInFormType) => void;
+  formTypeText: string;
+  register: UseFormRegister<CompanySignInInput | SupporterSignInInput>;
+  onSubmit: (e?: React.BaseSyntheticEvent) => Promise<void>;
+  validationError?: string;
 };
 
-const CompanySignInForm: FC<Props> = ({ formType, switchFormType }: Props) => {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<CompanySignInInput>();
-  const [validationError, setValidationError] = useState("");
-
-  const router = useRouter();
-
-  const onSubmit = handleSubmit(async (data) => {
-    const resValidationError = await postCompanySignIn({ companySignInInput: data });
-    if (resValidationError !== "" && resValidationError !== undefined) {
-      setValidationError(resValidationError);
-      return;
-    }
-
-    window.alert("企業のログインに成功しました!");
-    router.push("/");
-  });
-
+const SignInForm: FC<Props> = ({
+  formType,
+  switchFormType,
+  formTypeText,
+  register,
+  onSubmit,
+  validationError,
+}: Props) => {
   return (
     <>
       <FormTypeSelector formType={formType} switchFormType={switchFormType} />
 
-      <h3 className='mt-16 w-full text-center text-2xl font-bold'>企業 ログインフォーム</h3>
+      <h3 className='mt-16 w-full text-center text-2xl font-bold'>
+        {formTypeText} ログインフォーム
+      </h3>
 
       {validationError && (
-        <div className='w-full pt-5 text-left'>
+        <div className='w-full pt-5 text-center'>
           <p className='text-red-400'>{validationError}</p>
         </div>
       )}
@@ -55,7 +46,7 @@ const CompanySignInForm: FC<Props> = ({ formType, switchFormType }: Props) => {
             label='Email'
             type='email'
             {...register("email", { required: "Emailは必須です" })}
-            validationErrorMessages={errors.email?.message ? [errors.email.message] : []}
+            validationErrorMessages={[]}
           />
         </div>
 
@@ -65,7 +56,7 @@ const CompanySignInForm: FC<Props> = ({ formType, switchFormType }: Props) => {
             label='パスワード'
             type='password'
             {...register("password", { required: "パスワードは必須です" })}
-            validationErrorMessages={errors.password?.message ? [errors.password.message] : []}
+            validationErrorMessages={[]}
           />
         </div>
 
@@ -84,4 +75,4 @@ const CompanySignInForm: FC<Props> = ({ formType, switchFormType }: Props) => {
   );
 };
 
-export default CompanySignInForm;
+export default SignInForm;
