@@ -1,4 +1,4 @@
-import ProjectListsContainer from "@/features/projects/components/ProjectListsContainer";
+import ProjectListsContainer from "@/features/projects/components/Container/ProjectListsContainer";
 import { Suspense } from "react";
 
 export default async function ProjectListPage() {
