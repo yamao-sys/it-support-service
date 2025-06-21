@@ -1,3 +1,10 @@
+@summary("Company SignIn Input")
+model CompanySignInInput {
+  email: string;
+  password: string;
+}
+
+
 @summary("Company SignIn Ok Response")
 model CompanySignInOkResponse {
   token: string;
