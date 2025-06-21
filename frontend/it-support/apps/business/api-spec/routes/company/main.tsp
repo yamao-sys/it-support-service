@@ -2,9 +2,7 @@ import "@typespec/http";
 import "@typespec/openapi";
 import "@typespec/openapi3";
 
-import "./request-body.tsp";
-import "./response.tsp";
-
+import "../../models/company.tsp";
 import "../common";
 
 using Http;

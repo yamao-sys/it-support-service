@@ -24,16 +24,30 @@ model ProjectValidationError {
   isActive?: string[];
 }
 
-alias ProposalStatus = "NOT PROPOSED" | "TEMPORARY CREATING" | "PROPOSED";
-
-@summary("Project for Supporters")
-model ToProject {
-  id: integer;
+@summary("Project Store Input")
+model ProjectStoreInput {
   title: string;
   description: string;
-  startDate: plainDate;
-  endDate: plainDate;
+  startDate?: plainDate;
+  endDate?: plainDate;
   minBudget?: integer;
   maxBudget?: integer;
-  proposalStatus: ProposalStatus;
+  isActive: boolean;
+}
+
+@summary("Project Store Response")
+model ProjectStoreResponse {
+  project: Project;
+  errors: ProjectValidationError;
+}
+
+@summary("Projects List Response")
+model ProjectsListResponse{
+  projects: Project[];
+  nextPageToken: string;
+}
+
+@summary("Project Response")
+model ProjectResponse {
+  project: Project;
 }
