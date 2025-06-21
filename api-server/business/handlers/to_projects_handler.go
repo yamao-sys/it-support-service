@@ -13,6 +13,7 @@ import (
 type ToProjectsHandler interface {
 	GetToProjects(ctx context.Context, request businessapi.GetToProjectsRequestObject) (businessapi.GetToProjectsResponseObject, error)
 	GetToProject(ctx context.Context, request businessapi.GetToProjectRequestObject) (businessapi.GetToProjectResponseObject, error)
+	PostToProjectPlan(ctx context.Context, request businessapi.PostToProjectPlanRequestObject) (businessapi.PostToProjectPlanResponseObject, error)
 }
 
 type toProjectsHandler struct {
@@ -107,4 +108,69 @@ func (tph *toProjectsHandler) GetToProject(ctx context.Context, request business
 	resProject.ProposalStatus = project.ProposalStatus
 
 	return businessapi.GetToProject200JSONResponse(businessapi.ToProjectResponse{Project: resProject}), nil
+}
+
+func (tph *toProjectsHandler) PostToProjectPlan(ctx context.Context, request businessapi.PostToProjectPlanRequestObject) (businessapi.PostToProjectPlanResponseObject, error) {
+	supporterID, _ := businesshelpers.ExtractSupporterID(ctx)
+	if supporterID == 0 {
+		return businessapi.PostToProjectPlan403Response{}, nil
+	}
+
+	projectID := request.Id
+	
+	createdPlan, validationErrors, err := tph.toProjectService.CreatePlan(projectID, request.Body, supporterID)
+	if err != nil {
+		// NOTE: プロジェクトが見つからない場合
+		if err.Error() == "project not found" {
+			return businessapi.PostToProjectPlan404Response{}, nil
+		}
+		// NOTE: その他のサーバーエラー
+		return businessapi.PostToProjectPlan500Response{}, err
+	}
+
+	// NOTE: バリデーションエラーがある場合
+	if validationErrors != nil {
+		mappedValidationErrors := tph.toProjectService.MappingPlanWithStepsValidationErrorStruct(validationErrors)
+		return businessapi.PostToProjectPlan400JSONResponse(mappedValidationErrors), nil
+	}
+
+	// NOTE: 成功レスポンスの構築
+	resPlan := businessapi.Plan{
+		Id:          createdPlan.ID,
+		ProjectId:   createdPlan.ProjectID,
+		Title:       createdPlan.Title,
+		Description: createdPlan.Description,
+		UnitPrice:   createdPlan.UnitPrice,
+		CreatedAt:   createdPlan.CreatedAt,
+	}
+	if createdPlan.StartDate.Valid {
+		resPlan.StartDate = &openapi_types.Date{Time: createdPlan.StartDate.Time}
+	}
+	if createdPlan.EndDate.Valid {
+		resPlan.EndDate = &openapi_types.Date{Time: createdPlan.EndDate.Time}
+	}
+
+	// NOTE: PlanStepsをレスポンスに含める
+	if len(createdPlan.PlanSteps) > 0 {
+		resPlanSteps := make([]businessapi.PlanStep, 0, len(createdPlan.PlanSteps))
+		for _, planStep := range createdPlan.PlanSteps {
+			resPlanStep := businessapi.PlanStep{
+				Id:          planStep.ID,
+				PlanId:      planStep.PlanID,
+				Title:       planStep.Title,
+				Description: planStep.Description,
+				Duration:    planStep.Duration,
+			}
+			resPlanSteps = append(resPlanSteps, resPlanStep)
+		}
+		resPlan.PlanSteps = &resPlanSteps
+	}
+
+	// NOTE: 空のバリデーションエラーを作成
+	emptyValidationErrors := tph.toProjectService.MappingPlanWithStepsValidationErrorStruct(nil)
+
+	return businessapi.PostToProjectPlan200JSONResponse(businessapi.PlanWithStepsStoreResponse{
+		Plan:   resPlan,
+		Errors: emptyValidationErrors,
+	}), nil
 }

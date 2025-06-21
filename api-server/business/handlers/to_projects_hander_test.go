@@ -98,6 +98,250 @@ func (s *TestToProjectsHandlerSuite) TestGetToProjectsFetchLists_StatusOk() {
 	assert.Len(s.T(), resHaveBudgetproducts, 1)
 }
 
+func (s *TestToProjectsHandlerSuite) TestPostToProjectPlan_StatusOk_OnlyRequired_WithoutPlanSteps() {
+	_, cookieString := s.supporterSignIn()
+
+	reqBody := businessapi.PlanStoreWithStepsInput{
+		Title:       "テスト提案",
+		Description: "テスト提案の概要です",
+		UnitPrice:   5000,
+		PlanSteps:   nil,
+	}
+
+	result := testutil.NewRequest().Post("/to-projects/"+strconv.Itoa(project1.ID)+"/plans").WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithJsonBody(reqBody).GoWithHTTPHandler(s.T(), e)
+
+	assert.Equal(s.T(), http.StatusOK, result.Code())
+
+	var res businessapi.PostToProjectPlan200JSONResponse
+	result.UnmarshalBodyToObject(&res)
+	assert.Equal(s.T(), "テスト提案", res.Plan.Title)
+	assert.Equal(s.T(), "テスト提案の概要です", res.Plan.Description)
+	assert.Equal(s.T(), 5000, res.Plan.UnitPrice)
+	assert.Equal(s.T(), project1.ID, res.Plan.ProjectId)
+
+	// NOTE: エラーがない場合は空の構造体が返される
+	assert.Nil(s.T(), res.Errors.Title)
+	assert.Nil(s.T(), res.Errors.Description)
+	assert.Nil(s.T(), res.Errors.UnitPrice)
+
+	// NOTE: データベースに保存されているかの確認
+	var savedPlan models.Plan
+	DBCon.Where("project_id = ? AND title = ?", project1.ID, "テスト提案").First(&savedPlan)
+	assert.Equal(s.T(), "テスト提案", savedPlan.Title)
+	assert.Equal(s.T(), models.PlanStatusTempraryCreating, savedPlan.Status)
+}
+
+func (s *TestToProjectsHandlerSuite) TestPostToProjectPlan_StatusOk_PlanOnlyRequired_WithPlanSteps() {
+	_, cookieString := s.supporterSignIn()
+
+	planSteps := []businessapi.PlanStepInput{
+		{
+			Title:       "ステップ1",
+			Description: "ステップ1の詳細",
+			Duration:    5,
+		},
+		{
+			Title:       "ステップ2",
+			Description: "ステップ2の詳細",
+			Duration:    10,
+		},
+	}
+
+	reqBody := businessapi.PlanStoreWithStepsInput{
+		Title:       "ステップ付き提案",
+		Description: "ステップ付き提案の概要です", 
+		UnitPrice:   7500,
+		PlanSteps:   &planSteps,
+	}
+
+	result := testutil.NewRequest().Post("/to-projects/"+strconv.Itoa(project1.ID)+"/plans").WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithJsonBody(reqBody).GoWithHTTPHandler(s.T(), e)
+
+	assert.Equal(s.T(), http.StatusOK, result.Code())
+
+	var res businessapi.PostToProjectPlan200JSONResponse
+	result.UnmarshalBodyToObject(&res)
+	assert.Equal(s.T(), "ステップ付き提案", res.Plan.Title)
+	assert.Equal(s.T(), "ステップ付き提案の概要です", res.Plan.Description)
+	assert.Equal(s.T(), 7500, res.Plan.UnitPrice)
+	assert.Equal(s.T(), project1.ID, res.Plan.ProjectId)
+	assert.NotNil(s.T(), res.Plan.PlanSteps)
+	assert.Len(s.T(), *res.Plan.PlanSteps, 2)
+	assert.Equal(s.T(), "ステップ1", (*res.Plan.PlanSteps)[0].Title)
+	assert.Equal(s.T(), "ステップ1の詳細", (*res.Plan.PlanSteps)[0].Description)
+	assert.Equal(s.T(), 5, (*res.Plan.PlanSteps)[0].Duration)
+
+	assert.Equal(s.T(), http.StatusOK, result.Code())
+
+	result.UnmarshalBodyToObject(&res)
+	assert.Equal(s.T(), "ステップ付き提案", res.Plan.Title)
+	assert.Equal(s.T(), "ステップ付き提案の概要です", res.Plan.Description)
+	assert.Equal(s.T(), 7500, res.Plan.UnitPrice)
+
+	// NOTE: PlanStepsが保存されているかの確認
+	var savedPlan models.Plan
+	DBCon.Where("project_id = ? AND title = ?", project1.ID, "ステップ付き提案").First(&savedPlan)
+	
+	var savedPlanSteps []models.PlanStep
+	DBCon.Where("plan_id = ?", savedPlan.ID).Find(&savedPlanSteps)
+	assert.Len(s.T(), savedPlanSteps, 2)
+	assert.Equal(s.T(), "ステップ1", savedPlanSteps[0].Title)
+	assert.Equal(s.T(), "ステップ1の詳細", savedPlanSteps[0].Description)
+	assert.Equal(s.T(), 5, savedPlanSteps[0].Duration)
+	assert.Equal(s.T(), "ステップ2", savedPlanSteps[1].Title)
+	assert.Equal(s.T(), "ステップ2の詳細", savedPlanSteps[1].Description)
+	assert.Equal(s.T(), 10, savedPlanSteps[1].Duration)
+}
+
+func (s *TestToProjectsHandlerSuite) TestPostToProjectPlan_BadRequest_EmptyTitle() {
+	_, cookieString := s.supporterSignIn()
+
+	reqBody := businessapi.PlanStoreWithStepsInput{
+		Title:       "",
+		Description: "Test plan description",
+		UnitPrice:   5000,
+		PlanSteps: nil,
+	}
+
+	result := testutil.NewRequest().Post("/to-projects/"+strconv.Itoa(project1.ID)+"/plans").WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithJsonBody(reqBody).GoWithHTTPHandler(s.T(), e)
+
+	assert.Equal(s.T(), http.StatusBadRequest, result.Code())
+
+	var res businessapi.PostToProjectPlan400JSONResponse
+	result.UnmarshalBodyToObject(&res)
+	assert.Contains(s.T(), *res.Title, "支援タイトルは必須入力です。")
+}
+
+func (s *TestToProjectsHandlerSuite) TestPostToProjectPlan_BadRequest_EmptyDescription() {
+	_, cookieString := s.supporterSignIn()
+
+	reqBody := businessapi.PlanStoreWithStepsInput{
+		Title:       "Test Title",
+		Description: "",
+		UnitPrice:   5000,
+		PlanSteps: nil,
+	}
+
+	result := testutil.NewRequest().Post("/to-projects/"+strconv.Itoa(project1.ID)+"/plans").WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithJsonBody(reqBody).GoWithHTTPHandler(s.T(), e)
+
+	assert.Equal(s.T(), http.StatusBadRequest, result.Code())
+
+	var res businessapi.PostToProjectPlan400JSONResponse
+	result.UnmarshalBodyToObject(&res)
+	assert.Contains(s.T(), *res.Description, "支援概要は必須入力です。")
+}
+
+func (s *TestToProjectsHandlerSuite) TestPostToProjectPlan_BadRequest_InvalidUnitPrice_Minus() {
+	_, cookieString := s.supporterSignIn()
+
+	reqBody := businessapi.PlanStoreWithStepsInput{
+		Title:       "Test Title",
+		Description: "Test Description", 
+		UnitPrice:   -100,
+		PlanSteps: nil,
+	}
+
+	result := testutil.NewRequest().Post("/to-projects/"+strconv.Itoa(project1.ID)+"/plans").WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithJsonBody(reqBody).GoWithHTTPHandler(s.T(), e)
+
+	assert.Equal(s.T(), http.StatusBadRequest, result.Code())
+
+	var res businessapi.PostToProjectPlan400JSONResponse
+	result.UnmarshalBodyToObject(&res)
+	assert.Contains(s.T(), *res.UnitPrice, "支援単価は1円以上で入力してください。")
+}
+
+func (s *TestToProjectsHandlerSuite) TestPostToProjectPlan_BadRequest_InvalidUnitPrice_Zero() {
+	_, cookieString := s.supporterSignIn()
+	
+	reqBody := businessapi.PlanStoreWithStepsInput{
+		Title:       "テスト提案",
+		Description: "概要です",
+		UnitPrice:   0,
+		PlanSteps: nil,
+	}
+	
+	result := testutil.NewRequest().Post("/to-projects/"+strconv.Itoa(project1.ID)+"/plans").WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithJsonBody(reqBody).GoWithHTTPHandler(s.T(), e)
+
+	assert.Equal(s.T(), http.StatusBadRequest, result.Code())
+
+	var res businessapi.PostToProjectPlan400JSONResponse
+	result.UnmarshalBodyToObject(&res)
+	assert.NotNil(s.T(), res.UnitPrice)
+	assert.Contains(s.T(), *res.UnitPrice, "支援単価(税抜)は必須入力です。")
+}
+
+func (s *TestToProjectsHandlerSuite) TestPostToProjectPlan_BadRequest_InvalidPlanSteps() {
+	_, cookieString := s.supporterSignIn()
+
+	planSteps := []businessapi.PlanStepInput{
+		{
+			Title:       "",
+			Description: "Description",
+			Duration:    -5,
+		},
+	}
+
+	reqBody := businessapi.PlanStoreWithStepsInput{
+		Title:       "Test Title",
+		Description: "Test Description",
+		UnitPrice:   5000,
+		PlanSteps:   &planSteps,
+	}
+
+	result := testutil.NewRequest().Post("/to-projects/"+strconv.Itoa(project1.ID)+"/plans").WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithJsonBody(reqBody).GoWithHTTPHandler(s.T(), e)
+
+	assert.Equal(s.T(), http.StatusBadRequest, result.Code())
+
+	var res businessapi.PostToProjectPlan400JSONResponse
+	result.UnmarshalBodyToObject(&res)
+	assert.NotNil(s.T(), res.PlanSteps)
+	assert.Len(s.T(), *res.PlanSteps, 1)
+	assert.Contains(s.T(), *(*res.PlanSteps)[0].Title, "タイトルは必須入力です。")
+	assert.Contains(s.T(), *(*res.PlanSteps)[0].Duration, "支援時間は1時間以上で入力してください。")
+}
+
+func (s *TestToProjectsHandlerSuite) TestPostToProjectPlan_NotFound() {
+	_, cookieString := s.supporterSignIn()
+
+	reqBody := businessapi.PlanStoreWithStepsInput{
+		Title:       "テスト提案",
+		Description: "概要です",
+		UnitPrice:   5000,
+		PlanSteps:   nil,
+	}
+
+	result := testutil.NewRequest().Post("/to-projects/0/plans").WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithJsonBody(reqBody).GoWithHTTPHandler(s.T(), e)
+
+	assert.Equal(s.T(), http.StatusNotFound, result.Code())
+}
+
+func (s *TestToProjectsHandlerSuite) TestPostToProjectPlan_Unauthorized() {
+	reqBody := businessapi.PlanStoreWithStepsInput{
+		Title:       "テスト提案",
+		Description: "概要です",
+		UnitPrice:   5000,
+		PlanSteps:   nil,
+	}
+
+	result := testutil.NewRequest().Post("/to-projects/"+strconv.Itoa(project1.ID)+"/plans").WithHeader("Cookie", csrfTokenCookie).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithJsonBody(reqBody).GoWithHTTPHandler(s.T(), e)
+
+	assert.Equal(s.T(), http.StatusUnauthorized, result.Code())
+}
+
+func (s *TestToProjectsHandlerSuite) TestPostToProjectPlan_Forbidden() {
+	_, cookieString := s.companySignIn()
+
+	reqBody := businessapi.PlanStoreWithStepsInput{
+		Title:       "テスト提案",
+		Description: "概要です",
+		UnitPrice:   5000,
+		PlanSteps:   nil,
+	}
+
+	result := testutil.NewRequest().Post("/to-projects/"+strconv.Itoa(project1.ID)+"/plans").WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithJsonBody(reqBody).GoWithHTTPHandler(s.T(), e)
+
+	assert.Equal(s.T(), http.StatusForbidden, result.Code())
+}
+
 func (s *TestToProjectsHandlerSuite) TestGetToProjectsFetchLists_EmptyArgs_NotHavingNextPage_StatusOK() {
 	supporter, cookieString := s.supporterSignIn()
 
