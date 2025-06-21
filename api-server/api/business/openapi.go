@@ -61,10 +61,36 @@ type Plan struct {
 	Description string              `json:"description"`
 	EndDate     *openapi_types.Date `json:"endDate,omitempty"`
 	Id          int                 `json:"id"`
+	PlanSteps   *[]PlanStep         `json:"planSteps,omitempty"`
 	ProjectId   int                 `json:"projectId"`
 	StartDate   *openapi_types.Date `json:"startDate,omitempty"`
 	Title       string              `json:"title"`
 	UnitPrice   int                 `json:"unitPrice"`
+}
+
+// PlanStep defines model for PlanStep.
+type PlanStep struct {
+	Description string `json:"description"`
+	Duration    int    `json:"duration"`
+	Id          int    `json:"id"`
+	PlanId      int    `json:"planId"`
+	Title       string `json:"title"`
+}
+
+// PlanStepInput defines model for PlanStepInput.
+type PlanStepInput struct {
+	Deleted     *bool  `json:"deleted,omitempty"`
+	Description string `json:"description"`
+	Duration    int    `json:"duration"`
+	Id          *int   `json:"id,omitempty"`
+	Title       string `json:"title"`
+}
+
+// PlanStepValidationError defines model for PlanStepValidationError.
+type PlanStepValidationError struct {
+	Description *[]string `json:"description,omitempty"`
+	Duration    *[]string `json:"duration,omitempty"`
+	Title       *[]string `json:"title,omitempty"`
 }
 
 // PlanStoreInput defines model for PlanStoreInput.
@@ -83,6 +109,16 @@ type PlanStoreResponse struct {
 	Plan   Plan                `json:"plan"`
 }
 
+// PlanStoreWithStepsInput defines model for PlanStoreWithStepsInput.
+type PlanStoreWithStepsInput struct {
+	Description string              `json:"description"`
+	EndDate     *openapi_types.Date `json:"endDate,omitempty"`
+	PlanSteps   *[]PlanStepInput    `json:"planSteps,omitempty"`
+	StartDate   *openapi_types.Date `json:"startDate,omitempty"`
+	Title       string              `json:"title"`
+	UnitPrice   int                 `json:"unitPrice"`
+}
+
 // PlanValidationError defines model for PlanValidationError.
 type PlanValidationError struct {
 	Description *[]string `json:"description,omitempty"`
@@ -90,6 +126,22 @@ type PlanValidationError struct {
 	StartDate   *[]string `json:"startDate,omitempty"`
 	Title       *[]string `json:"title,omitempty"`
 	UnitPrice   *[]string `json:"unitPrice,omitempty"`
+}
+
+// PlanWithStepsStoreResponse defines model for PlanWithStepsStoreResponse.
+type PlanWithStepsStoreResponse struct {
+	Errors PlanWithStepsValidationError `json:"errors"`
+	Plan   Plan                         `json:"plan"`
+}
+
+// PlanWithStepsValidationError defines model for PlanWithStepsValidationError.
+type PlanWithStepsValidationError struct {
+	Description *[]string                  `json:"description,omitempty"`
+	EndDate     *[]string                  `json:"endDate,omitempty"`
+	PlanSteps   *[]PlanStepValidationError `json:"planSteps,omitempty"`
+	StartDate   *[]string                  `json:"startDate,omitempty"`
+	Title       *[]string                  `json:"title,omitempty"`
+	UnitPrice   *[]string                  `json:"unitPrice,omitempty"`
 }
 
 // Project defines model for Project.
@@ -213,6 +265,9 @@ type PutProjectJSONRequestBody = ProjectStoreInput
 // PostSupporterSignInJSONRequestBody defines body for PostSupporterSignIn for application/json ContentType.
 type PostSupporterSignInJSONRequestBody = SupporterSignInInput
 
+// PostToProjectPlanJSONRequestBody defines body for PostToProjectPlan for application/json ContentType.
+type PostToProjectPlanJSONRequestBody = PlanStoreWithStepsInput
+
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
 	// Company Sign In
@@ -245,6 +300,9 @@ type ServerInterface interface {
 	// Get Project for Supporters
 	// (GET /to-projects/{id})
 	GetToProject(ctx echo.Context, id int) error
+	// Create Plan for Project
+	// (POST /to-projects/{id}/plans)
+	PostToProjectPlan(ctx echo.Context, id int) error
 }
 
 // ServerInterfaceWrapper converts echo contexts to parameters.
@@ -409,6 +467,24 @@ func (w *ServerInterfaceWrapper) GetToProject(ctx echo.Context) error {
 	return err
 }
 
+// PostToProjectPlan converts echo context to params.
+func (w *ServerInterfaceWrapper) PostToProjectPlan(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "id" -------------
+	var id int
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, ctx.Param("id"), &id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
+	}
+
+	ctx.Set(ApiKeyAuthScopes, []string{})
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.PostToProjectPlan(ctx, id)
+	return err
+}
+
 // This is a simple interface which specifies echo.Route addition functions which
 // are present on both echo.Echo and echo.Group, since we want to allow using
 // either of them for path registration
@@ -447,6 +523,7 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.POST(baseURL+"/supporters/sign-in", wrapper.PostSupporterSignIn)
 	router.GET(baseURL+"/to-projects", wrapper.GetToProjects)
 	router.GET(baseURL+"/to-projects/:id", wrapper.GetToProject)
+	router.POST(baseURL+"/to-projects/:id/plans", wrapper.PostToProjectPlan)
 
 }
 
@@ -774,6 +851,57 @@ func (response GetToProject500Response) VisitGetToProjectResponse(w http.Respons
 	return nil
 }
 
+type PostToProjectPlanRequestObject struct {
+	Id   int `json:"id"`
+	Body *PostToProjectPlanJSONRequestBody
+}
+
+type PostToProjectPlanResponseObject interface {
+	VisitPostToProjectPlanResponse(w http.ResponseWriter) error
+}
+
+type PostToProjectPlan200JSONResponse PlanWithStepsStoreResponse
+
+func (response PostToProjectPlan200JSONResponse) VisitPostToProjectPlanResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostToProjectPlan400JSONResponse PlanWithStepsValidationError
+
+func (response PostToProjectPlan400JSONResponse) VisitPostToProjectPlanResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostToProjectPlan403Response struct {
+}
+
+func (response PostToProjectPlan403Response) VisitPostToProjectPlanResponse(w http.ResponseWriter) error {
+	w.WriteHeader(403)
+	return nil
+}
+
+type PostToProjectPlan404Response struct {
+}
+
+func (response PostToProjectPlan404Response) VisitPostToProjectPlanResponse(w http.ResponseWriter) error {
+	w.WriteHeader(404)
+	return nil
+}
+
+type PostToProjectPlan500Response struct {
+}
+
+func (response PostToProjectPlan500Response) VisitPostToProjectPlanResponse(w http.ResponseWriter) error {
+	w.WriteHeader(500)
+	return nil
+}
+
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
 	// Company Sign In
@@ -806,6 +934,9 @@ type StrictServerInterface interface {
 	// Get Project for Supporters
 	// (GET /to-projects/{id})
 	GetToProject(ctx context.Context, request GetToProjectRequestObject) (GetToProjectResponseObject, error)
+	// Create Plan for Project
+	// (POST /to-projects/{id}/plans)
+	PostToProjectPlan(ctx context.Context, request PostToProjectPlanRequestObject) (PostToProjectPlanResponseObject, error)
 }
 
 type StrictHandlerFunc = strictecho.StrictEchoHandlerFunc
@@ -1090,35 +1221,69 @@ func (sh *strictHandler) GetToProject(ctx echo.Context, id int) error {
 	return nil
 }
 
+// PostToProjectPlan operation middleware
+func (sh *strictHandler) PostToProjectPlan(ctx echo.Context, id int) error {
+	var request PostToProjectPlanRequestObject
+
+	request.Id = id
+
+	var body PostToProjectPlanJSONRequestBody
+	if err := ctx.Bind(&body); err != nil {
+		return err
+	}
+	request.Body = &body
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.PostToProjectPlan(ctx.Request().Context(), request.(PostToProjectPlanRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PostToProjectPlan")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(PostToProjectPlanResponseObject); ok {
+		return validResponse.VisitPostToProjectPlanResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("unexpected response type: %T", response)
+	}
+	return nil
+}
+
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
-	"/4cuSjayKgAA",
+	"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",
+	"w13P1n8HAAD//0abNWXVNQAA",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file
