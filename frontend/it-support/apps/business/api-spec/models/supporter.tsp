@@ -1,3 +1,9 @@
+@summary("Supporter SignIn Input")
+model SupporterSignInInput {
+  email: string;
+  password: string;
+}
+
 @summary("Supporter SignIn Ok Response")
 model SupporterSignInOkResponse {
   token: string;
