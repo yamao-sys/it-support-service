@@ -283,6 +283,45 @@ paths:
         - to-projects
       security:
         - ApiKeyAuth: []
+  /to-projects/{id}/plans:
+    post:
+      operationId: post-to-project-plan
+      summary: Create Plan for Project
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlanWithStepsStoreResponse'
+        '400':
+          description: The server could not understand the request due to invalid syntax.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlanWithStepsValidationError'
+        '403':
+          description: Access is forbidden.
+        '404':
+          description: The server cannot find the requested resource.
+        '500':
+          description: Server error
+      tags:
+        - to-projects
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlanStoreWithStepsInput'
+      security:
+        - ApiKeyAuth: []
 components:
   schemas:
     CompanySignInBadRequestResponse:
@@ -351,7 +390,65 @@ components:
         createdAt:
           type: string
           format: date-time
+        planSteps:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanStep'
       title: Plan
+    PlanStep:
+      type: object
+      required:
+        - id
+        - planId
+        - title
+        - description
+        - duration
+      properties:
+        id:
+          type: integer
+        planId:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        duration:
+          type: integer
+      title: Plan Step
+    PlanStepInput:
+      type: object
+      required:
+        - title
+        - description
+        - duration
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        duration:
+          type: integer
+        deleted:
+          type: boolean
+      title: Plan Step Input
+    PlanStepValidationError:
+      type: object
+      properties:
+        title:
+          type: array
+          items:
+            type: string
+        description:
+          type: array
+          items:
+            type: string
+        duration:
+          type: array
+          items:
+            type: string
+      title: PlanStep Validation Error
     PlanStoreInput:
       type: object
       required:
@@ -386,6 +483,30 @@ components:
         errors:
           $ref: '#/components/schemas/PlanValidationError'
       title: Plan Store Response
+    PlanStoreWithStepsInput:
+      type: object
+      required:
+        - title
+        - description
+        - unitPrice
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        unitPrice:
+          type: integer
+        planSteps:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanStepInput'
+      title: Plan Store with Steps Input
     PlanValidationError:
       type: object
       properties:
@@ -409,6 +530,45 @@ components:
           type: array
           items:
             type: string
+      title: Plan Validation Error
+    PlanWithStepsStoreResponse:
+      type: object
+      required:
+        - plan
+        - errors
+      properties:
+        plan:
+          $ref: '#/components/schemas/Plan'
+        errors:
+          $ref: '#/components/schemas/PlanWithStepsValidationError'
+      title: Plan Store Response
+    PlanWithStepsValidationError:
+      type: object
+      properties:
+        title:
+          type: array
+          items:
+            type: string
+        description:
+          type: array
+          items:
+            type: string
+        startDate:
+          type: array
+          items:
+            type: string
+        endDate:
+          type: array
+          items:
+            type: string
+        unitPrice:
+          type: array
+          items:
+            type: string
+        planSteps:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanStepValidationError'
       title: Plan Validation Error
     Project:
       type: object

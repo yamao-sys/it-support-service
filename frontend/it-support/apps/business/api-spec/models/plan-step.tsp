@@ -13,3 +13,12 @@ model PlanStepValidationError {
   description?: string[];
   duration?: string[];
 }
+
+@summary("Plan Step Input")
+model PlanStepInput {
+  id?: integer;
+  title: string;
+  description: string;
+  duration: integer;
+  deleted?: boolean;
+}
