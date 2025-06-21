@@ -2,11 +2,15 @@ package businessservices
 
 import (
 	businessapi "apps/api/business"
+	businessvalidators "apps/business/validators"
 	models "apps/models"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
+	validation "github.com/go-ozzo/ozzo-validation/v4"
+	"github.com/volatiletech/null/v8"
 	"gorm.io/gorm"
 )
 
@@ -15,6 +19,8 @@ const toProjectPerPage = 5
 type ToProjectService interface {
 	FetchLists(pageToken int, startDate string, endDate string, supporterID int) (toProjects []ToProjectFields, nextPageToken int)
 	Fetch(ID int, supporterID int) (toProject ToProjectFields, error error)
+	CreatePlan(projectID int, requestParams *businessapi.PlanStoreWithStepsInput, supporterID int) (plan models.Plan, validatorErrors error, error error)
+	MappingPlanWithStepsValidationErrorStruct(err error) businessapi.PlanWithStepsValidationError
 }
 
 type toProjectService struct {
@@ -83,6 +89,144 @@ func (tps *toProjectService) Fetch(ID int, supporterID int) (toProject ToProject
 	}
 	
 	return toProject, nil
+}
+
+func (tps *toProjectService) CreatePlan(projectID int, requestParams *businessapi.PlanStoreWithStepsInput, supporterID int) (plan models.Plan, validatorErrors error, error error) {
+	// NOTE: プロジェクトの存在確認
+	var project models.Project
+	if err := tps.db.First(&project, projectID).Error; err != nil {
+		fmt.Println("Project not found:", err)
+		return models.Plan{}, nil, errors.New("project not found")
+	}
+
+	// NOTE: バリデーションチェック
+	validatorErrors = businessvalidators.ValidatePlanWithSteps(requestParams)
+	if validatorErrors != nil {
+		return models.Plan{}, validatorErrors, nil
+	}
+
+	// NOTE: トランザクション開始
+	tx := tps.db.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	// NOTE: Planの作成
+	plan = models.Plan{}
+	plan.SupporterID = supporterID
+	plan.ProjectID = projectID
+	plan.Title = requestParams.Title
+	plan.Description = requestParams.Description
+	if requestParams.StartDate != nil {
+		plan.StartDate = null.Time{Time: requestParams.StartDate.Time, Valid: true}
+	}
+	if requestParams.EndDate != nil {
+		plan.EndDate = null.Time{Time: requestParams.EndDate.Time, Valid: true}
+	}
+	plan.UnitPrice = requestParams.UnitPrice
+	plan.Status = models.PlanStatusTempraryCreating
+
+	if err := tx.Create(&plan).Error; err != nil {
+		tx.Rollback()
+		return models.Plan{}, nil, err
+	}
+
+	// NOTE: PlanStepsの作成
+	if requestParams.PlanSteps != nil && len(*requestParams.PlanSteps) > 0 {
+		planSteps := make([]models.PlanStep, 0, len(*requestParams.PlanSteps))
+		for _, stepInput := range *requestParams.PlanSteps {
+			planStep := models.PlanStep{
+				PlanID:      plan.ID,
+				Title:       stepInput.Title,
+				Description: stepInput.Description,
+				Duration:    stepInput.Duration,
+			}
+			planSteps = append(planSteps, planStep)
+		}
+
+		if err := tx.Create(&planSteps).Error; err != nil {
+			tx.Rollback()
+			return models.Plan{}, nil, err
+		}
+	}
+
+	// NOTE: トランザクションコミット
+	if err := tx.Commit().Error; err != nil {
+		return models.Plan{}, nil, err
+	}
+
+	// NOTE: 作成されたPlanにPlanStepsを含めて返す
+	var finalPlan models.Plan
+	if err := tps.db.Preload("PlanSteps").First(&finalPlan, plan.ID).Error; err != nil {
+		return models.Plan{}, nil, err
+	}
+
+	return finalPlan, nil, nil
+}
+
+func (tps *toProjectService) MappingPlanWithStepsValidationErrorStruct(err error) businessapi.PlanWithStepsValidationError {
+	var validationError businessapi.PlanWithStepsValidationError
+	if err == nil {
+		return validationError
+	}
+
+	if errors, ok := err.(validation.Errors); ok {
+		// NOTE: レスポンス用の構造体にマッピング
+		for field, err := range errors {
+			messages := []string{err.Error()}
+			switch field {
+			case "title":
+				validationError.Title = &messages
+			case "description":
+				validationError.Description = &messages
+			case "startDate":
+				validationError.StartDate = &messages
+			case "endDate":
+				validationError.EndDate = &messages
+			case "unitPrice":
+				validationError.UnitPrice = &messages
+			case "planSteps":
+				stepErrors := tps.parsePlanStepsValidationError(err)
+				validationError.PlanSteps = &stepErrors
+			}
+		}
+	}
+
+	return validationError
+}
+
+func (tps *toProjectService) parsePlanStepsValidationError(err error) []businessapi.PlanStepValidationError {
+	var stepErrors []businessapi.PlanStepValidationError
+	
+	// NOTE: PlanStepsのバリデーションエラーがvalidation.Errorsの場合、フィールド名で分類
+	if validationErrors, ok := err.(validation.Errors); ok {
+		stepError := businessapi.PlanStepValidationError{}
+		
+		for field, fieldErr := range validationErrors {
+			messages := []string{fieldErr.Error()}
+			
+			switch field {
+			case "title":
+				stepError.Title = &messages
+			case "description":
+				stepError.Description = &messages
+			case "duration":
+				stepError.Duration = &messages
+			}
+		}
+		
+		stepErrors = append(stepErrors, stepError)
+	} else {
+		// NOTE: 単一エラーメッセージの場合（例：ステップ数が0など）
+		stepError := businessapi.PlanStepValidationError{}
+		messages := []string{err.Error()}
+		stepError.Title = &messages
+		stepErrors = append(stepErrors, stepError)
+	}
+	
+	return stepErrors
 }
 
 func (tps *toProjectService) toProjectFields() []string {

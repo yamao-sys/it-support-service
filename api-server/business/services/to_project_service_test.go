@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	openapi_types "github.com/oapi-codegen/runtime/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 )
@@ -568,6 +569,245 @@ func (s *TestToProjectServiceSuite) TestToProjectFetch_NotFound() {
 	assert.Equal(s.T(), "", fetchedProduct.Title)
 
 	assert.Equal(s.T(), errors.New("not found"), err)
+}
+
+func (s *TestToProjectServiceSuite) TestCreatePlan_Success_WithoutPlanSteps() {
+	startDate := time.Date(2025, 6, 1, 0, 0, 0, 0, time.Local)
+	endDate := time.Date(2025, 6, 30, 0, 0, 0, 0, time.Local)
+
+	requestParams := &businessapi.PlanStoreWithStepsInput{
+		Title:       "テスト提案",
+		Description: "テスト提案の概要です",
+		StartDate:   &openapi_types.Date{Time: startDate},
+		EndDate:     &openapi_types.Date{Time: endDate},
+		UnitPrice:   5000,
+		PlanSteps:   nil,
+	}
+
+	createdPlan, validationErrors, err := testToProjectService.CreatePlan(project1.ID, requestParams, supporter.ID)
+
+	// NOTE: 成功時の確認
+	assert.Nil(s.T(), validationErrors)
+	assert.Nil(s.T(), err)
+	assert.NotZero(s.T(), createdPlan.ID)
+	assert.Equal(s.T(), supporter.ID, createdPlan.SupporterID)
+	assert.Equal(s.T(), project1.ID, createdPlan.ProjectID)
+	assert.Equal(s.T(), "テスト提案", createdPlan.Title)
+	assert.Equal(s.T(), "テスト提案の概要です", createdPlan.Description)
+	assert.Equal(s.T(), startDate, createdPlan.StartDate.Time)
+	assert.Equal(s.T(), endDate, createdPlan.EndDate.Time)
+	assert.Equal(s.T(), 5000, createdPlan.UnitPrice)
+	assert.Equal(s.T(), models.PlanStatusTempraryCreating, createdPlan.Status)
+	assert.Empty(s.T(), createdPlan.PlanSteps)
+
+	// NOTE: データベースに保存されているかの確認
+	var savedPlan models.Plan
+	DBCon.First(&savedPlan, createdPlan.ID)
+	assert.Equal(s.T(), createdPlan.ID, savedPlan.ID)
+	assert.Equal(s.T(), supporter.ID, createdPlan.SupporterID)
+	assert.Equal(s.T(), "テスト提案", savedPlan.Title)
+	assert.Equal(s.T(), "テスト提案の概要です", savedPlan.Description)
+	assert.Equal(s.T(), startDate, savedPlan.StartDate.Time)
+	assert.Equal(s.T(), endDate, savedPlan.EndDate.Time)
+	assert.Equal(s.T(), 5000, savedPlan.UnitPrice)
+	assert.Equal(s.T(), models.PlanStatusTempraryCreating, savedPlan.Status)
+}
+
+func (s *TestToProjectServiceSuite) TestCreatePlan_Success_WithPlanSteps() {
+	startDate := time.Date(2025, 6, 1, 0, 0, 0, 0, time.Local)
+	endDate := time.Date(2025, 6, 30, 0, 0, 0, 0, time.Local)
+
+	planSteps := []businessapi.PlanStepInput{
+		{
+			Title:       "ステップ1",
+			Description: "ステップ1の概要",
+			Duration:    10,
+		},
+		{
+			Title:       "ステップ2",
+			Description: "ステップ2の概要",
+			Duration:    20,
+		},
+	}
+
+	requestParams := &businessapi.PlanStoreWithStepsInput{
+		Title:       "ステップ付き提案",
+		Description: "ステップ付き提案の概要です",
+		StartDate:   &openapi_types.Date{Time: startDate},
+		EndDate:     &openapi_types.Date{Time: endDate},
+		UnitPrice:   5000,
+		PlanSteps:   &planSteps,
+	}
+
+	createdPlan, validationErrors, err := testToProjectService.CreatePlan(project1.ID, requestParams, supporter.ID)
+
+	// NOTE: 成功時の確認
+	assert.Nil(s.T(), validationErrors)
+	assert.Nil(s.T(), err)
+	assert.NotZero(s.T(), createdPlan.ID)
+	assert.Equal(s.T(), supporter.ID, createdPlan.SupporterID)
+	assert.Equal(s.T(), "ステップ付き提案", createdPlan.Title)
+	assert.Equal(s.T(), "ステップ付き提案の概要です", createdPlan.Description)
+	assert.Equal(s.T(), startDate, createdPlan.StartDate.Time)
+	assert.Equal(s.T(), endDate, createdPlan.EndDate.Time)
+	assert.Equal(s.T(), 5000, createdPlan.UnitPrice)
+	assert.Equal(s.T(), models.PlanStatusTempraryCreating, createdPlan.Status)
+	assert.Equal(s.T(), "ステップ1", createdPlan.PlanSteps[0].Title)
+	assert.Equal(s.T(), "ステップ1の概要", createdPlan.PlanSteps[0].Description)
+	assert.Equal(s.T(), 10, createdPlan.PlanSteps[0].Duration)
+	assert.Equal(s.T(), "ステップ2", createdPlan.PlanSteps[1].Title)
+	assert.Equal(s.T(), "ステップ2の概要", createdPlan.PlanSteps[1].Description)
+	assert.Equal(s.T(), 20, createdPlan.PlanSteps[1].Duration)
+
+	// NOTE: PlanStepsが保存されているかの確認
+	var savedPlanSteps []models.PlanStep
+	DBCon.Where("plan_id = ?", createdPlan.ID).Find(&savedPlanSteps)
+	assert.Len(s.T(), savedPlanSteps, 2)
+	assert.Equal(s.T(), "ステップ1", savedPlanSteps[0].Title)
+	assert.Equal(s.T(), "ステップ1の概要", savedPlanSteps[0].Description)
+	assert.Equal(s.T(), 10, savedPlanSteps[0].Duration)
+	assert.Equal(s.T(), "ステップ2", savedPlanSteps[1].Title)
+	assert.Equal(s.T(), "ステップ2の概要", savedPlanSteps[1].Description)
+	assert.Equal(s.T(), 20, savedPlanSteps[1].Duration)
+}
+
+func (s *TestToProjectServiceSuite) TestCreatePlan_Success_WithoutDates() {
+	requestParams := &businessapi.PlanStoreWithStepsInput{
+		Title:       "日付なし提案",
+		Description: "日付なし提案の概要です",
+		StartDate:   nil,
+		EndDate:     nil,
+		UnitPrice:   3000,
+		PlanSteps:   nil,
+	}
+
+	createdPlan, validationErrors, err := testToProjectService.CreatePlan(project1.ID, requestParams, supporter.ID)
+
+	// NOTE: 成功時の確認
+	assert.Nil(s.T(), validationErrors)
+	assert.Nil(s.T(), err)
+	assert.Equal(s.T(), "日付なし提案", createdPlan.Title)
+	assert.False(s.T(), createdPlan.StartDate.Valid)
+	assert.False(s.T(), createdPlan.EndDate.Valid)
+}
+
+func (s *TestToProjectServiceSuite) TestCreatePlan_ValidationError_EmptyTitle() {
+	requestParams := &businessapi.PlanStoreWithStepsInput{
+		Title:       "",
+		Description: "概要です",
+		UnitPrice:   5000,
+	}
+
+	createdPlan, validationErrors, err := testToProjectService.CreatePlan(project1.ID, requestParams, supporter.ID)
+
+	// NOTE: バリデーションエラーの確認
+	assert.NotNil(s.T(), validationErrors)
+	assert.Nil(s.T(), err)
+	assert.Zero(s.T(), createdPlan.ID)
+}
+
+func (s *TestToProjectServiceSuite) TestCreatePlan_ValidationError_EmptyDescription() {
+	requestParams := &businessapi.PlanStoreWithStepsInput{
+		Title:       "テスト提案",
+		Description: "",
+		UnitPrice:   5000,
+	}
+
+	createdPlan, validationErrors, err := testToProjectService.CreatePlan(project1.ID, requestParams, supporter.ID)
+
+	// NOTE: バリデーションエラーの確認
+	assert.NotNil(s.T(), validationErrors)
+	assert.Nil(s.T(), err)
+	assert.Zero(s.T(), createdPlan.ID)
+}
+
+func (s *TestToProjectServiceSuite) TestCreatePlan_ValidationError_InvalidUnitPrice() {
+	requestParams := &businessapi.PlanStoreWithStepsInput{
+		Title:       "テスト提案",
+		Description: "概要です",
+		UnitPrice:   0,
+	}
+
+	createdPlan, validationErrors, err := testToProjectService.CreatePlan(project1.ID, requestParams, supporter.ID)
+
+	// NOTE: バリデーションエラーの確認
+	assert.NotNil(s.T(), validationErrors)
+	assert.Nil(s.T(), err)
+	assert.Zero(s.T(), createdPlan.ID)
+}
+
+func (s *TestToProjectServiceSuite) TestCreatePlan_ValidationError_InvalidDateRange() {
+	startDate := time.Date(2025, 6, 2, 0, 0, 0, 0, time.Local)
+	endDate := time.Date(2025, 6, 1, 0, 0, 0, 0, time.Local) // 開始日より前の終了日
+
+	requestParams := &businessapi.PlanStoreWithStepsInput{
+		Title:       "テスト提案",
+		Description: "概要です",
+		StartDate:   &openapi_types.Date{Time: startDate},
+		EndDate:     &openapi_types.Date{Time: endDate},
+		UnitPrice:   5000,
+	}
+
+	createdPlan, validationErrors, err := testToProjectService.CreatePlan(project1.ID, requestParams, supporter.ID)
+
+	// NOTE: バリデーションエラーの確認
+	assert.NotNil(s.T(), validationErrors)
+	assert.Nil(s.T(), err)
+	assert.Zero(s.T(), createdPlan.ID)
+}
+
+func (s *TestToProjectServiceSuite) TestCreatePlan_ValidationError_InvalidPlanSteps() {
+	planSteps := []businessapi.PlanStepInput{
+		{
+			Title:       "", // 空のタイトル
+			Description: "ステップ1の概要",
+			Duration:    10,
+		},
+	}
+
+	requestParams := &businessapi.PlanStoreWithStepsInput{
+		Title:       "テスト提案",
+		Description: "概要です",
+		UnitPrice:   5000,
+		PlanSteps:   &planSteps,
+	}
+
+	createdPlan, validationErrors, err := testToProjectService.CreatePlan(project1.ID, requestParams, supporter.ID)
+
+	// NOTE: バリデーションエラーの確認
+	assert.NotNil(s.T(), validationErrors)
+	assert.Nil(s.T(), err)
+	assert.Zero(s.T(), createdPlan.ID)
+}
+
+func (s *TestToProjectServiceSuite) TestCreatePlan_ProjectNotFound() {
+	nonExistentProjectID := 0
+
+	requestParams := &businessapi.PlanStoreWithStepsInput{
+		Title:       "テスト提案",
+		Description: "概要です",
+		UnitPrice:   5000,
+	}
+
+	createdPlan, validationErrors, err := testToProjectService.CreatePlan(nonExistentProjectID, requestParams, supporter.ID)
+
+	// NOTE: プロジェクトが見つからない場合のエラー確認
+	assert.Nil(s.T(), validationErrors)
+	assert.NotNil(s.T(), err)
+	assert.Equal(s.T(), "project not found", err.Error())
+	assert.Zero(s.T(), createdPlan.ID)
+}
+
+func (s *TestToProjectServiceSuite) TestMappingPlanWithStepsValidationErrorStruct_NoError() {
+	mappedError := testToProjectService.MappingPlanWithStepsValidationErrorStruct(nil)
+
+	// NOTE: エラーがない場合は空の構造体が返される
+	assert.Nil(s.T(), mappedError.Title)
+	assert.Nil(s.T(), mappedError.Description)
+	assert.Nil(s.T(), mappedError.StartDate)
+	assert.Nil(s.T(), mappedError.EndDate)
+	assert.Nil(s.T(), mappedError.UnitPrice)
+	assert.Nil(s.T(), mappedError.PlanSteps)
 }
 
 func TestToProjectService(t *testing.T) {
