@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/labstack/echo/v4"
+	openapi_types "github.com/oapi-codegen/runtime/types"
 	"github.com/oapi-codegen/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -128,6 +129,11 @@ func (s *TestToProjectsHandlerSuite) TestPostToProjectPlan_StatusOk_OnlyRequired
 	var savedPlan models.Plan
 	DBCon.Where("project_id = ? AND title = ?", project1.ID, "テスト提案").First(&savedPlan)
 	assert.Equal(s.T(), "テスト提案", savedPlan.Title)
+	assert.Equal(s.T(), "テスト提案の概要です", savedPlan.Description)
+	assert.Equal(s.T(), 5000, savedPlan.UnitPrice)
+	assert.Equal(s.T(), project1.ID, project1.ID)
+	assert.Equal(s.T(), null.Time{Time:time.Date(1, time.January, 1, 0, 0, 0, 0, time.UTC), Valid:false}, savedPlan.StartDate)
+	assert.Equal(s.T(), null.Time{Time:time.Date(1, time.January, 1, 0, 0, 0, 0, time.UTC), Valid:false}, savedPlan.EndDate)
 	assert.Equal(s.T(), models.PlanStatusTempraryCreating, savedPlan.Status)
 }
 
@@ -192,6 +198,42 @@ func (s *TestToProjectsHandlerSuite) TestPostToProjectPlan_StatusOk_PlanOnlyRequ
 	assert.Equal(s.T(), 10, savedPlanSteps[1].Duration)
 }
 
+func (s *TestToProjectsHandlerSuite) TestPostToProjectPlan_StatusOk_WithDates() {
+	_, cookieString := s.supporterSignIn()
+
+	stardDate := openapi_types.Date{Time: time.Date(2025, 6, 1, 0, 0, 0, 0, time.Local)}
+	endDate := openapi_types.Date{Time: time.Date(2025, 6, 30, 0, 0, 0, 0, time.Local)}
+	reqBody := businessapi.PlanStoreWithStepsInput{
+		Title:       "日付付き提案",
+		Description: "日付付き提案の概要です",
+		StartDate:   &stardDate,
+		EndDate:     &endDate,
+		UnitPrice:   5000,
+		PlanSteps:   nil,
+	}
+
+	result := testutil.NewRequest().Post("/to-projects/"+strconv.Itoa(project1.ID)+"/plans").WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithJsonBody(reqBody).GoWithHTTPHandler(s.T(), e)
+
+	assert.Equal(s.T(), http.StatusOK, result.Code())
+
+	var res businessapi.PostToProjectPlan200JSONResponse
+	result.UnmarshalBodyToObject(&res)
+	assert.Equal(s.T(), "日付付き提案", res.Plan.Title)
+	assert.Equal(s.T(), openapi_types.Date{Time: time.Date(stardDate.Year(), stardDate.Month(), stardDate.Day(), stardDate.Hour(), stardDate.Minute(), stardDate.Second(), stardDate.Nanosecond(), time.UTC)} , *res.Plan.StartDate)
+	assert.Equal(s.T(), openapi_types.Date{Time: time.Date(endDate.Year(), endDate.Month(), endDate.Day(), endDate.Hour(), endDate.Minute(), endDate.Second(), endDate.Nanosecond(), time.UTC)}, *res.Plan.EndDate)
+
+	// NOTE: Planが保存されているかの確認
+	var savedPlan models.Plan
+	DBCon.Where("project_id = ?", project1.ID).Preload("PlanSteps").First(&savedPlan)
+	assert.Equal(s.T(), "日付付き提案", savedPlan.Title)
+	assert.Equal(s.T(), "日付付き提案の概要です", savedPlan.Description)
+	assert.Equal(s.T(), 5000, savedPlan.UnitPrice)
+	assert.Equal(s.T(), null.Time{Time: stardDate.Time, Valid: true}, savedPlan.StartDate)
+	assert.Equal(s.T(), null.Time{Time: endDate.Time, Valid: true}, savedPlan.EndDate)
+	assert.Equal(s.T(), models.PlanStatusTempraryCreating, savedPlan.Status)
+	assert.Empty(s.T(), savedPlan.PlanSteps)
+}
+
 func (s *TestToProjectsHandlerSuite) TestPostToProjectPlan_BadRequest_EmptyTitle() {
 	_, cookieString := s.supporterSignIn()
 
@@ -209,6 +251,11 @@ func (s *TestToProjectsHandlerSuite) TestPostToProjectPlan_BadRequest_EmptyTitle
 	var res businessapi.PostToProjectPlan400JSONResponse
 	result.UnmarshalBodyToObject(&res)
 	assert.Contains(s.T(), *res.Title, "支援タイトルは必須入力です。")
+
+	// NOTE: Planが保存されていないことの確認
+	var savedPlan models.Plan
+	DBCon.Where("project_id = ?", project1.ID).Preload("PlanSteps").First(&savedPlan)
+	assert.Empty(s.T(), savedPlan.ID)
 }
 
 func (s *TestToProjectsHandlerSuite) TestPostToProjectPlan_BadRequest_EmptyDescription() {
@@ -228,6 +275,11 @@ func (s *TestToProjectsHandlerSuite) TestPostToProjectPlan_BadRequest_EmptyDescr
 	var res businessapi.PostToProjectPlan400JSONResponse
 	result.UnmarshalBodyToObject(&res)
 	assert.Contains(s.T(), *res.Description, "支援概要は必須入力です。")
+
+	// NOTE: Planが保存されていないことの確認
+	var savedPlan models.Plan
+	DBCon.Where("project_id = ?", project1.ID).Preload("PlanSteps").First(&savedPlan)
+	assert.Empty(s.T(), savedPlan.ID)
 }
 
 func (s *TestToProjectsHandlerSuite) TestPostToProjectPlan_BadRequest_InvalidUnitPrice_Minus() {
@@ -247,6 +299,11 @@ func (s *TestToProjectsHandlerSuite) TestPostToProjectPlan_BadRequest_InvalidUni
 	var res businessapi.PostToProjectPlan400JSONResponse
 	result.UnmarshalBodyToObject(&res)
 	assert.Contains(s.T(), *res.UnitPrice, "支援単価は1円以上で入力してください。")
+
+	// NOTE: Planが保存されていないことの確認
+	var savedPlan models.Plan
+	DBCon.Where("project_id = ?", project1.ID).Preload("PlanSteps").First(&savedPlan)
+	assert.Empty(s.T(), savedPlan.ID)
 }
 
 func (s *TestToProjectsHandlerSuite) TestPostToProjectPlan_BadRequest_InvalidUnitPrice_Zero() {
@@ -267,6 +324,11 @@ func (s *TestToProjectsHandlerSuite) TestPostToProjectPlan_BadRequest_InvalidUni
 	result.UnmarshalBodyToObject(&res)
 	assert.NotNil(s.T(), res.UnitPrice)
 	assert.Contains(s.T(), *res.UnitPrice, "支援単価(税抜)は必須入力です。")
+
+	// NOTE: Planが保存されていないことの確認
+	var savedPlan models.Plan
+	DBCon.Where("project_id = ?", project1.ID).Preload("PlanSteps").First(&savedPlan)
+	assert.Empty(s.T(), savedPlan.ID)
 }
 
 func (s *TestToProjectsHandlerSuite) TestPostToProjectPlan_BadRequest_InvalidPlanSteps() {
@@ -297,6 +359,92 @@ func (s *TestToProjectsHandlerSuite) TestPostToProjectPlan_BadRequest_InvalidPla
 	assert.Len(s.T(), *res.PlanSteps, 1)
 	assert.Contains(s.T(), *(*res.PlanSteps)[0].Title, "タイトルは必須入力です。")
 	assert.Contains(s.T(), *(*res.PlanSteps)[0].Duration, "支援時間は1時間以上で入力してください。")
+
+	// NOTE: Planが保存されていないことの確認
+	var savedPlan models.Plan
+	DBCon.Where("project_id = ?", project1.ID).Preload("PlanSteps").First(&savedPlan)
+	assert.Empty(s.T(), savedPlan.ID)
+}
+
+func (s *TestToProjectsHandlerSuite) TestPostToProjectPlan_BadRequest_DateRange() {
+	_, cookieString := s.supporterSignIn()
+
+	reqBody := businessapi.PlanStoreWithStepsInput{
+		Title:       "不正日付提案",
+		Description: "不正日付提案の概要です",
+		StartDate:   &openapi_types.Date{Time: time.Date(2025, 6, 2, 0, 0, 0, 0, time.Local)},
+		EndDate:     &openapi_types.Date{Time: time.Date(2025, 6, 1, 0, 0, 0, 0, time.Local)}, // 開始日より前
+		UnitPrice:   5000,
+		PlanSteps:   nil,
+	}
+
+	result := testutil.NewRequest().Post("/to-projects/"+strconv.Itoa(project1.ID)+"/plans").WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithJsonBody(reqBody).GoWithHTTPHandler(s.T(), e)
+
+	assert.Equal(s.T(), http.StatusBadRequest, result.Code())
+
+	var res businessapi.PostToProjectPlan400JSONResponse
+	result.UnmarshalBodyToObject(&res)
+	assert.NotNil(s.T(), res.EndDate)
+	assert.Contains(s.T(), (*res.EndDate)[0], "前後関係が不適です")
+
+	// NOTE: Planが保存されていないことの確認
+	var savedPlan models.Plan
+	DBCon.Where("project_id = ?", project1.ID).Preload("PlanSteps").First(&savedPlan)
+	assert.Empty(s.T(), savedPlan.ID)
+}
+
+func (s *TestToProjectsHandlerSuite) TestPostToProjectPlan_BadRequest_MissingEndDate() {
+	_, cookieString := s.supporterSignIn()
+
+	reqBody := businessapi.PlanStoreWithStepsInput{
+		Title:       "終了日なし提案",
+		Description: "終了日なし提案の概要です",
+		StartDate:   &openapi_types.Date{Time: time.Date(2025, 6, 1, 0, 0, 0, 0, time.Local)},
+		EndDate:     nil,
+		UnitPrice:   5000,
+		PlanSteps:   nil,
+	}
+
+	result := testutil.NewRequest().Post("/to-projects/"+strconv.Itoa(project1.ID)+"/plans").WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithJsonBody(reqBody).GoWithHTTPHandler(s.T(), e)
+
+	assert.Equal(s.T(), http.StatusBadRequest, result.Code())
+
+	var res businessapi.PostToProjectPlan400JSONResponse
+	result.UnmarshalBodyToObject(&res)
+	assert.NotNil(s.T(), res.EndDate)
+	assert.Contains(s.T(), (*res.EndDate)[0], "支援終了日は必須入力です")
+
+	// NOTE: Planが保存されていないことの確認
+	var savedPlan models.Plan
+	DBCon.Where("project_id = ?", project1.ID).Preload("PlanSteps").First(&savedPlan)
+	assert.Empty(s.T(), savedPlan.ID)
+}
+
+func (s *TestToProjectsHandlerSuite) TestPostToProjectPlan_BadRequest_EmptyPlanSteps() {
+	_, cookieString := s.supporterSignIn()
+
+	planSteps := []businessapi.PlanStepInput{}
+
+	reqBody := businessapi.PlanStoreWithStepsInput{
+		Title:       "空ステップ提案",
+		Description: "空ステップ提案の概要です",
+		UnitPrice:   5000,
+		PlanSteps:   &planSteps,
+	}
+
+	result := testutil.NewRequest().Post("/to-projects/"+strconv.Itoa(project1.ID)+"/plans").WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithJsonBody(reqBody).GoWithHTTPHandler(s.T(), e)
+
+	assert.Equal(s.T(), http.StatusBadRequest, result.Code())
+
+	var res businessapi.PostToProjectPlan400JSONResponse
+	result.UnmarshalBodyToObject(&res)
+	assert.NotNil(s.T(), res.PlanSteps)
+	assert.Contains(s.T(), (*(*res.PlanSteps)[0].Title)[0], "少なくとも1つの支援ステップを追加してください")
+
+	// NOTE: Planが保存されていないことの確認
+	var savedPlan models.Plan
+	DBCon.Where("project_id = ?", project1.ID).Preload("PlanSteps").First(&savedPlan)
+	assert.Empty(s.T(), savedPlan.ID)
 }
 
 func (s *TestToProjectsHandlerSuite) TestPostToProjectPlan_NotFound() {
@@ -312,6 +460,11 @@ func (s *TestToProjectsHandlerSuite) TestPostToProjectPlan_NotFound() {
 	result := testutil.NewRequest().Post("/to-projects/0/plans").WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithJsonBody(reqBody).GoWithHTTPHandler(s.T(), e)
 
 	assert.Equal(s.T(), http.StatusNotFound, result.Code())
+
+	// NOTE: Planが保存されていないことの確認
+	var savedPlan models.Plan
+	DBCon.Where("project_id = ?", 0).Preload("PlanSteps").First(&savedPlan)
+	assert.Empty(s.T(), savedPlan.ID)
 }
 
 func (s *TestToProjectsHandlerSuite) TestPostToProjectPlan_Unauthorized() {
@@ -325,6 +478,11 @@ func (s *TestToProjectsHandlerSuite) TestPostToProjectPlan_Unauthorized() {
 	result := testutil.NewRequest().Post("/to-projects/"+strconv.Itoa(project1.ID)+"/plans").WithHeader("Cookie", csrfTokenCookie).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithJsonBody(reqBody).GoWithHTTPHandler(s.T(), e)
 
 	assert.Equal(s.T(), http.StatusUnauthorized, result.Code())
+
+	// NOTE: Planが保存されていないことの確認
+	var savedPlan models.Plan
+	DBCon.Where("project_id = ?", project1.ID).Preload("PlanSteps").First(&savedPlan)
+	assert.Empty(s.T(), savedPlan.ID)
 }
 
 func (s *TestToProjectsHandlerSuite) TestPostToProjectPlan_Forbidden() {
@@ -340,6 +498,11 @@ func (s *TestToProjectsHandlerSuite) TestPostToProjectPlan_Forbidden() {
 	result := testutil.NewRequest().Post("/to-projects/"+strconv.Itoa(project1.ID)+"/plans").WithHeader("Cookie", csrfTokenCookie+"; "+cookieString).WithHeader(echo.HeaderXCSRFToken, csrfToken).WithJsonBody(reqBody).GoWithHTTPHandler(s.T(), e)
 
 	assert.Equal(s.T(), http.StatusForbidden, result.Code())
+
+	// NOTE: Planが保存されていないことの確認
+	var savedPlan models.Plan
+	DBCon.Where("project_id = ?", project1.ID).Preload("PlanSteps").First(&savedPlan)
+	assert.Empty(s.T(), savedPlan.ID)
 }
 
 func (s *TestToProjectsHandlerSuite) TestGetToProjectsFetchLists_EmptyArgs_NotHavingNextPage_StatusOK() {

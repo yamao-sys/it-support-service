@@ -2,6 +2,7 @@ package businessservices
 
 import (
 	businessapi "apps/api/business"
+	businessvalidators "apps/business/validators"
 	models "apps/models"
 	"apps/test/factories"
 	"errors"
@@ -11,6 +12,7 @@ import (
 	openapi_types "github.com/oapi-codegen/runtime/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
+	"github.com/volatiletech/null/v8"
 )
 
 type TestToProjectServiceSuite struct {
@@ -689,6 +691,48 @@ func (s *TestToProjectServiceSuite) TestCreatePlan_Success_WithoutDates() {
 	assert.Equal(s.T(), "日付なし提案", createdPlan.Title)
 	assert.False(s.T(), createdPlan.StartDate.Valid)
 	assert.False(s.T(), createdPlan.EndDate.Valid)
+
+	var savedPlan models.Plan
+	DBCon.Preload("PlanSteps").First(&savedPlan, createdPlan.ID)
+	assert.Equal(s.T(), createdPlan.ID, savedPlan.ID)
+	assert.Equal(s.T(), supporter.ID, createdPlan.SupporterID)
+	assert.Equal(s.T(), "日付なし提案", savedPlan.Title)
+	assert.Equal(s.T(), "日付なし提案の概要です", savedPlan.Description)
+	assert.Equal(s.T(), null.Time{Time:time.Date(1, time.January, 1, 0, 0, 0, 0, time.UTC), Valid:false}, savedPlan.StartDate)
+	assert.Equal(s.T(), null.Time{Time:time.Date(1, time.January, 1, 0, 0, 0, 0, time.UTC), Valid:false}, savedPlan.EndDate)
+	assert.Equal(s.T(), 3000, savedPlan.UnitPrice)
+	assert.Equal(s.T(), models.PlanStatusTempraryCreating, savedPlan.Status)
+	assert.Empty(s.T(), savedPlan.PlanSteps)
+}
+
+func (s *TestToProjectServiceSuite) TestCreatePlan_Success_WithNilPlanSteps() {
+	requestParams := &businessapi.PlanStoreWithStepsInput{
+		Title:       "nilステップ提案",
+		Description: "nilステップ提案の概要です",
+		UnitPrice:   5000,
+		PlanSteps:   nil,
+	}
+
+	createdPlan, validationErrors, err := testToProjectService.CreatePlan(project1.ID, requestParams, supporter.ID)
+
+	// NOTE: 成功時の確認
+	assert.Nil(s.T(), validationErrors)
+	assert.Nil(s.T(), err)
+	assert.NotZero(s.T(), createdPlan.ID)
+	assert.Equal(s.T(), "nilステップ提案", createdPlan.Title)
+	assert.Empty(s.T(), createdPlan.PlanSteps)
+
+	var savedPlan models.Plan
+	DBCon.Preload("PlanSteps").First(&savedPlan, createdPlan.ID)
+	assert.Equal(s.T(), createdPlan.ID, savedPlan.ID)
+	assert.Equal(s.T(), supporter.ID, createdPlan.SupporterID)
+	assert.Equal(s.T(), "nilステップ提案", savedPlan.Title)
+	assert.Equal(s.T(), "nilステップ提案の概要です", savedPlan.Description)
+	assert.Equal(s.T(), null.Time{Time:time.Date(1, time.January, 1, 0, 0, 0, 0, time.UTC), Valid:false}, savedPlan.StartDate)
+	assert.Equal(s.T(), null.Time{Time:time.Date(1, time.January, 1, 0, 0, 0, 0, time.UTC), Valid:false}, savedPlan.EndDate)
+	assert.Equal(s.T(), 5000, savedPlan.UnitPrice)
+	assert.Equal(s.T(), models.PlanStatusTempraryCreating, savedPlan.Status)
+	assert.Empty(s.T(), savedPlan.PlanSteps)
 }
 
 func (s *TestToProjectServiceSuite) TestCreatePlan_ValidationError_EmptyTitle() {
@@ -704,6 +748,11 @@ func (s *TestToProjectServiceSuite) TestCreatePlan_ValidationError_EmptyTitle() 
 	assert.NotNil(s.T(), validationErrors)
 	assert.Nil(s.T(), err)
 	assert.Zero(s.T(), createdPlan.ID)
+
+	// NOTE: Planが保存されていないことの確認
+	var savedPlan models.Plan
+	DBCon.Where("project_id = ?", project1.ID).Preload("PlanSteps").First(&savedPlan)
+	assert.Empty(s.T(), savedPlan.ID)
 }
 
 func (s *TestToProjectServiceSuite) TestCreatePlan_ValidationError_EmptyDescription() {
@@ -719,6 +768,11 @@ func (s *TestToProjectServiceSuite) TestCreatePlan_ValidationError_EmptyDescript
 	assert.NotNil(s.T(), validationErrors)
 	assert.Nil(s.T(), err)
 	assert.Zero(s.T(), createdPlan.ID)
+
+	// NOTE: Planが保存されていないことの確認
+	var savedPlan models.Plan
+	DBCon.Where("project_id = ?", project1.ID).Preload("PlanSteps").First(&savedPlan)
+	assert.Empty(s.T(), savedPlan.ID)
 }
 
 func (s *TestToProjectServiceSuite) TestCreatePlan_ValidationError_InvalidUnitPrice() {
@@ -734,6 +788,11 @@ func (s *TestToProjectServiceSuite) TestCreatePlan_ValidationError_InvalidUnitPr
 	assert.NotNil(s.T(), validationErrors)
 	assert.Nil(s.T(), err)
 	assert.Zero(s.T(), createdPlan.ID)
+	
+	// NOTE: Planが保存されていないことの確認
+	var savedPlan models.Plan
+	DBCon.Where("project_id = ?", project1.ID).Preload("PlanSteps").First(&savedPlan)
+	assert.Empty(s.T(), savedPlan.ID)
 }
 
 func (s *TestToProjectServiceSuite) TestCreatePlan_ValidationError_InvalidDateRange() {
@@ -754,6 +813,32 @@ func (s *TestToProjectServiceSuite) TestCreatePlan_ValidationError_InvalidDateRa
 	assert.NotNil(s.T(), validationErrors)
 	assert.Nil(s.T(), err)
 	assert.Zero(s.T(), createdPlan.ID)
+
+	// NOTE: Planが保存されていないことの確認
+	var savedPlan models.Plan
+	DBCon.Where("project_id = ?", project1.ID).Preload("PlanSteps").First(&savedPlan)
+	assert.Empty(s.T(), savedPlan.ID)
+}
+
+func (s *TestToProjectServiceSuite) TestCreatePlan_Success_WithEmptyPlanSteps() {
+	requestParams := &businessapi.PlanStoreWithStepsInput{
+		Title:       "空配列ステップ提案",
+		Description: "空配列ステップ提案の概要です",
+		UnitPrice:   5000,
+		PlanSteps:   &[]businessapi.PlanStepInput{},
+	}
+
+	createdPlan, validationErrors, err := testToProjectService.CreatePlan(project1.ID, requestParams, supporter.ID)
+
+	// NOTE: バリデーションエラーの確認
+	assert.NotNil(s.T(), validationErrors)
+	assert.Nil(s.T(), err)
+	assert.Zero(s.T(), createdPlan.ID)
+
+	// NOTE: Planが保存されていないことの確認
+	var savedPlan models.Plan
+	DBCon.Where("project_id = ?", project1.ID).Preload("PlanSteps").First(&savedPlan)
+	assert.Empty(s.T(), savedPlan.ID)
 }
 
 func (s *TestToProjectServiceSuite) TestCreatePlan_ValidationError_InvalidPlanSteps() {
@@ -778,6 +863,11 @@ func (s *TestToProjectServiceSuite) TestCreatePlan_ValidationError_InvalidPlanSt
 	assert.NotNil(s.T(), validationErrors)
 	assert.Nil(s.T(), err)
 	assert.Zero(s.T(), createdPlan.ID)
+
+	// NOTE: Planが保存されていないことの確認
+	var savedPlan models.Plan
+	DBCon.Where("project_id = ?", project1.ID).Preload("PlanSteps").First(&savedPlan)
+	assert.Empty(s.T(), savedPlan.ID)
 }
 
 func (s *TestToProjectServiceSuite) TestCreatePlan_ProjectNotFound() {
@@ -796,6 +886,11 @@ func (s *TestToProjectServiceSuite) TestCreatePlan_ProjectNotFound() {
 	assert.NotNil(s.T(), err)
 	assert.Equal(s.T(), "project not found", err.Error())
 	assert.Zero(s.T(), createdPlan.ID)
+
+	// NOTE: Planが保存されていないことの確認
+	var savedPlan models.Plan
+	DBCon.Where("project_id = ?", project1.ID).Preload("PlanSteps").First(&savedPlan)
+	assert.Empty(s.T(), savedPlan.ID)
 }
 
 func (s *TestToProjectServiceSuite) TestMappingPlanWithStepsValidationErrorStruct_NoError() {
@@ -808,6 +903,32 @@ func (s *TestToProjectServiceSuite) TestMappingPlanWithStepsValidationErrorStruc
 	assert.Nil(s.T(), mappedError.EndDate)
 	assert.Nil(s.T(), mappedError.UnitPrice)
 	assert.Nil(s.T(), mappedError.PlanSteps)
+}
+
+func (s *TestToProjectServiceSuite) TestMappingPlanWithStepsValidationErrorStruct_WithPlanStepsError() {
+	// NOTE: PlanStepsのバリデーションエラーをシミュレート
+	planSteps := []businessapi.PlanStepInput{
+		{
+			Title:       "",
+			Description: "概要",
+			Duration:    -1,
+		},
+	}
+
+	requestParams := &businessapi.PlanStoreWithStepsInput{
+		Title:       "テスト",
+		Description: "概要",
+		UnitPrice:   5000,
+		PlanSteps:   &planSteps,
+	}
+
+	// NOTE: バリデーションエラーを取得
+	validationError := businessvalidators.ValidatePlanWithSteps(requestParams)
+	assert.NotNil(s.T(), validationError)
+
+	// NOTE: マッピングをテスト
+	mappedError := testToProjectService.MappingPlanWithStepsValidationErrorStruct(validationError)
+	assert.NotNil(s.T(), mappedError.PlanSteps)
 }
 
 func TestToProjectService(t *testing.T) {
