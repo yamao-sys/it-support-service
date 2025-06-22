@@ -145,7 +145,7 @@ func (tps *toProjectService) CreatePlan(projectID int, requestParams *businessap
 			}
 			planSteps = append(planSteps, planStep)
 		}
-
+		
 		if err := tx.Create(&planSteps).Error; err != nil {
 			tx.Rollback()
 			return models.Plan{}, nil, err
@@ -159,9 +159,7 @@ func (tps *toProjectService) CreatePlan(projectID int, requestParams *businessap
 
 	// NOTE: 作成されたPlanにPlanStepsを含めて返す
 	var finalPlan models.Plan
-	if err := tps.db.Preload("PlanSteps").First(&finalPlan, plan.ID).Error; err != nil {
-		return models.Plan{}, nil, err
-	}
+	tps.db.Preload("PlanSteps").First(&finalPlan, plan.ID)
 
 	return finalPlan, nil, nil
 }
