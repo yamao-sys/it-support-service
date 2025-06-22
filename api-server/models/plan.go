@@ -33,4 +33,6 @@ type Plan struct {
 
 	Supporter          Supporter   `gorm:"foreignKey:SupporterID" validate:"omitempty"`
 	Project            Project   `gorm:"foreignKey:ProjectID" validate:"omitempty"`
+	
+	PlanSteps          []PlanStep    `gorm:"foreignKey:PlanID" validate:"omitempty"`
 }

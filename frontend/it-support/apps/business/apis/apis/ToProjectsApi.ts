@@ -13,8 +13,20 @@
  */
 
 import * as runtime from "../runtime";
-import type { ToProjectResponse, ToProjectsListResponse } from "../models/index";
+import type {
+  PlanStoreWithStepsInput,
+  PlanWithStepsStoreResponse,
+  PlanWithStepsValidationError,
+  ToProjectResponse,
+  ToProjectsListResponse,
+} from "../models/index";
 import {
+  PlanStoreWithStepsInputFromJSON,
+  PlanStoreWithStepsInputToJSON,
+  PlanWithStepsStoreResponseFromJSON,
+  PlanWithStepsStoreResponseToJSON,
+  PlanWithStepsValidationErrorFromJSON,
+  PlanWithStepsValidationErrorToJSON,
   ToProjectResponseFromJSON,
   ToProjectResponseToJSON,
   ToProjectsListResponseFromJSON,
@@ -29,6 +41,11 @@ export interface GetToProjectsRequest {
   pageToken?: string;
   startDate?: Date;
   endDate?: Date;
+}
+
+export interface PostToProjectPlanRequest {
+  id: number;
+  planStoreWithStepsInput: PlanStoreWithStepsInput;
 }
 
 /**
@@ -132,6 +149,63 @@ export class ToProjectsApi extends runtime.BaseAPI {
     initOverrides?: RequestInit | runtime.InitOverrideFunction,
   ): Promise<ToProjectsListResponse> {
     const response = await this.getToProjectsRaw(requestParameters, initOverrides);
+    return await response.value();
+  }
+
+  /**
+   * Create Plan for Project
+   */
+  async postToProjectPlanRaw(
+    requestParameters: PostToProjectPlanRequest,
+    initOverrides?: RequestInit | runtime.InitOverrideFunction,
+  ): Promise<runtime.ApiResponse<PlanWithStepsStoreResponse>> {
+    if (requestParameters["id"] == null) {
+      throw new runtime.RequiredError(
+        "id",
+        'Required parameter "id" was null or undefined when calling postToProjectPlan().',
+      );
+    }
+
+    if (requestParameters["planStoreWithStepsInput"] == null) {
+      throw new runtime.RequiredError(
+        "planStoreWithStepsInput",
+        'Required parameter "planStoreWithStepsInput" was null or undefined when calling postToProjectPlan().',
+      );
+    }
+
+    const queryParameters: any = {};
+
+    const headerParameters: runtime.HTTPHeaders = {};
+
+    headerParameters["Content-Type"] = "application/json";
+
+    const response = await this.request(
+      {
+        path: `/to-projects/{id}/plans`.replace(
+          `{${"id"}}`,
+          encodeURIComponent(String(requestParameters["id"])),
+        ),
+        method: "POST",
+        headers: headerParameters,
+        query: queryParameters,
+        body: PlanStoreWithStepsInputToJSON(requestParameters["planStoreWithStepsInput"]),
+      },
+      initOverrides,
+    );
+
+    return new runtime.JSONApiResponse(response, (jsonValue) =>
+      PlanWithStepsStoreResponseFromJSON(jsonValue),
+    );
+  }
+
+  /**
+   * Create Plan for Project
+   */
+  async postToProjectPlan(
+    requestParameters: PostToProjectPlanRequest,
+    initOverrides?: RequestInit | runtime.InitOverrideFunction,
+  ): Promise<PlanWithStepsStoreResponse> {
+    const response = await this.postToProjectPlanRaw(requestParameters, initOverrides);
     return await response.value();
   }
 }

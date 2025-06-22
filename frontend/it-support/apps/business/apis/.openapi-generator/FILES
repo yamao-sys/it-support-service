@@ -11,9 +11,15 @@ models/CompanySignInInput.ts
 models/CompanySignInOkResponse.ts
 models/CsrfResponse.ts
 models/Plan.ts
+models/PlanStep.ts
+models/PlanStepInput.ts
+models/PlanStepValidationError.ts
 models/PlanStoreInput.ts
 models/PlanStoreResponse.ts
+models/PlanStoreWithStepsInput.ts
 models/PlanValidationError.ts
+models/PlanWithStepsStoreResponse.ts
+models/PlanWithStepsValidationError.ts
 models/Project.ts
 models/ProjectResponse.ts
 models/ProjectStoreInput.ts

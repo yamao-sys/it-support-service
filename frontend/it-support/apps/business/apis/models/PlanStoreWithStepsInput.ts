@@ -13,135 +13,114 @@
  */
 
 import { mapValues } from "../runtime";
-import type { PlanStep } from "./PlanStep";
+import type { PlanStepInput } from "./PlanStepInput";
 import {
-  PlanStepFromJSON,
-  PlanStepFromJSONTyped,
-  PlanStepToJSON,
-  PlanStepToJSONTyped,
-} from "./PlanStep";
+  PlanStepInputFromJSON,
+  PlanStepInputFromJSONTyped,
+  PlanStepInputToJSON,
+  PlanStepInputToJSONTyped,
+} from "./PlanStepInput";
 
 /**
  *
  * @export
- * @interface Plan
+ * @interface PlanStoreWithStepsInput
  */
-export interface Plan {
-  /**
-   *
-   * @type {number}
-   * @memberof Plan
-   */
-  id: number;
-  /**
-   *
-   * @type {number}
-   * @memberof Plan
-   */
-  projectId: number;
+export interface PlanStoreWithStepsInput {
   /**
    *
    * @type {string}
-   * @memberof Plan
+   * @memberof PlanStoreWithStepsInput
    */
   title: string;
   /**
    *
    * @type {string}
-   * @memberof Plan
+   * @memberof PlanStoreWithStepsInput
    */
   description: string;
   /**
    *
    * @type {Date}
-   * @memberof Plan
+   * @memberof PlanStoreWithStepsInput
    */
   startDate?: Date;
   /**
    *
    * @type {Date}
-   * @memberof Plan
+   * @memberof PlanStoreWithStepsInput
    */
   endDate?: Date;
   /**
    *
    * @type {number}
-   * @memberof Plan
+   * @memberof PlanStoreWithStepsInput
    */
   unitPrice: number;
   /**
    *
-   * @type {Date}
-   * @memberof Plan
+   * @type {Array<PlanStepInput>}
+   * @memberof PlanStoreWithStepsInput
    */
-  createdAt: Date;
-  /**
-   *
-   * @type {Array<PlanStep>}
-   * @memberof Plan
-   */
-  planSteps?: Array<PlanStep>;
+  planSteps?: Array<PlanStepInput>;
 }
 
 /**
- * Check if a given object implements the Plan interface.
+ * Check if a given object implements the PlanStoreWithStepsInput interface.
  */
-export function instanceOfPlan(value: object): value is Plan {
-  if (!("id" in value) || value["id"] === undefined) return false;
-  if (!("projectId" in value) || value["projectId"] === undefined) return false;
+export function instanceOfPlanStoreWithStepsInput(value: object): value is PlanStoreWithStepsInput {
   if (!("title" in value) || value["title"] === undefined) return false;
   if (!("description" in value) || value["description"] === undefined) return false;
   if (!("unitPrice" in value) || value["unitPrice"] === undefined) return false;
-  if (!("createdAt" in value) || value["createdAt"] === undefined) return false;
   return true;
 }
 
-export function PlanFromJSON(json: any): Plan {
-  return PlanFromJSONTyped(json, false);
+export function PlanStoreWithStepsInputFromJSON(json: any): PlanStoreWithStepsInput {
+  return PlanStoreWithStepsInputFromJSONTyped(json, false);
 }
 
-export function PlanFromJSONTyped(json: any, ignoreDiscriminator: boolean): Plan {
+export function PlanStoreWithStepsInputFromJSONTyped(
+  json: any,
+  ignoreDiscriminator: boolean,
+): PlanStoreWithStepsInput {
   if (json == null) {
     return json;
   }
   return {
-    id: json["id"],
-    projectId: json["projectId"],
     title: json["title"],
     description: json["description"],
     startDate: json["startDate"] == null ? undefined : new Date(json["startDate"]),
     endDate: json["endDate"] == null ? undefined : new Date(json["endDate"]),
     unitPrice: json["unitPrice"],
-    createdAt: new Date(json["createdAt"]),
     planSteps:
       json["planSteps"] == null
         ? undefined
-        : (json["planSteps"] as Array<any>).map(PlanStepFromJSON),
+        : (json["planSteps"] as Array<any>).map(PlanStepInputFromJSON),
   };
 }
 
-export function PlanToJSON(json: any): Plan {
-  return PlanToJSONTyped(json, false);
+export function PlanStoreWithStepsInputToJSON(json: any): PlanStoreWithStepsInput {
+  return PlanStoreWithStepsInputToJSONTyped(json, false);
 }
 
-export function PlanToJSONTyped(value?: Plan | null, ignoreDiscriminator: boolean = false): any {
+export function PlanStoreWithStepsInputToJSONTyped(
+  value?: PlanStoreWithStepsInput | null,
+  ignoreDiscriminator: boolean = false,
+): any {
   if (value == null) {
     return value;
   }
 
   return {
-    id: value["id"],
-    projectId: value["projectId"],
     title: value["title"],
     description: value["description"],
     startDate:
       value["startDate"] == null ? undefined : value["startDate"].toISOString().substring(0, 10),
     endDate: value["endDate"] == null ? undefined : value["endDate"].toISOString().substring(0, 10),
     unitPrice: value["unitPrice"],
-    createdAt: value["createdAt"].toISOString(),
     planSteps:
       value["planSteps"] == null
         ? undefined
-        : (value["planSteps"] as Array<any>).map(PlanStepToJSON),
+        : (value["planSteps"] as Array<any>).map(PlanStepInputToJSON),
   };
 }
