@@ -3,6 +3,7 @@ package businessvalidators
 import (
 	businessapi "apps/api/business"
 	"fmt"
+	"reflect"
 
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	openapi_types "github.com/oapi-codegen/runtime/types"
@@ -33,7 +34,8 @@ func ValidatePlan(input *businessapi.PlanStoreInput) error {
 
 func validatePlanDateRequired(field string) validation.RuleFunc {
 	return func(value interface{}) error {
-		if value == nil || value.(*openapi_types.Date).Time.IsZero() {
+		v := reflect.ValueOf(value)
+		if (v.Kind() == reflect.Ptr && v.IsNil()) || value.(*openapi_types.Date).Time.IsZero() {
 			return fmt.Errorf("%sは必須入力です。", field)
 		}
 		return nil
