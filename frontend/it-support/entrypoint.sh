@@ -1,8 +1,7 @@
 #!/bin/bash
 
 pnpm i
-pnpm playwright install
-pnpm playwright install-deps
+pnpm playwright install --with-deps
 
 pnpm gen:api-spec:watch &
 pnpm dev
