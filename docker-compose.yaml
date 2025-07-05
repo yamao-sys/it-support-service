@@ -1,4 +1,4 @@
-version: '3.9'
+version: "3.9"
 services:
   registration_api:
     container_name: registration_api
@@ -47,14 +47,14 @@ services:
       - TZ=Asia/Tokyo
 
   db:
-    image: mysql:8.0.28
+    image: mysql:8.0.36
     container_name: db
     ports:
       - 3306:3306
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: it_support
-      TZ: 'Asia/Tokyo'
+      TZ: "Asia/Tokyo"
     volumes:
       - ./db/my.cnf:/etc/mysql/conf.d/my.cnf
       - ./mysql:/var/lib/mysql
@@ -84,4 +84,4 @@ services:
     restart: always
     tty: true
     stdin_open: true
-    command: 'bash entrypoint.sh'
+    command: "bash entrypoint.sh"
