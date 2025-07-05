@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM golang:1.23.1-alpine3.20 AS builder
+FROM golang:1.24.0-alpine3.20 AS builder
 
 WORKDIR /app
 
@@ -19,7 +19,7 @@ RUN go mod tidy && \
 # NOTE: ビルド
 RUN go build -o main
 
-FROM golang:1.23.1-alpine3.20
+FROM golang:1.24.0-alpine3.20
 
 WORKDIR /app
 
