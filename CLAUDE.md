@@ -30,7 +30,7 @@ This is an IT support service - a business matching platform built with Go backe
 
 ```bash
 # Start all services (includes APIs, frontend, MySQL, fake GCS)
-docker-compose up
+docker compose up
 
 # Frontend development (from frontend/it-support/)
 pnpm dev                    # Start all apps in dev mode
@@ -139,7 +139,7 @@ frontend/it-support/
 
 ## Key Configuration Files
 
-- `docker-compose.yaml` - Local development environment
+- `docker compose.yaml` - Local development environment
 - `turbo.json` - Turborepo task configuration
 - `oapi_codegen_config.yaml` - Go code generation config
 - `.air.{service}.toml` - Hot reload configuration for Go services
